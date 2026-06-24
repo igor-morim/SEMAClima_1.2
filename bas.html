@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BAS - Boletim Anual de Situação do Maranhão: Análise anual integrada das condições ambientais e recursos naturais.">
+    <meta name="keywords" content="boletim anual, Maranhão, BAS, meio ambiente, hidrologia, meteorologia, SEMA">
+    <meta name="author" content="Igor Carlos Cunha Morim">
+    <title>Boletim Anual de Situação - BAS</title>
+    
+    <!-- Favicon SIMA -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo/CPDAm/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/CPDAm/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo/CPDAm/favicon-16x16.png">
+    <link rel="icon" href="assets/images/logo/CPDAm/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/images/logo/CPDAm/favicon.ico">
+
+    <!-- Para Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/logo/CPDAm/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/logo/CPDAm/android-chrome-512x512.png">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- PDF.js Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <style>
+        :root {
+            /* Paleta Aquática (mesma do HydroMonitor) */
+            --primary-color: #0077b6;
+            --primary-dark: #00509d;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #ffc300;
+            --danger-color: #ef4444;
+            --bg-color: #e8f7ff;
+            --bg-secondary: #f0f8ff;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #d1e5f0;
+            --shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Cores específicas para o BDS */
+            --accent-color: #00bcd4;
+            --unavailable-color: #95a5a6;
+            --unavailable-bg: #ecf0f194;
+            --card-gradient: linear-gradient(135deg, #ffffff 0%, #f8fdff 100%);
+            --preview-overlay: rgba(0, 0, 0, 0.4);
+        }
+
+        .dark-mode {
+            --primary-color: #48bfe3;
+            --primary-dark: #0077b6;
+            --secondary-color: #94a3b8;
+            --bg-color: #0a192f;
+            --bg-secondary: #09131f;
+            --bg-card: #142d4a;
+            --text-primary: #e3f2fd;
+            --text-secondary: #b0bec5;
+            --text-muted: #607d8b;
+            --border-color: #2c4a6a;
+            --shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+            
+            /* Ajustes para dark mode no BDS */
+            --accent-color: #4fc3f7;
+            --unavailable-color: #78909c;
+            --unavailable-bg: #37474f;
+            --card-gradient: linear-gradient(135deg, #142d4a 0%, #1a3658 100%);
+            --preview-overlay: rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header - Estilo HydroDocs */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        .page-header {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-description {
+            color: var(--text-secondary);
+            text-align: justify;
+            font-size: 1.2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Controls */
+        .controls-section {
+            padding: 1.5rem 2rem;
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: right;
+            align-items: center;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            background: rgba(217, 119, 6, 0.1);
+        }
+
+        .stat-item i {
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        /* Cards com Destaque Visual para anos - UM POR LINHA */
+        .cards-highlight-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-top: 15px;
+        }
+
+        .card-highlight {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: row;
+            position: relative;
+            overflow: hidden;
+            min-height: 280px;
+        }
+
+        .card-highlight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .card-highlight:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-highlight:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-highlight.available {
+            cursor: default;
+        }
+
+        .card-highlight.unavailable {
+            background: var(--unavailable-bg);
+            color: var(--unavailable-color);
+            border-color: var(--border-color);
+        }
+
+        .card-highlight.unavailable:hover {
+            transform: none;
+            box-shadow: var(--shadow);
+        }
+
+        .card-highlight.unavailable:hover::before {
+            transform: scaleX(0);
+        }
+
+        /* NOVO: Background preview */
+        .card-preview-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.15;
+            z-index: 0;
+            transition: opacity 0.5s;
+        }
+
+        .card-highlight:hover .card-preview-bg {
+            opacity: 0.2;
+        }
+
+        .card-highlight.unavailable .card-preview-bg {
+            display: none;
+        }
+
+        /* Conteúdo do card sobreposto */
+        .card-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            width: 100%;
+            gap: 2rem;
+        }
+
+        .card-header {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-width: 140px;
+        }
+
+        .card-date {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-year {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            line-height: 1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-period {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 5px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .dark-mode .card-period {
+            background: rgba(20, 45, 74, 0.8);
+        }
+
+        .card-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-badge.status-available {
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+        }
+
+        .card-badge.status-unavailable {
+            background: rgba(149, 165, 166, 0.9);
+            color: white;
+        }
+
+        .card-body {
+            flex-grow: 1;
+            margin-bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-right: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.8rem;
+        }
+
+        .card-description {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.2rem;
+            max-width: 800px;
+        }
+
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .card-meta span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 6px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .dark-mode .card-meta span {
+            background: rgba(20, 45, 74, 0.7);
+        }
+
+        .card-meta i {
+            font-size: 0.8rem;
+            width: 14px;
+        }
+
+        .card-footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 200px;
+            gap: 12px;
+        }
+
+        .btn-download-highlight {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(0, 119, 182, 0.3);
+            cursor: pointer;
+            width: 100%;
+            max-width: 220px;
+            border: none;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-download-highlight:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 119, 182, 0.4);
+        }
+
+        .btn-download-highlight:disabled {
+            background: var(--unavailable-color);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-download-highlight:disabled:hover {
+            background: var(--unavailable-color);
+            transform: none;
+            box-shadow: none;
+        }
+
+        .preview-fullscreen-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary-color);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            border: 2px solid var(--primary-color);
+            cursor: pointer;
+            width: 100%;
+            max-width: 220px;
+            backdrop-filter: blur(4px);
+        }
+
+        .preview-fullscreen-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 119, 182, 0.3);
+        }
+
+        .dark-mode .preview-fullscreen-btn {
+            background: rgba(20, 45, 74, 0.8);
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .dark-mode .preview-fullscreen-btn:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .card-highlight.unavailable .btn-download-highlight,
+        .card-highlight.unavailable .preview-fullscreen-btn {
+            display: none;
+        }
+
+        /* Loading state para background preview */
+        .preview-loading-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0.1) 0%, 
+                rgba(255,255,255,0.2) 50%, 
+                rgba(255,255,255,0.1) 100%);
+            background-size: 200% 100%;
+            animation: loadingShimmer 1.5s infinite;
+            z-index: 0;
+        }
+
+        @keyframes loadingShimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Modal para visualização completa do PDF */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .preview-modal.active {
+            display: flex;
+        }
+
+        .modal-header {
+            width: 100%;
+            background: var(--primary-dark);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title i {
+            font-size: 1.2rem;
+        }
+
+        .modal-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .modal-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .modal-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .modal-btn-close {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .modal-btn-close:hover {
+            background: rgba(239, 68, 68, 0.5);
+        }
+
+        .modal-body {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #pdfViewer {
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            background: white;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow: auto;
+        }
+
+        .pdf-page {
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .pdf-page:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-footer {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .page-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+        }
+
+        .page-input {
+            width: 80px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .page-btn {
+            padding: 8px 16px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .page-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .page-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .zoom-percent {
+            min-width: 60px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .pdf-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            gap: 20px;
+            font-size: 1.2rem;
+        }
+
+        .pdf-loading i {
+            font-size: 3rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty and Loading States */
+        .empty-message {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-muted);
+            font-style: italic;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .empty-message i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        .loading p {
+            font-size: 1.1rem;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: var(--radius);
+            color: var(--danger-color);
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--danger-color);
+        }
+
+        .error-message i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Footer - Estilo HydroDocs */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: var(--transition);
+        }
+
+        .footer-link:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-copyright {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .main-content {
+                padding: 2rem;
+            }
+            
+            .page-title {
+                font-size: 2.5rem;
+            }
+            
+            .controls-section {
+                padding: 0.5rem;
+            }
+            
+            .stats {
+                gap: 1.5rem;
+                font-size: 1rem;
+            }
+            
+            .stat-item {
+                padding: 10px 16px;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .card-content {
+                flex-wrap: wrap;
+                gap: 1.5rem;
+            }
+            
+            .card-body {
+                padding-right: 0;
+                order: 2;
+                width: 100%;
+            }
+            
+            .card-footer {
+                order: 3;
+                width: 100%;
+                flex-direction: row;
+                justify-content: center;
+                gap: 20px;
+            }
+            
+            .card-header {
+                order: 1;
+                flex-direction: row;
+                justify-content: space-between;
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .card-badge {
+                margin-top: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                margin: 1rem 0;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .card-highlight {
+                min-height: auto;
+                padding: 1.5rem;
+            }
+            
+            .card-year {
+                font-size: 2.5rem;
+            }
+            
+            .card-footer {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn-download-highlight,
+            .preview-fullscreen-btn {
+                max-width: 100%;
+            }
+            
+            .modal-header,
+            .modal-footer {
+                padding: 0.75rem 1rem;
+            }
+            
+            .page-controls,
+            .zoom-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .modal-title {
+                font-size: 1rem;
+            }
+            
+            .modal-btn {
+                width: 35px;
+                height: 35px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .card-year {
+                font-size: 2rem;
+            }
+            
+            .card-title {
+                font-size: 1.2rem;
+            }
+            
+            .card-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .card-meta span {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .modal-body {
+                padding: 0.5rem;
+            }
+            
+            #pdfViewer {
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header - Estilo HydroDocs -->
+        <header class="header">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>BAS - Boletim Anual de Situação</span>
+                </a>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="refreshBoletins()">
+                        <i class="fas fa-sync-alt"></i>
+                        Atualizar
+                    </button>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Boletim Anual de Situação</h1>
+                <p class="page-description">O Boletim Anual de Situação consiste em um relatório técnico abrangente que apresenta análises anuais integradas das condições ambientais, hidrometeorológicas e de focos de calor no território estadual. Disponibiliza informações consolidadas para subsidiar processos analíticos e decisórios pelos órgãos competentes, oferecendo uma visão estratégica das tendências ambientais ao longo do tempo.</p>
+            </div>
+            
+            <div class="controls-section">
+                <div class="stats">
+                    <div class="stat-item">
+                        <i class="fas fa-file-pdf"></i>
+                        <span id="total-boletins">0 boletins</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span id="last-update">Atualização: Carregando...</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-eye"></i>
+                        <span>Pré-visualização ativa</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="boletins-container">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Carregando boletins...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modal para visualização completa do PDF -->
+        <div id="previewModal" class="preview-modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-file-pdf"></i>
+                    <span id="modalTitle">Carregando PDF...</span>
+                </div>
+                <div class="modal-controls">
+                    <button class="modal-btn" onclick="printPDF()" title="Imprimir">
+                        <i class="fas fa-print"></i>
+                    </button>
+                    <button class="modal-btn" onclick="downloadCurrentPDF()" title="Download">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="modal-btn modal-btn-close" onclick="closeModal()" title="Fechar (ESC)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <div id="pdfViewer"></div>
+                <div id="pdfLoading" class="pdf-loading" style="display: none;">
+                    <i class="fas fa-spinner"></i>
+                    <p>Carregando documento...</p>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <div class="page-controls">
+                    <button class="page-btn" onclick="prevPage()" id="prevPageBtn" disabled>
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    <span>Página: </span>
+                    <input type="number" id="currentPage" class="page-input" min="1" value="1" onchange="goToPage(this.value)">
+                    <span id="totalPages"> de 0</span>
+                    <button class="page-btn" onclick="nextPage()" id="nextPageBtn" disabled>
+                        Próxima <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="zoom-controls">
+                    <button class="zoom-btn" onclick="zoomOut()" title="Diminuir zoom">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <span id="zoomPercent" class="zoom-percent">100%</span>
+                    <button class="zoom-btn" onclick="zoomIn()" title="Aumentar zoom">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer - Estilo HydroDocs -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <i class="fas fa-chart-line"></i>
+                    <span>BAS - Boletim Anual de Situação</span>
+                </div>
+                
+                <div class="footer-copyright">
+                    &copy; 2025 Sistema de Monitoramento Ambiental - SIMA/MA
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ========== CONFIGURAÇÕES GLOBAIS ==========
+        const config = {
+            disableDownloads: false,
+            enableFullscreen: true,
+            previewOpacity: 0.15,
+            lazyLoad: true,
+        };
+
+        // Cache para background images
+        const bgImageCache = new Map();
+        let currentPDF = null;
+        let currentPageNum = 1;
+        let totalPages = 0;
+        let pdfScale = 1.0;
+        let currentPDFUrl = '';
+        let currentPDFYear = '';
+
+        // ========== TEMA ESCURO ==========
+        function carregarPreferenciasTema() {
+            const temaSalvo = localStorage.getItem('temaEscuro');
+            if (temaSalvo === 'true') {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const botaoTema = document.querySelector('.theme-toggle');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                botaoTema.innerHTML = '<i class="fas fa-sun"></i>';
+                localStorage.setItem('temaEscuro', 'true');
+            } else {
+                botaoTema.innerHTML = '<i class="fas fa-moon"></i>';
+                localStorage.setItem('temaEscuro', 'false');
+            }
+        }
+
+        // ========== FUNÇÕES DO BACKGROUND PREVIEW ==========
+        
+        // Função para criar uma imagem de background da primeira página
+        async function createBackgroundPreview(pdfUrl, year) {
+            const cacheKey = `bg-${year}`;
+            
+            // Verificar cache
+            if (bgImageCache.has(cacheKey)) {
+                return bgImageCache.get(cacheKey);
+            }
+            
+            try {
+                // Carregar o PDF
+                const loadingTask = pdfjsLib.getDocument(pdfUrl);
+                const pdf = await loadingTask.promise;
+                
+                // Obter a primeira página
+                const page = await pdf.getPage(1);
+                
+                // Criar canvas temporário
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Configurar dimensões para background (baixa resolução)
+                const viewport = page.getViewport({ scale: 0.5 });
+                tempCanvas.width = viewport.width;
+                tempCanvas.height = viewport.height;
+                
+                // Renderizar a página
+                await page.render({
+                    canvasContext: tempCtx,
+                    viewport: viewport
+                }).promise;
+                
+                // Converter para data URL
+                const dataUrl = tempCanvas.toDataURL('image/jpeg', 0.5);
+                
+                // Armazenar no cache
+                bgImageCache.set(cacheKey, dataUrl);
+                
+                return dataUrl;
+                
+            } catch (error) {
+                console.error(`Erro ao criar background para ${year}:`, error);
+                return null;
+            }
+        }
+
+        // Aplicar background preview a um card
+        async function applyBackgroundPreview(card, pdfUrl, year) {
+            const previewDiv = card.querySelector('.card-preview-bg');
+            if (!previewDiv) return;
+            
+            // Mostrar loading
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'preview-loading-bg';
+            previewDiv.appendChild(loadingDiv);
+            
+            try {
+                const dataUrl = await createBackgroundPreview(pdfUrl, year);
+                
+                if (dataUrl) {
+                    previewDiv.style.backgroundImage = `url("${dataUrl}")`;
+                    previewDiv.style.opacity = config.previewOpacity.toString();
+                }
+                
+                // Remover loading
+                if (loadingDiv.parentNode === previewDiv) {
+                    previewDiv.removeChild(loadingDiv);
+                }
+                
+            } catch (error) {
+                // Remover loading em caso de erro
+                if (loadingDiv.parentNode === previewDiv) {
+                    previewDiv.removeChild(loadingDiv);
+                }
+                console.error(`Erro ao aplicar background:`, error);
+            }
+        }
+
+        // ========== FUNÇÕES DO PDF VIEWER COMPLETO ==========
+        
+        // Abrir modal com PDF completo
+        async function openFullscreenPDF(pdfUrl, year) {
+            currentPDFUrl = pdfUrl;
+            currentPDFYear = year;
+            currentPageNum = 1;
+            
+            const modal = document.getElementById('previewModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const pdfViewer = document.getElementById('pdfViewer');
+            const pdfLoading = document.getElementById('pdfLoading');
+            
+            modalTitle.textContent = `Boletim Anual de Situação - ${year}`;
+            modal.classList.add('active');
+            pdfViewer.innerHTML = '';
+            pdfLoading.style.display = 'flex';
+            
+            try {
+                // Carregar o PDF
+                const loadingTask = pdfjsLib.getDocument(pdfUrl);
+                currentPDF = await loadingTask.promise;
+                totalPages = currentPDF.numPages;
+                
+                // Atualizar controles
+                updatePageControls();
+                
+                // Renderizar a primeira página
+                await renderPage(currentPageNum);
+                
+                pdfLoading.style.display = 'none';
+                
+            } catch (error) {
+                console.error('Erro ao carregar PDF completo:', error);
+                pdfLoading.innerHTML = `
+                    <div style="text-align: center; color: white;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
+                        <h3 style="margin: 1rem 0;">Erro ao carregar PDF</h3>
+                        <p>${error.message}</p>
+                        <button onclick="closeModal()" style="margin-top: 1rem; padding: 10px 20px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Fechar
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Renderizar uma página específica
+        async function renderPage(pageNum) {
+            if (!currentPDF || pageNum < 1 || pageNum > totalPages) return;
+            
+            const pdfViewer = document.getElementById('pdfViewer');
+            const existingPage = pdfViewer.querySelector(`[data-page="${pageNum}"]`);
+            
+            // Se a página já está renderizada, apenas rolá-la para a visão
+            if (existingPage) {
+                existingPage.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+            
+            try {
+                const page = await currentPDF.getPage(pageNum);
+                const viewport = page.getViewport({ scale: pdfScale });
+                
+                // Criar container para a página
+                const pageContainer = document.createElement('div');
+                pageContainer.className = 'pdf-page';
+                pageContainer.dataset.page = pageNum;
+                pageContainer.style.width = `${viewport.width}px`;
+                pageContainer.style.height = `${viewport.height}px`;
+                pageContainer.style.margin = '0 auto';
+                
+                // Criar canvas
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                
+                pageContainer.appendChild(canvas);
+                pdfViewer.appendChild(pageContainer);
+                
+                // Renderizar a página
+                await page.render({
+                    canvasContext: ctx,
+                    viewport: viewport
+                }).promise;
+                
+                // Rolar para a página
+                pageContainer.scrollIntoView({ behavior: 'smooth' });
+                
+                // Verificar se precisa pré-carregar páginas adjacentes
+                if (pageNum < totalPages) {
+                    setTimeout(() => preloadPage(pageNum + 1), 500);
+                }
+                if (pageNum > 1) {
+                    setTimeout(() => preloadPage(pageNum - 1), 500);
+                }
+                
+            } catch (error) {
+                console.error(`Erro ao renderizar página ${pageNum}:`, error);
+            }
+        }
+
+        // Pré-carregar uma página
+        async function preloadPage(pageNum) {
+            if (!currentPDF || pageNum < 1 || pageNum > totalPages) return;
+            
+            const pdfViewer = document.getElementById('pdfViewer');
+            const existingPage = pdfViewer.querySelector(`[data-page="${pageNum}"]`);
+            if (existingPage) return;
+            
+            try {
+                const page = await currentPDF.getPage(pageNum);
+                const viewport = page.getViewport({ scale: pdfScale });
+                
+                // Criar container
+                const pageContainer = document.createElement('div');
+                pageContainer.className = 'pdf-page';
+                pageContainer.dataset.page = pageNum;
+                pageContainer.style.width = `${viewport.width}px`;
+                pageContainer.style.height = `${viewport.height}px`;
+                pageContainer.style.margin = '0 auto';
+                
+                // Criar canvas
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                
+                pageContainer.appendChild(canvas);
+                
+                // Inserir na posição correta
+                const pages = Array.from(pdfViewer.querySelectorAll('.pdf-page'));
+                const insertBeforePage = pages.find(p => parseInt(p.dataset.page) > pageNum);
+                
+                if (insertBeforePage) {
+                    pdfViewer.insertBefore(pageContainer, insertBeforePage);
+                } else {
+                    pdfViewer.appendChild(pageContainer);
+                }
+                
+                // Renderizar em baixa prioridade
+                setTimeout(async () => {
+                    try {
+                        await page.render({
+                            canvasContext: ctx,
+                            viewport: viewport
+                        }).promise;
+                    } catch (err) {
+                        console.error(`Erro ao pré-carregar página ${pageNum}:`, err);
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                // Ignorar erros de pré-carregamento
+            }
+        }
+
+        // Atualizar controles de página
+        function updatePageControls() {
+            document.getElementById('currentPage').value = currentPageNum;
+            document.getElementById('totalPages').textContent = ` de ${totalPages}`;
+            
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+            
+            prevBtn.disabled = currentPageNum <= 1;
+            nextBtn.disabled = currentPageNum >= totalPages;
+            
+            document.getElementById('zoomPercent').textContent = `${Math.round(pdfScale * 100)}%`;
+        }
+
+        // Navegação de páginas
+        function prevPage() {
+            if (currentPageNum > 1) {
+                currentPageNum--;
+                renderPage(currentPageNum);
+                updatePageControls();
+            }
+        }
+
+        function nextPage() {
+            if (currentPageNum < totalPages) {
+                currentPageNum++;
+                renderPage(currentPageNum);
+                updatePageControls();
+            }
+        }
+
+        function goToPage(pageNum) {
+            const page = parseInt(pageNum);
+            if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                currentPageNum = page;
+                renderPage(currentPageNum);
+                updatePageControls();
+            } else {
+                document.getElementById('currentPage').value = currentPageNum;
+            }
+        }
+
+        // Controles de zoom
+        function zoomIn() {
+            if (pdfScale < 3.0) {
+                pdfScale += 0.25;
+                pdfScale = Math.round(pdfScale * 100) / 100; // Arredondar para 2 casas
+                reloadAllPages();
+                updatePageControls();
+            }
+        }
+
+        function zoomOut() {
+            if (pdfScale > 0.5) {
+                pdfScale -= 0.25;
+                pdfScale = Math.round(pdfScale * 100) / 100;
+                reloadAllPages();
+                updatePageControls();
+            }
+        }
+
+        // Recarregar todas as páginas com novo zoom
+        async function reloadAllPages() {
+            const pdfViewer = document.getElementById('pdfViewer');
+            pdfViewer.innerHTML = '';
+            
+            if (currentPDF) {
+                await renderPage(currentPageNum);
+            }
+        }
+
+        // Fechar modal
+        function closeModal() {
+            const modal = document.getElementById('previewModal');
+            modal.classList.remove('active');
+            
+            // Limpar PDF atual
+            currentPDF = null;
+            pdfScale = 1.0;
+        }
+
+        // Download do PDF atual
+        function downloadCurrentPDF() {
+            if (config.disableDownloads) {
+                alert('O download deste documento está desabilitado.');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.href = currentPDFUrl;
+            link.download = `BAS-${currentPDFYear}-completo.pdf`;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Imprimir PDF
+        function printPDF() {
+            if (!currentPDFUrl) return;
+            
+            const printWindow = window.open(currentPDFUrl, '_blank');
+            if (printWindow) {
+                printWindow.onload = function() {
+                    printWindow.print();
+                };
+            }
+        }
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('previewModal').classList.contains('active')) {
+                closeModal();
+            }
+        });
+
+        // ========== FUNÇÕES DO BOLETIM ==========
+        
+        // Função para buscar boletins da API
+        async function fetchBoletins() {
+            try {
+                const response = await fetch('/api/boletins-anuais');
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar boletins anuais');
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Erro:', error);
+                throw error;
+            }
+        }
+
+        // Função para criar cards com background preview
+        function createCards(boletins) {
+            let cardsHTML = '';
+            
+            boletins.forEach(boletim => {
+                const isAvailable = !!boletim.path;
+                
+                cardsHTML += `
+                    <div class="card-highlight ${isAvailable ? 'available' : 'unavailable'}" data-year="${boletim.year}" data-pdf-url="${isAvailable ? boletim.path : ''}">
+                        <!-- Background preview -->
+                        ${isAvailable ? '<div class="card-preview-bg"></div>' : ''}
+                        
+                        <div class="card-content">
+                            <div class="card-header">
+                                <div class="card-date">
+                                    <span class="card-year">${boletim.year}</span>
+                                    <span class="card-period">Ano Completo</span>
+                                </div>
+                                <div class="card-badge status-${isAvailable ? 'available' : 'unavailable'}">
+                                    <i class="fas fa-${isAvailable ? 'check-circle' : 'times-circle'}"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <h4 class="card-title">Boletim Anual de Situação - ${boletim.year}</h4>
+                                <p class="card-description">Relatório anual consolidado com análises integradas das condições ambientais, hidrometeorológicas e de focos de calor no território estadual do Maranhão.</p>
+                                <div class="card-meta">
+                                    <span><i class="fas fa-file-pdf"></i> PDF Completo</span>
+                                    <span><i class="fas fa-chart-bar"></i> Análises Estatísticas</span>
+                                    <span><i class="fas fa-calendar-alt"></i> Período: ${boletim.year}</span>
+                                    ${isAvailable ? '<span><i class="fas fa-eye"></i> Pré-visualização ativa</span>' : ''}
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer">
+                                ${isAvailable ? `
+                                    <button class="btn-download-highlight" ${config.disableDownloads ? 'disabled' : ''} onclick="downloadPDF('${boletim.path}', ${boletim.year})">
+                                        <i class="fas fa-download"></i>
+                                        <span>${config.disableDownloads ? 'Download desabilitado' : 'Baixar Relatório'}</span>
+                                    </button>
+                                    ${config.enableFullscreen ? `
+                                        <button class="preview-fullscreen-btn" onclick="openFullscreenPDF('${boletim.path}', ${boletim.year})">
+                                            <i class="fas fa-expand"></i>
+                                            <span>Visualizar PDF Completo</span>
+                                        </button>
+                                    ` : ''}
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return cardsHTML;
+        }
+
+        // Função para criar grid de cards
+        function createBoletinsGrid(boletins) {
+            return `<div class="cards-highlight-grid">${createCards(boletins)}</div>`;
+        }
+
+        // Função para aplicar background previews (lazy loading)
+        function applyBackgroundPreviewsLazy() {
+            const cards = document.querySelectorAll('.card-highlight.available');
+            
+            cards.forEach(card => {
+                const pdfUrl = card.dataset.pdfUrl;
+                const year = card.dataset.year;
+                
+                if (pdfUrl && year && !bgImageCache.has(`bg-${year}`)) {
+                    // Aplicar background preview
+                    applyBackgroundPreview(card, pdfUrl, year);
+                }
+            });
+        }
+
+        // Download do PDF
+        function downloadPDF(url, year) {
+            if (config.disableDownloads) {
+                alert('O download deste documento está desabilitado.');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `BAS-${year}.pdf`;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Função para renderizar os boletins
+        async function renderBoletins() {
+            const container = document.getElementById('boletins-container');
+            const totalBoletins = document.getElementById('total-boletins');
+            const lastUpdate = document.getElementById('last-update');
+            
+            container.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Carregando boletins...</p>
+                </div>
+            `;
+            
+            try {
+                const data = await fetchBoletins();
+                const boletinsData = data.data;
+                
+                totalBoletins.textContent = `${boletinsData.length} boletim${boletinsData.length !== 1 ? 's' : ''}`;
+                lastUpdate.textContent = `Atualização: ${new Date().toLocaleTimeString('pt-BR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'})}`;
+                
+                if (boletinsData.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-message">
+                            <i class="fas fa-file-pdf"></i>
+                            <h3>Nenhum boletim encontrado</h3>
+                            <p>Os boletins serão exibidos aqui assim que estiverem disponíveis.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const sortedBoletins = boletinsData.sort((a, b) => b.year - a.year);
+                container.innerHTML = createBoletinsGrid(sortedBoletins);
+                
+                // Aplicar background previews
+                if (config.lazyLoad) {
+                    setTimeout(applyBackgroundPreviewsLazy, 500);
+                } else {
+                    applyBackgroundPreviewsLazy();
+                }
+                
+            } catch (error) {
+                console.error('Erro ao renderizar boletins:', error);
+                container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar boletins</h3>
+                        <p>${error.message}</p>
+                        <p style="margin-top: 1rem; font-size: 0.9rem;">
+                            Verifique sua conexão e tente novamente.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Atualizar boletins
+        function refreshBoletins() {
+            bgImageCache.clear();
+            renderBoletins();
+        }
+
+        // Observador de interseção para lazy loading
+        function setupIntersectionObserver() {
+            if (!config.lazyLoad || !('IntersectionObserver' in window)) return;
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const card = entry.target;
+                        const pdfUrl = card.dataset.pdfUrl;
+                        const year = card.dataset.year;
+                        
+                        if (pdfUrl && year && !bgImageCache.has(`bg-${year}`)) {
+                            applyBackgroundPreview(card, pdfUrl, year);
+                        }
+                        
+                        observer.unobserve(card);
+                    }
+                });
+            }, {
+                rootMargin: '100px',
+                threshold: 0.1
+            });
+            
+            setTimeout(() => {
+                document.querySelectorAll('.card-highlight.available').forEach(card => {
+                    observer.observe(card);
+                });
+            }, 1000);
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarPreferenciasTema();
+            renderBoletins().then(() => {
+                setupIntersectionObserver();
+            });
+            
+            // Configurar worker do PDF.js
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        });
+
+        // Redimensionamento da janela
+        window.addEventListener('resize', function() {
+            if (document.getElementById('previewModal').classList.contains('active')) {
+                reloadAllPages();
+            }
+        });
+    </script>
+</body>
+</html>

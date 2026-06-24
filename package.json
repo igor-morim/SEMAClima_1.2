@@ -1,0 +1,32 @@
+{
+  "name": "monitor-rios",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "@mapbox/mbtiles": "^0.12.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "gdal-js": "^2.2.0",
+    "georaster": "^1.6.0",
+    "georaster-layer-for-leaflet": "^4.1.2",
+    "leaflet": "^1.9.4",
+    "leaflet-draw": "^1.0.4",
+    "leaflet-fullscreen": "^1.0.2",
+    "leaflet-imageoverlay-rotated": "^0.2.1",
+    "plotty": "^0.4.9",
+    "sharp": "^0.34.5",
+    "sqlite3": "^5.1.7",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "main": "server.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

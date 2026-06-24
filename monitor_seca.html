@@ -1,0 +1,4073 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão: Tecnologia para preservação ambiental com monitoramento inteligente dos recursos naturais.">
+    <meta name="keywords" content="monitoramento ambiental, Maranhão, SIMA, meio ambiente, hidrologia, meteorologia, queimadas, seca, estiagem, SEMA">
+    <meta name="author" content="Igor Carlos Cunha Morim">
+    <title>Monitor de Seca - Maranhão</title>
+
+    <link rel="icon" href="../assets/images/logo/Monitor_Secas/favicon/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="../assets/images/logo/Monitor_Secas/manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/logo/Monitor_Secas/logo_monitor_16.png"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/logo/Monitor_Secas/logo_monitor_32.png"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/logo/Monitor_Secas/logo_monitor_180.png"/>
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/logo/Monitor_Secas/logo_monitor_192.png"/>
+    <link rel="icon" type="image/png" sizes="512x512" href="../assets/images/logo/Monitor_Secas/logo_monitor_512.png"/>
+
+    <meta name="msapplication-TileColor" content="#ffc107">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #D2691E;
+            --secondary: #8B4513;
+            --accent: #CD853F;
+            --success: #556B2F;
+            --warning: #B8860B;
+            --danger: #8B0000;
+            --dark: #2F1B0A;
+            --light: #F5F5DC;
+            --gray: #A9A9A9;
+            --card-bg: rgba(139, 69, 19, 0.15);
+            --glass-bg: rgba(160, 82, 45, 0.2);
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            
+            --seca-fraca: #FFFF00;
+            --seca-moderada: #FFAA00;
+            --seca-grave: #FF5500;
+            --seca-extrema: #CC0000;
+            --seca-excepcional: #800000;
+            --sem-seca: transparent;
+        }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #2F1B0A 0%, #5D4037 100%);
+            min-height: 100vh;
+            color: var(--light);
+            overflow: hidden;
+            font-size: 16px;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+            position: relative;
+        }
+
+        .leaflet-interactive:focus {
+            outline: none !important;
+        }
+        
+        .leaflet-interactive {
+            -webkit-tap-highlight-color: transparent !important;
+        }
+        
+        /* Sidebar responsiva - PROPORÇÕES ATUALIZADAS */
+        .sidebar {
+            width: 70px; /* REDUZIDO de 80px para 70px */
+            background: rgba(47, 27, 10, 0.95);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            z-index: 1999;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .sidebar:hover {
+            width: 280px; /* REDUZIDO de 320px para 280px */
+        }
+        
+        .logo {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .logo-icon {
+            font-size: 2.2em;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        
+        .logo-text {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        /* Estilo para o marcador de localização GPS */
+        .gps-marker {
+            background: #4285F4;
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            animation: pulse-gps 2s infinite;
+        }
+
+        .gps-accuracy {
+            fill: #4285F4;
+            fill-opacity: 0.2;
+            stroke: #4285F4;
+            stroke-width: 1;
+            stroke-opacity: 0.5;
+        }
+
+        @keyframes pulse-gps {
+            0% {
+                box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(66, 133, 244, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(66, 133, 244, 0);
+            }
+        }
+
+        /* Indicador de carregamento do GPS */
+        .gps-loading {
+            color: var(--accent);
+            animation: spin 1s linear infinite;
+        }
+        
+        .sidebar:hover .logo-text {
+            opacity: 1;
+        }
+        
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 5px;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            color: var(--gray);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(160, 82, 45, 0.3);
+            color: var(--accent);
+            border-right: 3px solid var(--accent);
+        }
+        
+        .nav-item i {
+            font-size: 1.4em;
+            margin-right: 20px;
+            min-width: 24px;
+        }
+        
+        .nav-text {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .sidebar:hover .nav-text {
+            opacity: 1;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        /* Top bar responsiva - PADDING REDUZIDO */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 5px; /* REDUZIDO de 15px 15px para 5px 5px */
+            background: rgba(47, 27, 10, 0.7);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 900;
+            min-height: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            background: white;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* NOVO: Container para os logos */
+        .logos-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 0 20px;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        .logo-img {
+            height: 40px;
+            width: auto;
+            max-width: 100px;
+            object-fit: contain;
+            /*filter: brightness(0) invert(1);*/
+            opacity: 1.5;
+            transition: all 0.3s ease;
+        }
+
+        .logo-img:hover {
+            opacity: 1;
+            transform: scale(1.05);
+            background: var(--light);
+        }
+
+        .date-selector-container {
+            display: flex;
+            align-content: end;
+            align-items: center;
+            gap: 15px;
+            background: rgba(47, 27, 10, 0.9);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+            padding: 5px; /* REDUZIDO de 15px para 5px */
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .date-selector-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .date-selector-label {
+            font-size: 0.8em;
+            color: whitesmoke;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .date-selector {
+            position: relative;
+            min-width: 160px;
+        }
+
+        .date-selector select {
+            appearance: none;
+            background: rgba(30, 20, 10, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            padding: 10px 40px 10px 15px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .date-selector select:hover {
+            background: rgba(40, 25, 15, 0.9);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .date-selector select:focus {
+            outline: none;
+            background: rgba(50, 30, 15, 0.9);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(205, 133, 63, 0.3);
+        }
+
+        .date-selector::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            pointer-events: none;
+            font-size: 0.8em;
+        }
+
+        .date-selector select option {
+            background: rgba(30, 20, 10, 0.95);
+            color: white;
+            padding: 10px;
+        }
+
+        .date-selector-divider {
+            width: 1px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 5px;
+        }
+
+        .periodo-combined {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .periodo-selector {
+            position: relative;
+            min-width: 200px;
+        }
+
+        .periodo-selector select {
+            appearance: none;
+            background: rgba(30, 20, 10, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            padding: 10px 40px 10px 15px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .periodo-selector select:hover {
+            background: rgba(40, 25, 15, 0.9);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .periodo-selector select:focus {
+            outline: none;
+            background: rgba(50, 30, 15, 0.9);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(205, 133, 63, 0.3);
+        }
+
+        .periodo-selector::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            pointer-events: none;
+            font-size: 0.8em;
+        }
+
+        .periodo-selector select option {
+            background: rgba(30, 20, 10, 0.95);
+            color: white;
+            padding: 10px;
+        }
+
+        .tooltip-impactos {
+            background: rgba(255, 107, 107, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            font-size: 0.8em;
+        }
+        
+        .date-info {
+            font-size: 1em;
+            color: var(--gray);
+            font-weight: 500;
+        }
+        
+        .map-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .tooltip-maranhao {
+            background: rgba(47, 27, 10, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            font-size: 0.9em;
+        }
+        
+        /* Side panels responsivos - NOVO: Controle de visibilidade mobile */
+        .side-panels {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 800;
+        }
+        
+        /* NOVO: Controle de visibilidade mobile */
+        .side-panels.mobile-hidden .panel {
+            display: none;
+        }
+        
+        .side-panels.mobile-hidden .panel.mobile-visible {
+            display: block;
+        }
+        
+        /* Garantir que no desktop os painéis sejam sempre visíveis */
+        @media (min-width: 769px) {
+            .side-panels.mobile-hidden .panel {
+                display: block !important;
+            }
+        }
+        
+        .panel {
+            background: rgba(47, 27, 10, 0.85);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        
+        .panel-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .panel-header:hover {
+            background: rgba(160, 82, 45, 0.2);
+        }
+
+        .impacto-tipo-rotulo {
+            background: transparent !important;
+            border: none !important;
+        }
+
+        .impacto-tipo-rotulo div {
+            animation: pulse 4s infinite;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .seca-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+            margin-right: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            vertical-align: middle;
+        }
+
+        .seca-icon-0 { background: var(--sem-seca); border-color: #cccccc; }
+        .seca-icon-1 { background: var(--seca-fraca); }
+        .seca-icon-2 { background: var(--seca-moderada); }
+        .seca-icon-3 { background: var(--seca-grave); }
+        .seca-icon-4 { background: var(--seca-extrema); }
+        .seca-icon-5 { background: var(--seca-excepcional); }
+
+        .seca-icon-lg {
+            width: 18px;
+            height: 18px;
+            margin-right: 2px;
+        }
+
+        @keyframes pulse {
+            0% { 
+                transform: scale(1); 
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.2); 
+                opacity: 0.9;
+            }
+            100% { 
+                transform: scale(1); 
+                opacity: 1;
+            }
+        }
+
+        .leaflet-div-icon {
+            background: transparent !important;
+            border: none !important;
+        }
+        
+        .panel-title {
+            font-size: 1.0em;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-title i {
+            color: var(--accent);
+        }
+        
+        .panel-toggle {
+            color: var(--gray);
+            transition: transform 0.3s ease;
+        }
+        
+        .panel-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        
+        .panel.expanded .panel-content {
+            max-height: 500px;
+        }
+        
+        .panel.expanded .panel-toggle {
+            transform: rotate(180deg);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .categories-list {
+            padding: 0 20px 20px;
+        }
+        
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .category-item:last-child {
+            border-bottom: none;
+        }
+        
+        .category-intensity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .category-color {
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+        }
+        
+        .category-name {
+            font-weight: 500;
+            color: white;
+            font-size: 0.9em;
+        }
+        
+        .category-value {
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 0.9em;
+            text-align: right;
+        }
+        
+        .area-value {
+            display: block;
+            font-size: 1em;
+        }
+        
+        .area-percentage {
+            display: block;
+            font-size: 0.8em;
+            color: var(--gray);
+        }
+        
+        .legend-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 0 20px 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: background 0.3s ease;
+        }
+        
+        .legend-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            margin-right: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .legend-label {
+            font-weight: 500;
+            color: var(--light);
+            font-size: 0.9em;
+        }
+        
+        /* Map controls responsivos - AGORA NO CANTO INFERIOR ESQUERDO */
+        .map-controls {
+            position: absolute;
+            bottom: 25px;
+            left: 25px;
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            z-index: 800;
+            background: rgba(47, 27, 10, 0.85);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            padding: 10px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+        }
+        
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            background: rgba(160, 82, 45, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn.active {
+            background: var(--accent);
+        }
+        
+        .control-btn:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* Botão compacto para mobile - CORRIGIDO PARA ANDROID E TAMANHO REDUZIDO */
+        .map-controls-compact {
+            display: none;
+            position: fixed; /* Alterado para fixed */
+            bottom: 20px; /* Usando mesma posição do botão direito */
+            left: 20px; /* Usando mesma posição do botão direito */
+            z-index: 1100; /* Mesmo z-index do botão direito */
+        }
+        
+        .compact-toggle {
+            width: 52px; /* REDUZIDO de 60px para 52px */
+            height: 52px; /* REDUZIDO de 60px para 52px */
+            border-radius: 15px; /* Mantendo bordas semi-arredondadas */
+            background: rgba(160, 82, 45, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em; /* REDUZIDO de 1.5em para 1.4em */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+        
+        .compact-toggle:hover {
+            background: var(--accent);
+            transform: scale(1.05);
+        }
+        
+        .compact-menu {
+            position: absolute;
+            bottom: 62px; /* AJUSTADO para acompanhar o novo tamanho (52px + 10px) */
+            left: 0;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(47, 27, 10, 0.9);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-lg);
+            padding: 10px;
+            z-index: 801;
+        }
+        
+        .compact-menu.show {
+            display: flex;
+        }
+        
+        .compact-btn {
+            width: 45px; /* REDUZIDO de 50px para 45px */
+            height: 45px; /* REDUZIDO de 50px para 45px */
+            border-radius: 15px;
+            background: rgba(160, 82, 45, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em; /* REDUZIDO de 1.3em para 1.2em */
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .compact-btn.active {
+            background: var(--accent);
+        }
+        
+        .compact-btn:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* Seca view selector responsivo */
+        .seca-view-selector {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            z-index: 800;
+            background: rgba(47, 27, 10, 0.9);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-lg);
+            padding: 15px;
+            min-width: 200px;
+        }
+
+        .seca-view-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .seca-view-title i {
+            color: var(--accent);
+        }
+
+        .seca-view-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .seca-view-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .seca-view-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .seca-view-option.active {
+            background: rgba(160, 82, 45, 0.3);
+            border-color: var(--accent);
+        }
+
+        .seca-view-option i {
+            font-size: 1.2em;
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .seca-view-label {
+            font-weight: 500;
+            color: white;
+            flex: 1;
+        }
+
+        .seca-view-badge {
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        
+        /* Loading screen responsiva */
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(47, 27, 10, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 30px;
+        }
+        
+        .loading-text {
+            font-size: 1.2em;
+            color: white;
+            text-align: center;
+        }
+        
+        .loading-progress {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #CD853F);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .leaflet-tooltip {
+            background: rgba(47, 27, 10, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 10px;
+            font-weight: 500;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        
+        .leaflet-popup-content-wrapper {
+            background: rgba(47, 27, 10, 0.9);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .leaflet-popup-tip {
+            background: rgba(47, 27, 10, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Menu mobile */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1100;
+            background: rgba(47, 27, 10, 0.9);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            width: 50px;
+            height: 50px;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        
+        /* Menu flutuante para mobile - TAMANHO REDUZIDO E ESTILO UNIFICADO */
+        .mobile-floating-menu {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+        
+        .mobile-menu-button {
+            width: 52px; /* REDUZIDO de 60px para 52px */
+            height: 52px; /* REDUZIDO de 60px para 52px */
+            border-radius: 15px; /* ALTERADO: de 50% para 15px para igualar ao outro botão */
+            background: rgba(160, 82, 45, 0.85); /* ALTERADO: mesma cor do compact-toggle */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* ALTERADO: mesma borda do compact-toggle */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em; /* REDUZIDO de 1.5em para 1.4em */
+            cursor: pointer;
+            box-shadow: var(--shadow); /* ALTERADO: mesma sombra do compact-toggle */
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-button:hover {
+            background: var(--accent);
+            transform: scale(1.05); /* ALTERADO: mesma animação do compact-toggle */
+        }
+        
+        .mobile-menu-content {
+            position: absolute;
+            bottom: 62px; /* AJUSTADO para acompanhar o novo tamanho (52px + 10px) */
+            right: 0;
+            background: rgba(47, 27, 10, 0.95);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-lg);
+            width: 250px;
+            padding: 15px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .mobile-menu-content.show {
+            display: flex;
+        }
+        
+        .mobile-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            color: white;
+            font-size: 1em;
+            text-align: left;
+        }
+        
+        .mobile-menu-item:hover {
+            background: rgba(160, 82, 45, 0.3);
+        }
+        
+        .mobile-menu-item.active {
+            background: rgba(160, 82, 45, 0.3);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .mobile-menu-item i {
+            margin-right: 10px;
+            font-size: 1.2em;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Submenu para os painéis de informações */
+        .mobile-submenu {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+            padding-left: 20px;
+            border-left: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .mobile-submenu.show {
+            display: flex;
+        }
+        
+        .mobile-submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            color: white;
+            font-size: 0.9em;
+            text-align: left;
+        }
+        
+        .mobile-submenu-item:hover {
+            background: rgba(160, 82, 45, 0.2);
+        }
+        
+        .mobile-submenu-item.active {
+            background: rgba(160, 82, 45, 0.3);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .mobile-submenu-item i {
+            margin-right: 8px;
+            font-size: 1em;
+            width: 16px;
+            text-align: center;
+        }
+        
+        /* Overlay para fechar menu ao clicar fora */
+        .menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 1099;
+        }
+
+        /* NOVO: Spinner para carregamento de período - POSICIONAMENTO CENTRALIZADO */
+        .periodo-loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2001;
+            text-align: center;
+            background: rgba(47, 27, 10, 0.95);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .periodo-spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px;
+        }
+
+        .periodo-loading-text {
+            color: white;
+            font-size: 1.3em;
+            font-weight: 500;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        /* BARRA DE PESQUISA POR MUNICÍPIO - NOVO */
+        .search-container {
+            position: absolute;
+            top: 25px;
+            left: 280px;
+            z-index: 800;
+            background: rgba(47, 27, 10, 0.9);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-lg);
+            padding: 15px;
+            min-width: 300px;
+            max-width: 400px;
+        }
+
+        .search-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-title i {
+            color: var(--accent);
+        }
+
+        .search-input-container {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            background: rgba(30, 20, 10, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(205, 133, 63, 0.3);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            pointer-events: none;
+        }
+
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(30, 20, 10, 0.9);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-item:hover {
+            background: rgba(160, 82, 45, 0.3);
+        }
+
+        .search-result-item .municipio-name {
+            font-weight: 500;
+            color: white;
+        }
+
+        .search-result-item .municipio-info {
+            font-size: 0.8em;
+            color: var(--gray);
+            margin-top: 2px;
+        }
+
+        .no-results {
+            padding: 15px;
+            text-align: center;
+            color: var(--gray);
+            font-style: italic;
+        }
+
+        /* NOVO: Barra de pesquisa no menu compacto mobile - AGORA É APENAS UM BOTÃO */
+        .compact-search-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 15px;
+            background: rgba(160, 82, 45, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .compact-search-btn.active {
+            background: var(--accent);
+        }
+
+        .compact-search-btn:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        /* Media Queries para responsividade */
+        
+        /* Notebooks e tablets grandes (1024px - 1440px) */
+        @media (max-width: 1440px) {
+            .sidebar {
+                width: 70px; /* MANTIDO */
+            }
+            
+            .sidebar:hover {
+                width: 280px; /* MANTIDO */
+            }
+            
+            .side-panels {
+                width: 320px;
+            }
+
+            .seca-view-selector {
+                left: 20px;
+                top: 20px;
+            }
+
+            .search-container {
+                left: 250px;
+                top: 20px;
+                min-width: 280px;
+            }
+
+            .date-selector-container {
+                gap: 10px;
+                padding: 5px; /* MANTIDO */
+            }
+
+            .date-selector-divider {
+                display: none;
+            }
+            
+            .page-title {
+                font-size: 1.4em;
+            }
+            
+            /* Ajustes responsivos para os logos */
+            .logos-container {
+                gap: 15px;
+                margin: 0 15px;
+            }
+            
+            .logo-img {
+                height: 35px;
+                max-width: 100px;
+            }
+        }
+        
+        /* Tablets (768px - 1024px) */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 60px; /* REDUZIDO de 70px para 60px */
+            }
+            
+            .sidebar:hover {
+                width: 250px; /* REDUZIDO de 280px para 250px */
+            }
+            
+            .side-panels {
+                width: 300px;
+                right: 20px;
+                top: 20px;
+            }
+            
+            .map-controls {
+                left: 20px;
+                bottom: 20px;
+            }
+
+            .seca-view-selector {
+                left: 20px;
+                top: 20px;
+                min-width: 180px;
+            }
+
+            .search-container {
+                left: 220px;
+                top: 20px;
+                min-width: 250px;
+            }
+
+            .top-bar {
+                padding: 5px 5px; /* MANTIDO */
+            }
+            
+            .page-title {
+                font-size: 1.3em;
+            }
+            
+            .date-selector-container {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 5px; /* MANTIDO */
+            }
+            
+            .periodo-selector {
+                min-width: 180px;
+            }
+            
+            /* Ajustes responsivos para os logos */
+            .logos-container {
+                gap: 15px;
+                margin: 0 15px;
+            }
+            
+            .logo-img {
+                height: 35px;
+                max-width: 100px;
+            }
+        }
+        
+        /* Tablets pequenos e celulares grandes (600px - 768px) */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                width: 280px; /* MANTIDO */
+                height: 100%;
+                /*z-index: 1000;*/
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.mobile-open {
+                left: 0;
+            }
+            
+            .sidebar:hover {
+                width: 280px; /* MANTIDO */
+            }
+            
+            .nav-text {
+                opacity: 1;
+            }
+            
+            .mobile-menu-toggle {
+                display: flex;
+            }
+            
+            .side-panels {
+                width: calc(100% - 40px);
+                right: 20px;
+                top: 10px;
+            }
+            
+            .map-controls {
+                display: none;
+            }
+            
+            /* CORREÇÃO CRÍTICA - Botão inferior esquerdo agora usa mesma estratégia do direito */
+            .map-controls-compact {
+                display: block !important;
+                position: fixed !important;
+                bottom: 20px !important;
+                left: 20px !important;
+                z-index: 1100 !important;
+            }
+
+            .seca-view-selector {
+                left: 20px;
+                top: 80px;
+                min-width: 180px;
+            }
+
+            .search-container {
+                display: none; /* Oculta a barra de pesquisa normal no mobile */
+            }
+
+            .top-bar {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            /* ALTERAÇÃO CRÍTICA: Layout para mobile - seletor e logos lado a lado, título em linha completa */
+            .page-title {
+                order: 1;
+                flex: 1 1 100%; /* Ocupa toda a largura */
+                text-align: left;
+                font-size: 1.2em;
+                margin-bottom: 10px;
+            }
+            
+            .date-selector-container {
+                order: 2;
+                flex: 1;
+                justify-content: flex-start;
+                margin-right: 10px;
+            }
+            
+            .logos-container {
+                order: 3;
+                flex: 1;
+                justify-content: flex-end;
+                margin: 0;
+                gap: 10px;
+            }
+            
+            .logo-img {
+                height: 30px;
+                max-width: 80px;
+                flex-shrink: 0; /* Impedir que as imagens encolham */
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .panel {
+                font-size: 0.9em;
+            }
+            
+            /* Mostrar menu flutuante em mobile */
+            .mobile-floating-menu {
+                display: block;
+            }
+        }
+
+        /* Celulares (até 600px) */
+        @media (max-width: 600px) {
+            .seca-view-selector {
+                top: 80px;
+                left: 20px;
+                width: calc(100% - 40px);
+            }
+            
+            .search-container {
+                top: 160px;
+                left: 20px;
+                width: calc(100% - 40px);
+            }
+            
+            .side-panels {
+                width: calc(100% - 30px);
+                right: 15px;
+                top: 10px;
+            }
+            
+            /* Ajustes para o botão inferior esquerdo em telas menores */
+            .map-controls-compact {
+                left: 15px !important;
+                bottom: 15px !important;
+            }
+            
+            .compact-toggle {
+                width: 48px; /* REDUZIDO de 52px para 48px */
+                height: 48px; /* REDUZIDO de 52px para 48px */
+                font-size: 1.3em; /* REDUZIDO de 1.4em para 1.3em */
+            }
+            
+            .compact-btn {
+                width: 42px; /* REDUZIDO de 45px para 42px */
+                height: 42px; /* REDUZIDO de 45px para 42px */
+                font-size: 1.1em; /* REDUZIDO de 1.2em para 1.1em */
+            }
+            
+            .top-bar {
+                padding: 5px 5px; /* MANTIDO */
+            }
+            
+            .page-title {
+                font-size: 1.1em;
+            }
+            
+            .date-selector-container {
+                padding: 5px; /* MANTIDO */
+            }
+            
+            .periodo-selector, .date-selector {
+                min-width: 150px;
+            }
+            
+            .loading-progress {
+                width: 250px;
+            }
+            
+            .loading-text {
+                font-size: 1em;
+            }
+            
+            .panel-header {
+                padding: 12px 15px;
+            }
+            
+            .stats-grid {
+                padding: 15px;
+                gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 12px;
+            }
+            
+            .stat-value {
+                font-size: 1.5em;
+            }
+            
+            .mobile-floating-menu {
+                bottom: 15px;
+                right: 15px;
+            }
+            
+            .mobile-menu-content {
+                width: 220px;
+            }
+            
+            .mobile-menu-button {
+                width: 48px; /* REDUZIDO de 52px para 48px */
+                height: 48px; /* REDUZIDO de 52px para 48px */
+                font-size: 1.3em; /* REDUZIDO de 1.4em para 1.3em */
+            }
+            
+            /* Ajustes responsivos para os logos em celulares */
+            .logos-container {
+                gap: 8px;
+            }
+            
+            .logo-img {
+                height: 25px;
+                max-width: 70px;
+            }
+        }
+        
+        /* Telas muito pequenas (até 400px) */
+        @media (max-width: 400px) {
+            .seca-view-selector {
+                padding: 12px;
+                top: 10px;
+                font-size: 0.9em;
+            }
+            
+            .search-container {
+                top: 140px;
+                padding: 12px;
+                font-size: 0.9em;
+            }
+            
+            .side-panels {
+                width: calc(100% - 140px);
+                right: 10px;
+                top: 10px;
+                font-size: 0.9em;
+            }
+            
+            /* Ajustes finos para o botão inferior esquerdo em telas muito pequenas */
+            .map-controls-compact {
+                left: 10px !important;
+                bottom: 10px !important;
+            }
+            
+            .compact-toggle {
+                width: 40px; /* REDUZIDO de 48px para 40px */
+                height: 40px; /* REDUZIDO de 48px para 40px */
+                font-size: 1.2em; /* REDUZIDO de 1.3em para 1.2em */
+            }
+            
+            .compact-btn {
+                width: 40px; /* REDUZIDO de 42px para 40px */
+                height: 40px; /* REDUZIDO de 42px para 40px */
+                font-size: 1em; /* REDUZIDO de 1.1em para 1em */
+            }
+            
+            .top-bar {
+                padding: 5px 5px; /* MANTIDO */
+            }
+            
+            .page-title {
+                font-size: 1.2em;
+            }
+            
+            .date-selector-container {
+                padding: 5px; /* MANTIDO */
+            }
+            
+            .periodo-selector, .date-selector {
+                min-width: 130px;
+            }
+            
+            .periodo-selector select, .date-selector select {
+                padding: 8px 35px 8px 12px;
+                font-size: 0.9em;
+                color: white;
+            }
+            
+            .loading-progress {
+                width: 200px;
+            }
+            
+            .mobile-menu-content {
+                width: 200px;
+            }
+            
+            .mobile-menu-button {
+                width: 45px; /* REDUZIDO de 48px para 45px */
+                height: 45px; /* REDUZIDO de 48px para 45px */
+                font-size: 1.2em; /* REDUZIDO de 1.3em para 1.2em */
+            }
+            
+            /* Ajustes responsivos para os logos em telas muito pequenas */
+            .logos-container {
+                gap: 5px;
+            }
+            
+            .logo-img {
+                height: 22px;
+                max-width: 60px;
+            }
+        }
+        
+        /* Otimizações para telas de alta densidade como Redmi Note 12 Pro */
+        @media (max-width: 768px) and (min-resolution: 2dppx) {
+            .mobile-menu-toggle {
+                width: 56px;
+                height: 56px;
+                font-size: 1.7em;
+            }
+            
+            .compact-toggle {
+                width: 58px; /* REDUZIDO de 64px para 58px */
+                height: 58px; /* REDUZIDO de 64px para 58px */
+                font-size: 1.5em; /* REDUZIDO de 1.6em para 1.5em */
+            }
+            
+            .compact-btn {
+                width: 48px; /* REDUZIDO de 52px para 48px */
+                height: 48px; /* REDUZIDO de 52px para 48px */
+                font-size: 1.3em; /* REDUZIDO de 1.4em para 1.3em */
+            }
+            
+            .mobile-menu-button {
+                width: 58px; /* REDUZIDO de 64px para 58px */
+                height: 58px; /* REDUZIDO de 64px para 58px */
+                font-size: 1.5em; /* REDUZIDO de 1.6em para 1.5em */
+            }
+            
+            /* Ajustes para os logos em telas de alta densidade */
+            .logo-img {
+                height: 32px;
+                max-width: 90px;
+            }
+        }
+        
+        /* Televisões e telas muito grandes (acima de 1440px) */
+        @media (min-width: 1441px) {
+            .app-container {
+                max-width: 1920px;
+                margin: 0 auto;
+            }
+            
+            .sidebar {
+                width: 70px; /* MANTIDO */
+            }
+            
+            .sidebar:hover {
+                width: 280px; /* MANTIDO */
+            }
+            
+            .side-panels {
+                width: 400px;
+            }
+            
+            .seca-view-selector {
+                min-width: 250px;
+            }
+
+            .search-container {
+                left: 320px;
+                min-width: 350px;
+            }
+            
+            .page-title {
+                font-size: 1.8em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            
+            .panel {
+                font-size: 1.1em;
+            }
+            
+            /* Ajustes para os logos em telas grandes */
+            .logo-img {
+                height: 45px;
+                max-width: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Menu mobile toggle -->
+        <div class="mobile-menu-toggle" id="mobileMenuToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        
+        <div class="sidebar" id="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <div class="logo-text">Monitor de Seca</div>
+            </div>
+            
+            <div class="nav-items">
+                <a href="Monitor_Seca.html" class="nav-item active">
+                    <i class="fas fa-map"></i>
+                    <span class="nav-text">Mapa Interativo</span>
+                </a>
+                <a href="monitor_seca/analises.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="nav-text">Análises</span>
+                </a>
+                <a href="monitor_seca/observadores.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span class="nav-text">Rede de Observadores</span>
+                </a>
+                <a href="monitor_seca/sobre.html" class="nav-item">
+                    <i class="fas fa-info-circle"></i>
+                    <span class="nav-text">Sobre</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="page-title">Monitor de Secas - Maranhão</div>
+                
+                <div class="date-selector-container">
+                    <div class="periodo-combined">
+                        <div class="date-selector-label">Período Disponível</div>
+                        <div class="periodo-selector">
+                            <select id="periodo-select" title="Selecione o período de monitoramento">
+                                <!-- Será preenchido dinamicamente com os períodos disponíveis -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="logos-container">
+                    <img src="./assets/images/logo/Monitor de Secas.png" alt="Monitor de Secas" class="logo-img">
+                    <img src="./assets/images/logo/ANA.png" alt="Agência Nacional de Águas" class="logo-img">
+                    <!--<img src="docs/logos/sema.png" alt="SEMA" class="logo-img">
+                    <img src="docs/logos/governo-ma.png" alt="Governo do Maranhão" class="logo-img">
+                    <img src="docs/logos/sima.png" alt="SIMA" class="logo-img">-->
+                </div>
+            </div>
+            
+            <div class="map-area">
+                <div id="map"></div>
+                
+                <!-- BARRA DE PESQUISA POR MUNICÍPIO - NOVO -->
+                <div class="search-container">
+                    <div class="search-title">
+                        <i class="fas fa-search"></i>
+                        Pesquisar Município
+                    </div>
+                    <div class="search-input-container">
+                        <input type="text" class="search-input" id="municipioSearch" placeholder="Digite o nome do município...">
+                        <div class="search-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+                
+                <div class="seca-view-selector">
+                    <div class="seca-view-title">
+                        <i class="fas fa-layer-group"></i>
+                        Visualização de Secas
+                    </div>
+                    <div class="seca-view-options">
+                        <div class="seca-view-option active" data-view="estadual">
+                            <i class="fas fa-map"></i>
+                            <span class="seca-view-label">Limite Estadual</span>
+                        </div>
+                        <div class="seca-view-option" data-view="municipal">
+                            <i class="fas fa-city"></i>
+                            <span class="seca-view-label">Limite Absoluto</span>
+                        </div>
+                        <div class="seca-view-option" data-view="composto">
+                            <i class="fas fa-layer-group"></i>
+                            <span class="seca-view-label">Limite Municipal</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- NOVO: Adicionada classe mobile-hidden para controle de visibilidade -->
+                <div class="side-panels mobile-hidden" id="sidePanels">
+                    <div class="panel" id="panel-stats">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <i class="fas fa-chart-bar"></i>
+                                Estatísticas
+                            </div>
+                            <div class="panel-toggle">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="panel-content">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="total-areas">0</div>
+                                    <div class="stat-label">Categorias de Secas</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="total-area-km">0</div>
+                                    <div class="stat-label">Área Total (km²)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="panel" id="panel-categories">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <i class="fas fa-layer-group"></i>
+                                Categorias de Secas
+                            </div>
+                            <div class="panel-toggle">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="panel-content">
+                            <div class="categories-list">
+                                <div class="category-item">
+                                    <div class="category-intensity">
+                                        <div class="category-color" style="background:var(--seca-fraca)"></div>
+                                        <span class="category-name">Seca Fraca</span>
+                                    </div>
+                                    <div class="category-value">
+                                        <span class="area-value" id="area-fraca">0 km²</span>
+                                        <span class="area-percentage" id="percent-fraca">(0%)</span>
+                                    </div>
+                                </div>
+                                <div class="category-item">
+                                    <div class="category-intensity">
+                                        <div class="category-color" style="background:var(--seca-moderada)"></div>
+                                        <span class="category-name">Seca Moderada</span>
+                                    </div>
+                                    <div class="category-value">
+                                        <span class="area-value" id="area-moderada">0 km²</span>
+                                        <span class="area-percentage" id="percent-moderada">(0%)</span>
+                                    </div>
+                                </div>
+                                <div class="category-item">
+                                    <div class="category-intensity">
+                                        <div class="category-color" style="background:var(--seca-grave)"></div>
+                                        <span class="category-name">Seca Grave</span>
+                                    </div>
+                                    <div class="category-value">
+                                        <span class="area-value" id="area-grave">0 km²</span>
+                                        <span class="area-percentage" id="percent-grave">(0%)</span>
+                                    </div>
+                                </div>
+                                <div class="category-item">
+                                    <div class="category-intensity">
+                                        <div class="category-color" style="background:var(--seca-extrema)"></div>
+                                        <span class="category-name">Seca Extrema</span>
+                                    </div>
+                                    <div class="category-value">
+                                        <span class="area-value" id="area-extrema">0 km²</span>
+                                        <span class="area-percentage" id="percent-extrema">(0%)</span>
+                                    </div>
+                                </div>
+                                <div class="category-item">
+                                    <div class="category-intensity">
+                                        <div class="category-color" style="background:var(--seca-excepcional)"></div>
+                                        <span class="category-name">Seca Excepcional</span>
+                                    </div>
+                                    <div class="category-value">
+                                        <span class="area-value" id="area-excepcional">0 km²</span>
+                                        <span class="area-percentage" id="percent-excepcional">(0%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="panel" id="panel-legend">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <i class="fas fa-palette"></i>
+                                Legenda
+                            </div>
+                            <div class="panel-toggle">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="panel-content">
+                            <div class="legend-items">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background:var(--sem-seca); border: 1px solid #cccccc;"></div>
+                                    <span class="legend-label">Sem Seca</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background:var(--seca-fraca);"></div>
+                                    <span class="legend-label">Seca Fraca</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background:var(--seca-moderada);"></div>
+                                    <span class="legend-label">Seca Moderada</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background:var(--seca-grave);"></div>
+                                    <span class="legend-label">Seca Grave</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background:var(--seca-extrema);"></div>
+                                    <span class="legend-label">Seca Extrema</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background:var(--seca-excepcional);"></div>
+                                    <span class="legend-label">Seca Excepcional</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Botões horizontais para telas maiores -->
+                <div class="map-controls">
+                    <button class="control-btn" id="gps-location" title="Minha Localização">
+                        <i class="fas fa-location-arrow"></i>
+                    </button>
+                    <button class="control-btn" id="reset-view" title="Resetar Visualização">
+                        <i class="fas fa-crosshairs"></i>
+                    </button>
+                    <button class="control-btn" id="fullscreen" title="Tela Cheia">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="control-btn" id="map-type" title="Alternar Tipo de Mapa">
+                        <i class="fas fa-layer-group"></i>
+                    </button>
+                    <button class="control-btn" id="toggle-impactos" title="Mostrar/Ocultar Impactos">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </button>
+                    <button class="control-btn" id="toggle-impactos-tipo" title="Mostrar/Ocultar Tipos de Impacto">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+                
+                <!-- Botão compacto para mobile - CORRIGIDO -->
+                <div class="map-controls-compact">
+                    <button class="compact-toggle" id="compactToggle" title="Controles do Mapa">
+                        <i class="fas fa-sliders-h"></i>
+                    </button>
+                    <div class="compact-menu" id="compactMenu">
+                        <!-- MODIFICAÇÃO 02: Agora é apenas um botão que abre a barra de pesquisa -->
+                        <button class="compact-btn" id="compact-search-btn" title="Pesquisar Município">
+                            <i class="fas fa-search"></i>
+                        </button>
+
+                        <button class="compact-btn" id="compact-gps-location" title="Minha Localização">
+                            <i class="fas fa-location-arrow"></i>
+                        </button>
+                        <button class="compact-btn" id="compact-reset-view" title="Resetar Visualização">
+                            <i class="fas fa-crosshairs"></i>
+                        </button>
+                        <button class="compact-btn" id="compact-fullscreen" title="Tela Cheia">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button class="compact-btn" id="compact-map-type" title="Alternar Tipo de Mapa">
+                            <i class="fas fa-layer-group"></i>
+                        </button>
+                        <button class="compact-btn" id="compact-toggle-impactos" title="Mostrar/Ocultar Impactos">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </button>
+                        <button class="compact-btn" id="compact-toggle-impactos-tipo" title="Mostrar/Ocultar Tipos de Impacto">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Menu flutuante para mobile - MODIFICADO COM ESTILO UNIFICADO -->
+                <div class="mobile-floating-menu">
+                    <button class="mobile-menu-button" id="mobileFloatingMenuButton">
+                        <i class="fa fa-bar-chart" aria-hidden="false"></i>
+                    </button>
+                    <div class="mobile-menu-content" id="mobileMenuContent">
+                        <button class="mobile-menu-item" data-action="view">
+                            <i class="fas fa-layer-group"></i>
+                            Limites
+                        </button>
+                        <button class="mobile-menu-item" data-action="stats">
+                            <i class="fas fa-chart-bar"></i>
+                            Estatísticas
+                        </button>
+                        <div class="mobile-submenu" id="panelsSubmenu">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Overlay para fechar menu ao clicar fora -->
+                <div class="menu-overlay" id="menuOverlay"></div>
+            </div>
+        </div>
+        
+        <!-- Loading screen principal -->
+        <div class="loading-screen" id="loadingScreen">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Carregando mapa e dados de secas...</div>
+            <div class="loading-progress">
+                <div class="loading-bar" id="loadingBar"></div>
+            </div>
+        </div>
+        
+        <!-- NOVO: Spinner para carregamento de período - POSICIONAMENTO CENTRALIZADO -->
+        <div class="periodo-loading" id="periodoLoading">
+            <div class="periodo-spinner"></div>
+            <div class="periodo-loading-text">Carregando dados...</div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // FUNÇÃO PARA DETERMINAR ZOOM BASEADO NA TELA
+        function getZoomLevelByScreenSize() {
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            // Considerar telas grandes acima de 1440px de largura OU com alta densidade
+            const isLargeScreen = screenWidth > 1440 || (screenWidth > 1024 && window.devicePixelRatio >= 2);
+            
+            // Considerar telas muito pequenas (celulares) abaixo de 768px
+            const isSmallScreen = screenWidth <= 768;
+            
+            console.log(`Screen: ${screenWidth}x${screenHeight}, Pixel Ratio: ${window.devicePixelRatio}, Large: ${isLargeScreen}, Small: ${isSmallScreen}`);
+            
+            if (isLargeScreen) {
+                return 6.9; // Zoom para telas grandes
+            } else if (isSmallScreen) {
+                return 6.2; // Zoom para telas pequenas (mobile)
+            } else {
+                return 6.5; // Zoom padrão para tablets e notebooks
+            }
+        }
+
+        // FUNÇÃO PARA APLICAR O ZOOM OTIMIZADO
+        function applyOptimalZoom() {
+            const optimalZoom = getZoomLevelByScreenSize();
+            
+            // Se o mapa já foi inicializado, aplicar o zoom
+            if (map) {
+                map.setZoom(optimalZoom);
+            }
+            
+            return optimalZoom;
+        }
+
+        // DETECÇÃO DE ANDROID E CORREÇÃO DE BOTÃO
+        function detectAndroidAndFixButton() {
+            const isAndroid = /Android/.test(navigator.userAgent);
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isAndroid && isMobile) {
+                console.log('Android detectado - aplicando correções para botão inferior esquerdo');
+                
+                // Forçar exibição do botão compacto inferior esquerdo
+                const compactControls = document.querySelector('.map-controls-compact');
+                if (compactControls) {
+                    compactControls.style.display = 'block';
+                    compactControls.style.position = 'fixed';
+                    compactControls.style.bottom = '20px';
+                    compactControls.style.left = '20px';
+                    compactControls.style.zIndex = '1100';
+                }
+            }
+        }
+
+        // Código JavaScript modificado para iniciar com camadas desativadas
+        let map;
+        let maranhaoLayer;
+        let impactosTipoLayer;
+        let impactosLayer;
+        let secaLayer;
+        let municipiosLayer;
+        let limiteCompostoLayer;
+        let isFullscreen = false;
+        let currentMapType = 'dark';
+        let currentSecaView = 'estadual';
+        let currentMonth = '09';
+        let currentYear = '2025';
+        
+        // Variáveis para a busca de municípios
+        let municipiosData = [];
+        let municipiosLayerGroup = null;
+        let selectedMunicipioLayer = null;
+        
+        // Variáveis para geolocalização
+        let userLocationMarker = null;
+        let userLocationCircle = null;
+        let isGeolocationActive = false;
+        let geolocationWatchId = null;
+        
+        let areaData = {
+            total: 0,
+            weak: 0,
+            moderate: 0,
+            severe: 0,
+            extreme: 0,
+            exceptional: 0,
+            sem_seca: 0
+        };
+
+        const descricoesSeca = {
+            0:'Sem Seca',
+            1:'Seca Fraca',
+            2:'Seca Moderada', 
+            3:'Seca Grave',
+            4:'Seca Extrema',
+            5:'Seca Excepcional'
+        };
+
+        const coresSeca = {
+            0: 'var(--sem-seca)',
+            1: 'var(--seca-fraca)',
+            2: 'var(--seca-moderada)',
+            3: 'var(--seca-grave)',
+            4: 'var(--seca-extrema)',
+            5: 'var(--seca-excepcional)'
+        };
+
+        const nomesMeses = {
+            '01': 'Janeiro',
+            '02': 'Fevereiro',
+            '03': 'Março',
+            '04': 'Abril',
+            '05': 'Maio',
+            '06': 'Junho',
+            '07': 'Julho',
+            '08': 'Agosto',
+            '09': 'Setembro',
+            '10': 'Outubro',
+            '11': 'Novembro',
+            '12': 'Dezembro'
+        };
+
+        function getSecaIcone(nivel, tamanho = 'normal') {
+            const classe = tamanho === 'lg' ? 'seca-icon-lg' : 'seca-icon';
+            return `<span class="seca-icon seca-icon-${nivel} ${classe}"></span>`;
+        }
+
+        const iconesSeca = {
+            0: getSecaIcone(0),
+            1: getSecaIcone(1),
+            2: getSecaIcone(2),
+            3: getSecaIcone(3),
+            4: getSecaIcone(4),
+            5: getSecaIcone(5)
+        };
+
+        // Função para descobrir os períodos disponíveis via arquivo JSON
+        async function descobrirPeriodosDisponiveis() {
+            try {
+                const response = await fetch('docs/monitor_seca/periodos_disponiveis.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.periodos_disponiveis || [];
+                }
+            } catch (error) {
+                console.error('Erro ao carregar períodos disponíveis:', error);
+            }
+            return [];
+        }
+
+        // Função para ordenar períodos em ordem cronológica correta
+        function ordenarPeriodosCronologicamente(periodos) {
+            return periodos.sort((a, b) => {
+                // Converte "MMYYYY" para objeto Date para comparação
+                const mesA = parseInt(a.substring(0, 2));
+                const anoA = parseInt(a.substring(2, 6));
+                const mesB = parseInt(b.substring(0, 2));
+                const anoB = parseInt(b.substring(2, 6));
+                
+                // Primeiro compara o ano, depois o mês
+                if (anoA !== anoB) {
+                    return anoA - anoB;
+                }
+                return mesA - mesB;
+            });
+        }
+
+        // Função para popular o seletor com períodos disponíveis formatados
+        function popularSeletorPeriodos(periodosDisponiveis) {
+            const periodoSelect = document.getElementById('periodo-select');
+            
+            // Limpa o seletor atual
+            periodoSelect.innerHTML = '';
+            
+            if (periodosDisponiveis.length === 0) {
+                // Fallback caso não haja períodos disponíveis
+                const option = document.createElement('option');
+                option.value = '092025';
+                option.textContent = 'Setembro 2025';
+                periodoSelect.appendChild(option);
+                return;
+            }
+            
+            // Ordena os períodos em ordem cronológica correta
+            const periodosOrdenados = ordenarPeriodosCronologicamente(periodosDisponiveis);
+            
+            // Popula o seletor com períodos formatados
+            periodosOrdenados.forEach(periodo => {
+                const mes = periodo.substring(0, 2);
+                const ano = periodo.substring(2, 6);
+                
+                if (nomesMeses[mes]) {
+                    const option = document.createElement('option');
+                    option.value = periodo;
+                    option.textContent = `${nomesMeses[mes]} ${ano}`;
+                    periodoSelect.appendChild(option);
+                }
+            });
+            
+            // Define o período mais recente como selecionado por padrão
+            if (periodosOrdenados.length > 0) {
+                const periodoMaisRecente = periodosOrdenados[periodosOrdenados.length - 1];
+                periodoSelect.value = periodoMaisRecente;
+                
+                currentMonth = periodoMaisRecente.substring(0, 2);
+                currentYear = periodoMaisRecente.substring(2, 6);
+            }
+        }
+
+        // FUNÇÃO PARA VERIFICAR SE É MOBILE
+        function isMobileDevice() {
+            return window.innerWidth <= 768;
+        }
+
+        // FUNÇÃO PARA INICIALIZAR CAMADAS OCULTAS NO MOBILE
+        function inicializarCamadasMobile() {
+            if (isMobileDevice()) {
+                console.log('Dispositivo mobile detectado - iniciando camadas ocultas');
+                
+                // Remover classes 'active' dos botões de impacto no mobile
+                const btnImpactos = document.getElementById('toggle-impactos');
+                const btnImpactosTipo = document.getElementById('toggle-impactos-tipo');
+                const compactBtnImpactos = document.getElementById('compact-toggle-impactos');
+                const compactBtnImpactosTipo = document.getElementById('compact-toggle-impactos-tipo');
+                
+                if (btnImpactos) btnImpactos.classList.remove('active');
+                if (btnImpactosTipo) btnImpactosTipo.classList.remove('active');
+                if (compactBtnImpactos) compactBtnImpactos.classList.remove('active');
+                if (compactBtnImpactosTipo) compactBtnImpactosTipo.classList.remove('active');
+                
+                // Garantir que as camadas de impacto estejam ocultas no mapa
+                if (impactosLayer && map.hasLayer(impactosLayer)) {
+                    map.removeLayer(impactosLayer);
+                }
+                if (impactosTipoLayer && map.hasLayer(impactosTipoLayer)) {
+                    map.removeLayer(impactosTipoLayer);
+                }
+            } else {
+                console.log('Dispositivo desktop/tablet - mantendo comportamento padrão');
+                // Para desktop/tablet, manter as camadas como estão (visíveis)
+            }
+        }
+
+        // NOVO: Função para controlar visibilidade dos painéis no mobile
+        function inicializarVisibilidadePainelMobile() {
+            if (isMobileDevice()) {
+                // No mobile, adicionar a classe mobile-hidden para ocultar todos os painéis
+                const sidePanels = document.getElementById('sidePanels');
+                if (sidePanels) {
+                    sidePanels.classList.add('mobile-hidden');
+                }
+                
+                // Ocultar também o seletor de visualização inicialmente
+                const secaViewSelector = document.querySelector('.seca-view-selector');
+                if (secaViewSelector) {
+                    secaViewSelector.style.display = 'none';
+                }
+            } else {
+                // No desktop, garantir que tudo esteja visível
+                const sidePanels = document.getElementById('sidePanels');
+                if (sidePanels) {
+                    sidePanels.classList.remove('mobile-hidden');
+                }
+                
+                const secaViewSelector = document.querySelector('.seca-view-selector');
+                if (secaViewSelector) {
+                    secaViewSelector.style.display = 'block';
+                }
+            }
+        }
+
+        // NOVO: Função para mostrar um painel específico no mobile
+        function mostrarPainelMobile(painelId) {
+            if (!isMobileDevice()) return;
+            
+            const sidePanels = document.getElementById('sidePanels');
+            const paineis = sidePanels.querySelectorAll('.panel');
+            
+            // Remover a classe mobile-visible de todos os painéis
+            paineis.forEach(painel => {
+                painel.classList.remove('mobile-visible');
+            });
+            
+            // Adicionar a classe mobile-visible apenas ao painel selecionado
+            const painelSelecionado = document.getElementById(painelId);
+            if (painelSelecionado) {
+                painelSelecionado.classList.add('mobile-visible');
+                sidePanels.classList.remove('mobile-hidden');
+            }
+        }
+
+        // NOVO: Função para ocultar todos os painéis no mobile
+        function ocultarTodosPaineisMobile() {
+            if (!isMobileDevice()) return;
+            
+            const sidePanels = document.getElementById('sidePanels');
+            const paineis = sidePanels.querySelectorAll('.panel');
+            
+            // Remover a classe mobile-visible de todos os painéis
+            paineis.forEach(painel => {
+                painel.classList.remove('mobile-visible');
+            });
+            
+            // Adicionar a classe mobile-hidden para ocultar todos os painéis
+            sidePanels.classList.add('mobile-hidden');
+        }
+
+        // NOVA FUNÇÃO: Adicionar efeito de clique nos itens do menu
+        function adicionarEfeitoCliqueMenu() {
+            document.querySelectorAll('.mobile-menu-item, .mobile-submenu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remover classe active de todos os itens do mesmo nível
+                    const parent = this.parentElement;
+                    const siblings = parent.querySelectorAll('.mobile-menu-item, .mobile-submenu-item');
+                    siblings.forEach(sibling => {
+                        sibling.classList.remove('active');
+                    });
+                    
+                    // Adicionar classe active ao item clicado
+                    this.classList.add('active');
+                    
+                    // Efeito visual de clique
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            });
+        }
+
+        // NOVA FUNÇÃO: Mostrar spinner de carregamento
+        function mostrarSpinnerPeriodo() {
+            const periodoLoading = document.getElementById('periodoLoading');
+            if (periodoLoading) {
+                periodoLoading.style.display = 'block';
+            }
+        }
+
+        // NOVA FUNÇÃO: Ocultar spinner de carregamento
+        function ocultarSpinnerPeriodo() {
+            const periodoLoading = document.getElementById('periodoLoading');
+            if (periodoLoading) {
+                periodoLoading.style.display = 'none';
+            }
+        }
+
+        // FUNÇÕES PARA A BARRA DE PESQUISA DE MUNICÍPIOS - NOVO
+        function inicializarBuscaMunicipios() {
+            const searchInput = document.getElementById('municipioSearch');
+            const searchResults = document.getElementById('searchResults');
+            
+            // Event listener para o input de busca desktop
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.trim().toLowerCase();
+                
+                if (searchTerm.length < 2) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                const resultados = municipiosData.filter(municipio => 
+                    municipio.nome.toLowerCase().includes(searchTerm)
+                );
+                
+                exibirResultadosBusca(resultados, searchResults);
+            });
+            
+            // Event listener para limpar busca quando clicar fora
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.search-container')) {
+                    searchResults.style.display = 'none';
+                }
+            });
+            
+            // Event listener para o botão de pesquisa no menu mobile
+            const pesquisaMenuItem = document.querySelector('.mobile-menu-item[data-action="search"]');
+            if (pesquisaMenuItem) {
+                pesquisaMenuItem.addEventListener('click', function() {
+                    abrirBarraPesquisaMobile();
+                });
+            }
+
+            // Event listener para o botão de pesquisa no menu compacto
+            const compactSearchBtn = document.getElementById('compact-search-btn');
+            if (compactSearchBtn) {
+                compactSearchBtn.addEventListener('click', function() {
+                    abrirBarraPesquisaMobile();
+                });
+            }
+        }
+
+        // NOVA FUNÇÃO: Abrir barra de pesquisa no mobile
+        function abrirBarraPesquisaMobile() {
+            // Fechar outros menus abertos
+            document.getElementById('mobileMenuContent').classList.remove('show');
+            document.getElementById('compactMenu').classList.remove('show');
+            document.getElementById('menuOverlay').style.display = 'none';
+            
+            // Mostrar a barra de pesquisa principal
+            const searchContainer = document.querySelector('.search-container');
+            if (searchContainer) {
+                searchContainer.style.display = 'block';
+                
+                // Focar no input de pesquisa após uma pequena pausa
+                setTimeout(() => {
+                    const searchInput = document.getElementById('municipioSearch');
+                    if (searchInput) {
+                        searchInput.focus();
+                    }
+                }, 300);
+            }
+        }
+
+        function exibirResultadosBusca(resultados, container) {
+            if (resultados.length === 0) {
+                container.innerHTML = '<div class="no-results">Nenhum município encontrado</div>';
+                container.style.display = 'block';
+                return;
+            }
+            
+            let html = '';
+            resultados.forEach(municipio => {
+                html += `
+                    <div class="search-result-item" data-municipio-id="${municipio.id}">
+                        <div class="municipio-name">${municipio.nome}</div>
+                        <div class="municipio-info">
+                            ${municipio.tem_seca ? 'Com seca' : 'Sem seca'} | 
+                            Área: ${formatNumber(municipio.area_municipio_km2.toFixed(2))} km²
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            container.style.display = 'block';
+            
+            // Adicionar event listeners para os resultados
+            container.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const municipioId = this.getAttribute('data-municipio-id');
+                    const municipio = municipiosData.find(m => m.id == municipioId);
+                    if (municipio) {
+                        selecionarMunicipio(municipio);
+                    }
+                });
+            });
+        }
+
+        // MODIFICAÇÃO 01: Remover seleção automática, apenas dar zoom e simular clique
+        function selecionarMunicipio(municipio) {
+            // Fechar resultados da busca
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('municipioSearch').value = municipio.nome;
+            
+            // Fechar barra de pesquisa no mobile
+            if (isMobileDevice()) {
+                const searchContainer = document.querySelector('.search-container');
+                if (searchContainer) {
+                    searchContainer.style.display = 'none';
+                }
+            }
+            
+            // Limpar seleção anterior (se houver)
+            if (selectedMunicipioLayer) {
+                map.removeLayer(selectedMunicipioLayer);
+                selectedMunicipioLayer = null;
+            }
+            
+            // Encontrar e simular clique no município
+            if (municipiosLayerGroup) {
+                let municipioEncontrado = false;
+                
+                municipiosLayerGroup.eachLayer(function(layer) {
+                    const props = layer.feature.properties;
+                    if (props && props.NM_MUN === municipio.nome) {
+                        municipioEncontrado = true;
+                        
+                        // Centralizar no município
+                        const bounds = layer.getBounds();
+                        map.fitBounds(bounds, {
+                            padding: [50, 50],
+                            maxZoom: 10
+                        });
+                        
+                        // Simular um clique para abrir o popup
+                        setTimeout(() => {
+                            layer.fire('click');
+                        }, 500);
+                    }
+                });
+                
+                if (!municipioEncontrado) {
+                    console.log('Município não encontrado no mapa:', municipio.nome);
+                }
+            }
+        }
+
+        function extrairDadosMunicipios(geojsonData) {
+            municipiosData = [];
+            
+            if (!geojsonData.features) return;
+            
+            geojsonData.features.forEach((feature, index) => {
+                const props = feature.properties;
+                if (props && props.NM_MUN) {
+                    municipiosData.push({
+                        id: index,
+                        nome: props.NM_MUN,
+                        area_municipio_km2: props.area_municipio_km2 || props.AREA_KM2 || 0,
+                        tem_seca: props.tem_seca || false,
+                        nivel_seca_predominante: props.nivel_seca_predominante || 0,
+                        feature: feature
+                    });
+                }
+            });
+            
+            // Ordenar por nome
+            municipiosData.sort((a, b) => a.nome.localeCompare(b.nome));
+        }
+
+        // NOVAS FUNÇÕES PARA GEOLOCALIZAÇÃO
+        function inicializarGeolocalizacao() {
+            const gpsBtn = document.getElementById('gps-location');
+            const compactGpsBtn = document.getElementById('compact-gps-location');
+            
+            // Event listeners para os botões de GPS
+            gpsBtn.addEventListener('click', toggleGeolocation);
+            compactGpsBtn.addEventListener('click', function() {
+                toggleGeolocation();
+                fecharMenuCompacto();
+            });
+            
+            // Verificar se a geolocalização é suportada
+            if (!navigator.geolocation) {
+                console.log('Geolocalização não é suportada por este navegador');
+                gpsBtn.disabled = true;
+                compactGpsBtn.disabled = true;
+                gpsBtn.title = 'Geolocalização não suportada';
+                compactGpsBtn.title = 'Geolocalização não suportada';
+            }
+        }
+
+        function toggleGeolocation() {
+            if (isGeolocationActive) {
+                desativarGeolocalizacao();
+            } else {
+                ativarGeolocalizacao();
+            }
+        }
+
+        function ativarGeolocalizacao() {
+            if (!navigator.geolocation) {
+                alert('Geolocalização não é suportada pelo seu navegador.');
+                return;
+            }
+            
+            // Atualizar estado dos botões
+            document.getElementById('gps-location').classList.add('active');
+            document.getElementById('compact-gps-location').classList.add('active');
+            
+            // Mostrar indicador de carregamento
+            document.getElementById('gps-location').innerHTML = '<i class="fas fa-spinner gps-loading"></i>';
+            document.getElementById('compact-gps-location').innerHTML = '<i class="fas fa-spinner gps-loading"></i>';
+            
+            // Opções para geolocalização
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            };
+            
+            // Iniciar watch da posição
+            geolocationWatchId = navigator.geolocation.watchPosition(
+                function(position) {
+                    // Sucesso na obtenção da localização
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    
+                    console.log(`Localização obtida: ${lat}, ${lng} (precisão: ${accuracy}m)`);
+                    
+                    // Atualizar ícones dos botões
+                    document.getElementById('gps-location').innerHTML = '<i class="fas fa-location-arrow"></i>';
+                    document.getElementById('compact-gps-location').innerHTML = '<i class="fas fa-location-arrow"></i>';
+                    
+                    // Adicionar/atualizar marcador no mapa
+                    adicionarMarcadorLocalizacao(lat, lng, accuracy);
+                    
+                    // Centralizar no usuário
+                    map.setView([lat, lng], Math.max(map.getZoom(), 14));
+                    
+                    isGeolocationActive = true;
+                },
+                function(error) {
+                    // Erro na obtenção da localização
+                    console.error('Erro na geolocalização:', error);
+                    
+                    // Restaurar ícones dos botões
+                    document.getElementById('gps-location').innerHTML = '<i class="fas fa-location-arrow"></i>';
+                    document.getElementById('compact-gps-location').innerHTML = '<i class="fas fa-location-arrow"></i>';
+                    
+                    // Remover classes active
+                    document.getElementById('gps-location').classList.remove('active');
+                    document.getElementById('compact-gps-location').classList.remove('active');
+                    
+                    let errorMessage = 'Erro ao obter localização: ';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage += 'Permissão negada pelo usuário.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage += 'Localização indisponível.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage += 'Tempo esgotado para obter localização.';
+                            break;
+                        default:
+                            errorMessage += 'Erro desconhecido.';
+                            break;
+                    }
+                    
+                    alert(errorMessage);
+                    isGeolocationActive = false;
+                },
+                options
+            );
+        }
+
+        function desativarGeolocalizacao() {
+            if (geolocationWatchId) {
+                navigator.geolocation.clearWatch(geolocationWatchId);
+                geolocationWatchId = null;
+            }
+            
+            // Remover marcador do mapa
+            if (userLocationMarker) {
+                map.removeLayer(userLocationMarker);
+                userLocationMarker = null;
+            }
+            if (userLocationCircle) {
+                map.removeLayer(userLocationCircle);
+                userLocationCircle = null;
+            }
+            
+            // Atualizar estado dos botões
+            document.getElementById('gps-location').classList.remove('active');
+            document.getElementById('compact-gps-location').classList.remove('active');
+            
+            isGeolocationActive = false;
+        }
+
+        function adicionarMarcadorLocalizacao(lat, lng, accuracy) {
+            // Remover marcador anterior se existir
+            if (userLocationMarker) {
+                map.removeLayer(userLocationMarker);
+            }
+            if (userLocationCircle) {
+                map.removeLayer(userLocationCircle);
+            }
+            
+            // Criar marcador personalizado
+            userLocationMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: 'gps-marker',
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                })
+            }).addTo(map);
+            
+            // Criar círculo de precisão
+            userLocationCircle = L.circle([lat, lng], {
+                radius: accuracy,
+                className: 'gps-accuracy'
+            }).addTo(map);
+            
+            // Adicionar popup ao marcador
+            userLocationMarker.bindPopup(`
+                <div style="min-width: 200px;">
+                    <h4 style="margin: 0 0 10px 0; color: white; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">
+                        <i class="fas fa-location-arrow"></i> Sua Localização
+                    </h4>
+                    <p style="margin: 5px 0;"><strong>Latitude:</strong> ${lat.toFixed(6)}</p>
+                    <p style="margin: 5px 0;"><strong>Longitude:</strong> ${lng.toFixed(6)}</p>
+                    <p style="margin: 5px 0;"><strong>Precisão:</strong> ${Math.round(accuracy)} metros</p>
+                </div>
+            `);
+            
+            // Tooltip
+            userLocationMarker.bindTooltip('Sua localização', {
+                permanent: false,
+                direction: 'top'
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Executar detecção Android primeiro
+            detectAndroidAndFixButton();
+            
+            // Inicializar visibilidade dos painéis baseado no dispositivo
+            inicializarVisibilidadePainelMobile();
+            
+            // Inicializa o mapa primeiro COM ZOOM OTIMIZADO
+            map = L.map('map', {
+                zoomControl: false,
+                wheelPxPerZoomLevel: 250,
+                zoomSnap: 0.1,
+                zoomDelta: 0.25,
+                wheelDebounceTime: 20,
+                smoothWheelZoom: true,
+                smoothSensitivity: 1.2,
+                attributionControl: false
+            }).setView([-6.0, -45.0], 6.5); // ZOOM OTIMIZADO AQUI
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '©OpenStreetMap, ©CartoDB',
+                subdomains: 'abcd',
+                minZoom: 6,
+                maxZoom: 19.9
+            }).addTo(map);
+
+            // Inicializar geolocalização
+            inicializarGeolocalizacao();
+
+            // Descobre e popula os períodos disponíveis
+            try {
+                const periodosDisponiveis = await descobrirPeriodosDisponiveis();
+                popularSeletorPeriodos(periodosDisponiveis);
+            } catch (error) {
+                console.error('Erro ao carregar períodos:', error);
+            }
+
+            // Event listener para o seletor de período - ATUALIZADO COM SPINNER
+            document.getElementById('periodo-select').addEventListener('change', function() {
+                const periodo = this.value;
+                currentMonth = periodo.substring(0, 2);
+                currentYear = periodo.substring(2, 6);
+                
+                // Mostrar spinner antes de iniciar o carregamento
+                mostrarSpinnerPeriodo();
+                
+                // Recarregar os dados
+                atualizarDados();
+            });
+
+            // Event listener para o menu mobile
+            document.getElementById('mobileMenuToggle').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('mobile-open');
+            });
+
+            // Event listener para o menu flutuante mobile
+            document.getElementById('mobileFloatingMenuButton').addEventListener('click', function() {
+                const menuContent = document.getElementById('mobileMenuContent');
+                const overlay = document.getElementById('menuOverlay');
+                
+                menuContent.classList.toggle('show');
+                overlay.style.display = menuContent.classList.contains('show') ? 'block' : 'none';
+            });
+
+            // Event listener para o overlay (fechar menu ao clicar fora)
+            document.getElementById('menuOverlay').addEventListener('click', function() {
+                document.getElementById('mobileMenuContent').classList.remove('show');
+                document.getElementById('compactMenu').classList.remove('show');
+                this.style.display = 'none';
+            });
+
+            // Event listeners para os itens do menu flutuante - ATUALIZADO
+            document.querySelectorAll('.mobile-menu-item, .mobile-submenu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const action = this.getAttribute('data-action');
+                    handleMobileMenuAction(action);
+                    
+                    // Fechar o menu principal após a seleção
+                    document.getElementById('mobileMenuContent').classList.remove('show');
+                    document.getElementById('menuOverlay').style.display = 'none';
+                });
+            });
+
+            // Event listeners para os botões normais COM ZOOM OTIMIZADO
+            document.getElementById('reset-view').addEventListener('click', function() {
+                map.setView([-6.0, -45.0], getZoomLevelByScreenSize()); // ZOOM OTIMIZADO AQUI
+            });
+            
+            document.getElementById('fullscreen').addEventListener('click', function() {
+                toggleFullscreen();
+            });
+            
+            document.getElementById('map-type').addEventListener('click', function() {
+                toggleMapType();
+            });
+
+            // Event listeners para os botões compactos (mobile) COM ZOOM OTIMIZADO
+            document.getElementById('compact-reset-view').addEventListener('click', function() {
+                map.setView([-6.0, -45.0], getZoomLevelByScreenSize()); // ZOOM OTIMIZADO AQUI
+                fecharMenuCompacto();
+            });
+            
+            document.getElementById('compact-fullscreen').addEventListener('click', function() {
+                toggleFullscreen();
+                fecharMenuCompacto();
+            });
+            
+            document.getElementById('compact-map-type').addEventListener('click', function() {
+                toggleMapType();
+                fecharMenuCompacto();
+            });
+
+            // Adicionar listener para redimensionamento da tela
+            window.addEventListener('resize', function() {
+                // Aguardar um pouco para que o redimensionamento termine
+                setTimeout(() => {
+                    applyOptimalZoom();
+                    detectAndroidAndFixButton();
+                    // Re-aplicar configuração de camadas quando a orientação mudar
+                    inicializarCamadasMobile();
+                    // Re-aplicar configuração de visibilidade dos painéis
+                    inicializarVisibilidadePainelMobile();
+                }, 250);
+            });
+
+            // Event listener para o botão toggle do menu compacto
+            document.getElementById('compactToggle').addEventListener('click', function() {
+                const compactMenu = document.getElementById('compactMenu');
+                const overlay = document.getElementById('menuOverlay');
+                
+                compactMenu.classList.toggle('show');
+                overlay.style.display = compactMenu.classList.contains('show') ? 'block' : 'none';
+                
+                // Fechar outros menus abertos
+                document.getElementById('mobileMenuContent').classList.remove('show');
+            });
+
+            document.querySelectorAll('.panel-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    const panel = this.parentElement;
+                    panel.classList.toggle('expanded');
+                });
+            });
+
+            document.querySelectorAll('.seca-view-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const view = this.getAttribute('data-view');
+                    alternarVisualizacaoSeca(view);
+                });
+            });
+
+            // Inicializar botões de impacto sem ativá-los
+            inicializarBotoesImpactos();
+
+            // Adicionar efeito de clique nos itens do menu
+            adicionarEfeitoCliqueMenu();
+
+            // Inicializar a barra de pesquisa de municípios
+            inicializarBuscaMunicipios();
+
+            // Simular o loading e carregar os dados
+            simulateLoading();
+            
+            setTimeout(function() {
+                carregarDadosSeca().catch(function(error) {
+                    usarDadosFallback();
+                });
+            }, 1500);
+        });
+
+        // Função para fechar o menu compacto
+        function fecharMenuCompacto() {
+            document.getElementById('compactMenu').classList.remove('show');
+            document.getElementById('menuOverlay').style.display = 'none';
+        }
+
+        // NOVO: Função atualizada para lidar com ações do menu mobile
+        function handleMobileMenuAction(action) {
+            switch(action) {
+                case 'search':
+                    // Abrir a barra de pesquisa
+                    abrirBarraPesquisaMobile();
+                    break;
+                    
+                case 'view':
+                    // Alternar visibilidade do seletor de visualização
+                    const viewSelector = document.querySelector('.seca-view-selector');
+                    const isVisible = viewSelector.style.display !== 'none';
+                    
+                    // Ocultar todos os painéis primeiro
+                    ocultarTodosPaineisMobile();
+                    
+                    // Mostrar/ocultar o seletor de visualização
+                    viewSelector.style.display = isVisible ? 'none' : 'block';
+                    break;
+                    
+                case 'stats':
+                    // Alternar visibilidade do painel de estatísticas
+                    const statsPanel = document.getElementById('panel-stats');
+                    const statsVisible = statsPanel.classList.contains('mobile-visible');
+                    
+                    // Ocultar o seletor de visualização
+                    document.querySelector('.seca-view-selector').style.display = 'none';
+                    
+                    // Mostrar/ocultar o painel de estatísticas
+                    if (statsVisible) {
+                        ocultarTodosPaineisMobile();
+                    } else {
+                        mostrarPainelMobile('panel-stats');
+                    }
+                    break;
+            }
+        }
+
+        function atualizarDados() {
+            // Atualizar a data exibida
+            const nomeMes = nomesMeses[currentMonth] || `Mês ${currentMonth}`;
+            
+            // Recarregar os dados
+            carregarDadosSeca().catch(function(error) {
+                usarDadosFallback();
+            });
+        }
+
+        function alternarVisualizacaoSeca(view) {
+            if (view === currentSecaView) return;
+            
+            currentSecaView = view;
+            
+            document.querySelectorAll('.seca-view-option').forEach(option => {
+                if (option.getAttribute('data-view') === view) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
+                }
+            });
+            
+            aplicarVisualizacaoSeca();
+            
+            reordenarCamadasImpacto();
+        }
+
+        function reordenarCamadasImpacto() {
+            if (impactosLayer && map.hasLayer(impactosLayer)) {
+                map.removeLayer(impactosLayer);
+            }
+            if (impactosTipoLayer && map.hasLayer(impactosTipoLayer)) {
+                map.removeLayer(impactosTipoLayer);
+            }
+            
+            // Não adiciona automaticamente as camadas de impacto
+            // Elas só serão adicionadas quando o usuário ativar manualmente
+        }
+
+        function aplicarVisualizacaoSeca() {
+            if (secaLayer && map.hasLayer(secaLayer)) {
+                map.removeLayer(secaLayer);
+            }
+            if (municipiosLayer && map.hasLayer(municipiosLayer)) {
+                map.removeLayer(municipiosLayer);
+            }
+            if (limiteCompostoLayer && map.hasLayer(limiteCompostoLayer)) {
+                map.removeLayer(limiteCompostoLayer);
+            }
+            
+            if (currentSecaView === 'estadual') {
+                if (secaLayer) {
+                    map.addLayer(secaLayer);
+                }
+            } else if (currentSecaView === 'municipal') {
+                if (municipiosLayer) {
+                    map.addLayer(municipiosLayer);
+                }
+            } else if (currentSecaView === 'composto') {
+                if (secaLayer) {
+                    map.addLayer(secaLayer);
+                }
+                if (limiteCompostoLayer) {
+                    map.addLayer(limiteCompostoLayer);
+                }
+            }
+        }
+
+        function criarLimiteComposto(geojsonData) {
+            if (limiteCompostoLayer) {
+                map.removeLayer(limiteCompostoLayer);
+            }
+
+            if (!geojsonData.features || geojsonData.features.length === 0) {
+                return;
+            }
+
+            limiteCompostoLayer = L.geoJSON(geojsonData, {
+                style: function(feature) {
+                    return getEstiloLimiteComposto(feature.properties);
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties;
+                    
+                    adicionarPopupMunicipioCompleto(layer, props);
+                    
+                    layer.on('mouseover', function() {
+                        layer.setStyle({
+                            weight: 3,
+                            color: '#FFFF00',
+                            fillOpacity: 0.1
+                        });
+                    });
+
+                    layer.on('mouseout', function() {
+                        layer.setStyle({
+                            weight: 1,
+                            color: '#ffffff',
+                            fillOpacity: 0
+                        });
+                    });
+                }
+            });
+        }
+
+        function getEstiloLimiteComposto(properties) {
+            return {
+                fillColor: 'transparent',
+                weight: 0.8,
+                opacity: 0.8,
+                color: '#ffffff',
+                fillOpacity: 0,
+                dashArray: '0'
+            };
+        }
+
+        function toggleMapType() {
+            map.eachLayer(function(layer) {
+                if (layer instanceof L.TileLayer) {
+                    map.removeLayer(layer);
+                }
+            });
+            
+            switch(currentMapType) {
+                case 'dark':
+                    currentMapType = 'satellite';
+                    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+                        minZoom: 6,
+                        maxZoom: 19.9
+                    }).addTo(map);
+                    break;
+                case 'satellite':
+                    currentMapType = 'street';
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                        minZoom: 6,
+                        maxZoom: 19.9
+                    }).addTo(map);
+                    break;
+                case 'street':
+                    currentMapType = 'dark';
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                        attribution: '©OpenStreetMap, ©CartoDB',
+                        subdomains: 'abcd',
+                        minZoom: 6,
+                        maxZoom: 19.9
+                    }).addTo(map);
+                    break;
+            }
+            
+            aplicarVisualizacaoSeca();
+            
+            reordenarCamadasImpacto();
+        }
+
+        function simulateLoading() {
+            const loadingBar = document.getElementById('loadingBar');
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += 2;
+                loadingBar.style.width = `${progress}%`;
+                
+                if (progress >= 90) {
+                    clearInterval(interval);
+                }
+            }, 50);
+        }
+
+        function toggleFullscreen() {
+            const elem = document.documentElement;
+            
+            if (!isFullscreen) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+                isFullscreen = true;
+                document.getElementById('fullscreen').innerHTML = '<i class="fas fa-compress"></i>';
+                document.getElementById('compact-fullscreen').innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                isFullscreen = false;
+                document.getElementById('fullscreen').innerHTML = '<i class="fas fa-expand"></i>';
+                document.getElementById('compact-fullscreen').innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('pt-BR').format(num);
+        }
+
+        function calcularPorcentagem(area, areaTotal) {
+            return areaTotal > 0 ? ((area / areaTotal) * 100).toFixed(2) : 0;
+        }
+
+        function exibirImpactosTipo(geojsonData) {
+            if (impactosTipoLayer) {
+                map.removeLayer(impactosTipoLayer);
+            }
+
+            if (!geojsonData.features || geojsonData.features.length === 0) {
+                return;
+            }
+
+            impactosTipoLayer = L.geoJSON(geojsonData, {
+                pointToLayer: function(feature, latlng) {
+                    const props = feature.properties;
+                    const tipo = props.Type || 'C';
+                    
+                    return L.marker(latlng, {
+                        icon: L.divIcon({
+                            className: 'impacto-tipo-rotulo',
+                            html: `<div style="
+                                color: #000000;
+                                font-weight: bold;
+                                font-size: 27px;
+                                text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+                                white-space: nowrap;
+                                text-align: center;
+                                line-height: 1;
+                            ">${tipo}</div>`,
+                            iconSize: [20, 20],
+                            iconAnchor: [10, 30]
+                        })
+                    });
+                },
+                style: function(feature) {
+                    return {
+                        color: '#FF6B6B',
+                        weight: 2,
+                        opacity: 0.8,
+                        fillColor: '#FF6B6B',
+                        fillOpacity: 0.8,
+                        dashArray: '3, 3'
+                    };
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties;
+                    
+                    let popupContent = `
+                        <div style="min-width: 250px; max-width: 300px;">
+                            <h4 style="margin: 0 0 10px 0; color: white; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">
+                                ${getSecaIcone(1)} Tipo de Impacto
+                            </h4>
+                    `;
+                    
+                    for (const [key, value] of Object.entries(props)) {
+                        if (value !== null && value !== undefined && value !== '') {
+                            popupContent += `<p style="margin: 5px 0;"><strong>${key}:</strong> ${value}</p>`;
+                        }
+                    }
+                    
+                    popupContent += `</div>`;
+                    
+                    layer.bindPopup(popupContent);
+                    
+                    const tooltipText = `Tipo: ${props.Type || 'N/A'}`;
+                    layer.bindTooltip(tooltipText, { 
+                        permanent: false, 
+                        direction: 'top',
+                        className: 'tooltip-impactos'
+                    });
+                }
+            });
+        }
+
+        function exibirImpactos(geojsonData) {
+            if (impactosLayer) {
+                map.removeLayer(impactosLayer);
+            }
+
+            if (!geojsonData.features || geojsonData.features.length === 0) {
+                return;
+            }
+
+            impactosLayer = L.geoJSON(geojsonData, {
+                style: {
+                    color: 'black',
+                    weight: 4,
+                    opacity: 0.8,
+                    fillColor: 'white',
+                    fillOpacity: 0.8,
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties;
+                    
+                    let popupContent = `
+                        <div style="min-width: 250px; max-width: 300px;">
+                            <h4 style="margin: 0 0 10px 0; color: white; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">
+                                ${getSecaIcone(3)} Impactos Detalhados
+                            </h4>
+                    `;
+                    
+                    for (const [key, value] of Object.entries(props)) {
+                        if (value !== null && value !== undefined && value !== '') {
+                            popupContent += `<p style="margin: 5px 0;"><strong>${key}:</strong> ${value}</p>`;
+                        }
+                    }
+                    
+                    popupContent += `</div>`;
+                    
+                    layer.bindPopup(popupContent);
+                    
+                    const tooltipText = props.TIPO || props.IMPACTO || 'Impacto Detalhado';
+                    layer.bindTooltip(tooltipText, { 
+                        permanent: false, 
+                        direction: 'center',
+                        className: 'tooltip-impactos'
+                    });
+                }
+            });
+        }
+
+        function exibirMunicipiosComSeca(geojsonData) {
+            if (municipiosLayer) {
+                map.removeLayer(municipiosLayer);
+            }
+
+            if (!geojsonData.features || geojsonData.features.length === 0) {
+                return;
+            }
+
+            // Extrair dados para a busca
+            extrairDadosMunicipios(geojsonData);
+
+            municipiosLayer = L.geoJSON(geojsonData, {
+                style: function(feature) {
+                    return getEstiloMunicipio(feature.properties);
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties;
+                    adicionarPopupMunicipioCompleto(layer, props);
+                    
+                    layer.on('mouseover', function() {
+                        layer.setStyle({
+                            weight: 3,
+                            fillOpacity: 0.8,
+                            color: '#ffffff',
+                            fillColor: layer.options.fillColor
+                        });
+                    });
+
+                    layer.on('mouseout', function() {
+                        layer.setStyle({
+                            weight: 1,
+                            fillOpacity: 0.8,
+                            color: '#ffffff',
+                            fillColor: layer.options.fillColor
+                        });
+                    });
+                }
+            });
+
+            // Criar layer group para busca
+            municipiosLayerGroup = L.geoJSON(geojsonData, {
+                style: function(feature) {
+                    return {
+                        fillColor: 'transparent',
+                        weight: 0,
+                        opacity: 0,
+                        color: 'transparent',
+                        fillOpacity: 0
+                    };
+                },
+                onEachFeature: function(feature, layer) {
+                    // Apenas para manter referência aos municípios
+                }
+            });
+
+            criarLimiteComposto(geojsonData);
+        }
+
+        function getEstiloMunicipio(properties) {
+            if (!properties) {
+                return {
+                    fillColor: '#cccccc',
+                    weight: 1,
+                    opacity: 0.5,
+                    color: '#ffffff',
+                    dashArray: '1',
+                    fillOpacity: 0.8
+                };
+            }
+
+            const temSeca = properties.tem_seca;
+            const nivelSeca = properties.nivel_seca_predominante || 0;
+            const percAfetada = properties.perc_area_com_seca || properties.perc_area_afetada || 0;
+
+            const cor = temSeca ? (coresSeca[nivelSeca] || 'var(--seca-fraca)') : 'var(--sem-seca)';
+
+            let opacidade = 0.8;
+            if (temSeca) {
+                if (percAfetada > 50) opacidade = 0.8;
+                else if (percAfetada > 25) opacidade = 0.8;
+                else opacidade = 0.8;
+            }
+
+            return {
+                fillColor: cor,
+                weight: 1,
+                opacity: 0.8,
+                color: '#ffffff',
+                fillOpacity: opacidade,
+                dashArray: temSeca ? '0' : '2, 2'
+            };
+        }
+
+        function adicionarPopupMunicipioCompleto(layer, properties) {
+            if (!properties) {
+                layer.bindPopup(`${getSecaIcone(0)} Município<br>Informações não disponíveis`);
+                return;
+            }
+
+            const nomeMunicipio = properties.NM_MUN || properties.nome || 'Município';
+            const areaMunicipio = properties.area_municipio_km2 || properties.AREA_KM2 || 0;
+            const areaSeca = properties.area_com_seca_km2 || properties.area_seca_total_km2 || 0;
+            const percAfetada = properties.perc_area_com_seca || properties.perc_area_afetada || 0;
+            const nivelSeca = properties.nivel_seca_predominante || 0;
+            const temSeca = properties.tem_seca || false;
+            const numTiposSecas = properties.num_tipos_seca || 0;
+            
+            let secaPorNivel = {};
+            
+            try {
+                if (properties.seca_por_nivel_json && typeof properties.seca_por_nivel_json === 'object') {
+                    secaPorNivel = properties.seca_por_nivel_json;
+                }
+                else if (properties.seca_por_nivel && typeof properties.seca_por_nivel === 'object') {
+                    secaPorNivel = properties.seca_por_nivel;
+                }
+                else if (properties.seca_por_nivel && typeof properties.seca_por_nivel === 'string') {
+                    const jsonString = properties.seca_por_nivel
+                        .replace(/np\.float64\(([^)]+)\)/g, '$1')
+                        .replace(/'/g, '"');
+                    
+                    secaPorNivel = JSON.parse(jsonString);
+                }
+            } catch (e) {
+                secaPorNivel = {};
+            }
+
+            const descricaoSeca = descricoesSeca[nivelSeca] || 'Desconhecido';
+            const icone = iconesSeca[nivelSeca] || getSecaIcone(0);
+
+            let popupContent = `
+                <div style="min-width: 320px; max-width: 400px;">
+                    <h4 style="margin: 0 0 15px 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 8px;">
+                        ${icone} ${nomeMunicipio}
+                    </h4>
+                    
+                    <div style="margin-bottom: 15px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <p style="margin: 5px 0;"><strong>Área Total:</strong> ${formatNumber(areaMunicipio.toFixed(2))} km²</p>
+            `;
+
+            if (temSeca) {
+                popupContent += `
+                        <p style="margin: 5px 0;"><strong>Área com Seca:</strong> ${formatNumber(areaSeca.toFixed(2))} km²</p>
+                        <p style="margin: 5px 0;"><strong>Porcentagem Afetada:</strong> <span style="color: #FF6B6B; font-weight: bold;">${percAfetada.toFixed(0)}%</span></p>
+                        <p style="margin: 5px 0;"><strong>Nível Predominante:</strong> ${descricaoSeca}</p>
+                        <p style="margin: 5px 0;"><strong>Tipos de Seca Presentes:</strong> ${numTiposSecas}</p>
+                `;
+            } else {
+                popupContent += `
+                        <p style="margin: 5px 0; color: #90EE90; font-weight: bold;">Sem seca detectada</p>
+                `;
+            }
+
+            popupContent += `</div>`;
+
+            if (temSeca && Object.keys(secaPorNivel).length > 0) {
+                popupContent += `
+                    <div style="margin-bottom: 10px;">
+                        <h5 style="margin: 0 0 10px 0; color: white; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">
+                            Detalhamento por Tipo de Seca
+                        </h5>
+                `;
+
+                const niveisOrdenados = Object.keys(secaPorNivel)
+                    .map(nivel => parseInt(nivel))
+                    .sort((a, b) => b - a);
+
+                for (const nivel of niveisOrdenados) {
+                    const dados = secaPorNivel[nivel];
+                    const descricao = descricoesSeca[nivel] || `Nível ${nivel}`;
+                    const iconeNivel = getSecaIcone(nivel, 'lg');
+                    const corNivel = coresSeca[nivel] || '#cccccc';
+                    
+                    const areaKm2 = dados.area_km2 || 0;
+                    const percMunicipio = dados.perc_municipio || 0;
+                    const percSecas = dados.perc_area_seca || dados.perc_seca || 0;
+                    
+                    popupContent += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; border-left: 4px solid ${corNivel};">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    ${iconeNivel}
+                                    <span style="font-weight: 600;">${descricao}</span>
+                                </div>
+                                <div style="font-size: 0.85em; color: #cccccc; margin-top: 4px;">
+                                    ${formatNumber(areaKm2.toFixed(2))} km²
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: 600; color: #FFAA00;">${percMunicipio.toFixed(0)}%</div>
+                                <div style="font-size: 0.8em; color: #cccccc;">do município</div>
+                                <div style="font-size: 0.8em; color: #cccccc;">${percSecas.toFixed(2)}% da seca</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                popupContent += `</div>`;
+            }
+
+            if (temSeca) {
+                popupContent += `
+                    <div style="margin-top: 6px; padding: 0px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                        <div style="font-size: 0.6em; color: #cccccc; text-align: center;">
+                            Fraca | ${getSecaIcone(1)} 
+                            Moderada | ${getSecaIcone(2)}
+                            Grave | ${getSecaIcone(3)}
+                            Extrema | ${getSecaIcone(4)}
+                            Excepcional | ${getSecaIcone(5)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            popupContent += `</div>`;
+            
+            layer.bindPopup(popupContent);
+            
+            let tooltipText = `${nomeMunicipio}`;
+            if (temSeca) {
+                if (numTiposSecas > 1) {
+                    const tipos = Object.keys(secaPorNivel).map(nivel => `N${nivel}`).join(',');
+                    tooltipText += ` - ${descricaoSeca} (${percAfetada.toFixed(1)}%) - Tipos: ${tipos}`;
+                } else {
+                    tooltipText += ` - ${descricaoSeca} (${percAfetada.toFixed(1)}%)`;
+                }
+            } else {
+                tooltipText += ' - Sem Seca';
+            }
+                
+            layer.bindTooltip(tooltipText, { 
+                permanent: false, 
+                direction: 'center',
+                className: 'tooltip-municipio'
+            });
+        }
+
+        function inicializarBotoesImpactos() {
+            const btnImpactos = document.getElementById('toggle-impactos');
+            const btnImpactosTipo = document.getElementById('toggle-impactos-tipo');
+            const compactBtnImpactos = document.getElementById('compact-toggle-impactos');
+            const compactBtnImpactosTipo = document.getElementById('compact-toggle-impactos-tipo');
+            
+            // Remove qualquer classe 'active' que possa existir
+            btnImpactos.classList.remove('active');
+            btnImpactosTipo.classList.remove('active');
+            compactBtnImpactos.classList.remove('active');
+            compactBtnImpactosTipo.classList.remove('active');
+            
+            btnImpactos.addEventListener('click', function() {
+                if (impactosLayer) {
+                    if (map.hasLayer(impactosLayer)) {
+                        map.removeLayer(impactosLayer);
+                        this.classList.remove('active');
+                        compactBtnImpactos.classList.remove('active');
+                    } else {
+                        map.addLayer(impactosLayer);
+                        this.classList.add('active');
+                        compactBtnImpactos.classList.add('active');
+                    }
+                }
+            });
+
+            btnImpactosTipo.addEventListener('click', function() {
+                if (impactosTipoLayer) {
+                    if (map.hasLayer(impactosTipoLayer)) {
+                        map.removeLayer(impactosTipoLayer);
+                        this.classList.remove('active');
+                        compactBtnImpactosTipo.classList.remove('active');
+                    } else {
+                        map.addLayer(impactosTipoLayer);
+                        this.classList.add('active');
+                        compactBtnImpactosTipo.classList.add('active');
+                    }
+                }
+            });
+
+            // Event listeners para os botões compactos
+            compactBtnImpactos.addEventListener('click', function() {
+                if (impactosLayer) {
+                    if (map.hasLayer(impactosLayer)) {
+                        map.removeLayer(impactosLayer);
+                        this.classList.remove('active');
+                        btnImpactos.classList.remove('active');
+                    } else {
+                        map.addLayer(impactosLayer);
+                        this.classList.add('active');
+                        btnImpactos.classList.add('active');
+                    }
+                }
+                fecharMenuCompacto();
+            });
+
+            compactBtnImpactosTipo.addEventListener('click', function() {
+                if (impactosTipoLayer) {
+                    if (map.hasLayer(impactosTipoLayer)) {
+                        map.removeLayer(impactosTipoLayer);
+                        this.classList.remove('active');
+                        btnImpactosTipo.classList.remove('active');
+                    } else {
+                        map.addLayer(impactosTipoLayer);
+                        this.classList.add('active');
+                        btnImpactosTipo.classList.add('active');
+                    }
+                }
+                fecharMenuCompacto();
+            });
+        }
+
+        function carregarDadosSeca() {
+            return new Promise((resolve, reject) => {
+                const loadingBar = document.getElementById('loadingBar');
+                
+                // Definir os caminhos baseados no período selecionado
+                const periodo = currentMonth + currentYear;
+                const basePath = `docs/monitor_seca/${periodo}/`;
+                
+                const geojsonSecaPath = `${basePath}seca_atributos.geojson`;
+                const geojsonMaranhaoPath = 'docs/Shapefile/MA_Municipios_2022_limite/Limite_MA_2022.geojson';
+                const geojsonImpactosTipoPath = `${basePath}impactos_tipo_recortado.geojson`;
+                const geojsonImpactosPath = `${basePath}impactos_recortado.geojson`;
+                const geojsonMunicipiosPath = `${basePath}seca_por_municipio.geojson`;
+                
+                Promise.all([
+                    fetch(geojsonSecaPath).then(response => {
+                        if (!response.ok) throw new Error(`Erro HTTP Seca: ${response.status}`);
+                        return response.json();
+                    }),
+                    fetch(geojsonMaranhaoPath).then(response => {
+                        if (!response.ok) throw new Error(`Erro HTTP Maranhão: ${response.status}`);
+                        return response.json();
+                    }),
+                    fetch(geojsonImpactosTipoPath).then(response => {
+                        if (!response.ok) {
+                            return null;
+                        }
+                        return response.json();
+                    }),
+                    fetch(geojsonImpactosPath).then(response => {
+                        if (!response.ok) {
+                            return null;
+                        }
+                        return response.json();
+                    }),
+                    fetch(geojsonMunicipiosPath).then(response => {
+                        if (!response.ok) {
+                            return null;
+                        }
+                        return response.json();
+                    })
+                ])
+                .then(([dadosSeca, dadosMaranhao, dadosImpactosTipo, dadosImpactos, dadosMunicipios]) => {
+                    loadingBar.style.width = '100%';
+                    
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').style.opacity = '0';
+                        setTimeout(() => {
+                            document.getElementById('loadingScreen').style.display = 'none';
+                        }, 500);
+                    }, 500);
+                    
+                    exibirLimiteMaranhao(dadosMaranhao, dadosSeca);
+                    
+                    if (dadosImpactosTipo) {
+                        exibirImpactosTipo(dadosImpactosTipo);
+                    }
+                    
+                    if (dadosImpactos) {
+                        exibirImpactos(dadosImpactos);
+                    }
+                    
+                    exibirDadosNoMapa(dadosSeca);
+                    
+                    if (dadosMunicipios) {
+                        exibirMunicipiosComSeca(dadosMunicipios);
+                    }
+                    
+                    if (secaLayer) {
+                        map.addLayer(secaLayer);
+                    }
+                    
+                    // NÃO adiciona automaticamente as camadas de impacto
+                    // Elas só serão adicionadas quando o usuário ativar manualmente
+                    
+                    aplicarVisualizacaoSeca();
+                    
+                    // INICIALIZAR CAMADAS OCULTAS APENAS NO MOBILE
+                    inicializarCamadasMobile();
+                    
+                    // OCULTAR SPINNER APÓS CARREGAR OS DADOS
+                    ocultarSpinnerPeriodo();
+                    
+                    resolve([dadosSeca, dadosMaranhao, dadosImpactosTipo, dadosImpactos, dadosMunicipios]);
+                })
+                .catch(error => {
+                    Promise.all([
+                        fetch(geojsonSecaPath),
+                        fetch(geojsonMaranhaoPath)
+                    ])
+                    .then(([responseSeca, responseMaranhao]) => {
+                        if (!responseSeca.ok || !responseMaranhao.ok) throw error;
+                        return Promise.all([responseSeca.json(), responseMaranhao.json()]);
+                    })
+                    .then(([dadosSeca, dadosMaranhao]) => {
+                        loadingBar.style.width = '100%';
+                        setTimeout(() => {
+                            document.getElementById('loadingScreen').style.opacity = '0';
+                            setTimeout(() => {
+                                document.getElementById('loadingScreen').style.display = 'none';
+                            }, 500);
+                        }, 500);
+                        
+                        exibirLimiteMaranhao(dadosMaranhao, dadosSeca);
+                        exibirDadosNoMapa(dadosSeca);
+
+                        // INICIALIZAR CAMADAS OCULTAS APENAS NO MOBILE
+                        inicializarCamadasMobile();
+
+                        // OCULTAR SPINNER APÓS CARREGAR OS DADOS
+                        ocultarSpinnerPeriodo();
+
+                        resolve([dadosSeca, dadosMaranhao, null, null, null]);
+                    })
+                    .catch(finalError => {
+                        // OCULTAR SPINNER EM CASO DE ERRO TAMBÉM
+                        ocultarSpinnerPeriodo();
+                        reject(finalError);
+                    });
+                });
+            });
+        }
+
+        function exibirLimiteMaranhao(geojsonData, dadosSeca) {
+            if (maranhaoLayer) {
+                map.removeLayer(maranhaoLayer);
+            }
+
+            if (!geojsonData.features || geojsonData.features.length === 0) {
+                return;
+            }
+
+            let areaTotalMaranhao = 329651.54;
+            if (dadosSeca && dadosSeca.features && dadosSeca.features.length > 0) {
+                const primeiraFeature = dadosSeca.features[0];
+                const props = primeiraFeature.properties;
+                if (props && props.area_maranhao_total_km2) {
+                    areaTotalMaranhao = props.area_maranhao_total_km2;
+                }
+            }
+
+            maranhaoLayer = L.geoJSON(geojsonData, {
+                style: {
+                    color: '#FFFFFF',
+                    weight: 1,
+                    opacity: 0.8,
+                    fillColor: 'transparent',
+                    fillOpacity: 0,
+                },
+                onEachFeature: function(feature, layer) {
+                    layer.bindTooltip('Maranhão', {
+                        permanent: false,
+                        direction: 'center',
+                        className: 'tooltip-maranhao'
+                    });
+                    
+                    layer.bindPopup(`
+                        <div style="min-width: 200px;">
+                            <h4 style="margin: 0 0 10px 0; color: white; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">
+                                Maranhão
+                            </h4>
+                            <p style="margin: 5px 0;"><strong>Estado:</strong> Maranhão</p>
+                            <p style="margin: 5px 0;"><strong>Região:</strong> Nordeste</p>
+                            <p style="margin: 5px 0;"><strong>Área Total:</strong> ${formatNumber(areaTotalMaranhao.toFixed(2))} km²</p>
+                        </div>
+                    `);
+                }
+            }).addTo(map);
+        }
+
+        function usarDadosFallback() {
+            const loadingBar = document.getElementById('loadingBar');
+            loadingBar.style.width = '100%';
+            
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                }, 500);
+            }, 500);
+            
+            // OCULTAR SPINNER NO FALLBACK TAMBÉM
+            ocultarSpinnerPeriodo();
+            
+            atualizarEstatisticas(329651.54);
+        }
+
+        function extrairDadosArea(geojsonData) {
+            areaData = {
+                total: 0,
+                weak: 0,
+                moderate: 0,
+                severe: 0,
+                extreme: 0,
+                exceptional: 0,
+                sem_seca: 0
+            };
+
+            let areaTotalMaranhao = 0;
+            let areaTotalSeca = 0;
+            let areaSemSeca = 0;
+
+            if (geojsonData.features && geojsonData.features.length > 0) {
+                const primeiraFeature = geojsonData.features[0];
+                const props = primeiraFeature.properties;
+                
+                areaTotalMaranhao = props.area_maranhao_total_km2 || 0;
+                areaTotalSeca = props.area_total_seca_km2 || 0;
+                areaSemSeca = props.area_sem_seca_km2 || 0;
+            }
+
+            geojsonData.features.forEach(feature => {
+                const props = feature.properties;
+                const valor = props.Valor;
+                const areaFeature = props.area_seca_km2 || 0;
+                
+                switch(valor) {
+                    case 0:
+                        areaData.sem_seca += areaFeature;
+                        break;
+                    case 1:
+                        areaData.weak += areaFeature;
+                        areaData.total += areaFeature;
+                        break;
+                    case 2:
+                        areaData.moderate += areaFeature;
+                        areaData.total += areaFeature;
+                        break;
+                    case 3:
+                        areaData.severe += areaFeature;
+                        areaData.total += areaFeature;
+                        break;
+                    case 4:
+                        areaData.extreme += areaFeature;
+                        areaData.total += areaFeature;
+                        break;
+                    case 5:
+                        areaData.exceptional += areaFeature;
+                        areaData.total += areaFeature;
+                        break;
+                }
+            });
+
+            if (areaTotalSeca > 0 && Math.abs(areaData.total - areaTotalSeca) > 1000) {
+                areaData.total = areaTotalSeca;
+            }
+
+            return areaTotalMaranhao;
+        }
+
+        function exibirDadosNoMapa(geojsonData) {
+            if (secaLayer) {
+                map.removeLayer(secaLayer);
+            }
+
+            if (!geojsonData.features || geojsonData.features.length === 0) {
+                return;
+            }
+
+            const AREA_TOTAL_MA = extrairDadosArea(geojsonData);
+
+            secaLayer = L.geoJSON(geojsonData, {
+                style: function(feature) {
+                    return getEstiloSeca(feature.properties);
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties;
+                    const areaKm2 = props.area_seca_km2 || 0;
+                    
+                    adicionarPopupCompleto(layer, props, areaKm2, AREA_TOTAL_MA);
+                    
+                    layer.on('mouseover', function() {
+                        layer.setStyle({
+                            weight: 3,
+                            fillOpacity: props.Valor === 0 ? 0.2 : 0.8
+                        });
+                    });
+                    
+                    layer.on('mouseout', function() {
+                        layer.setStyle({
+                            weight: 1,
+                            fillOpacity: props.Valor === 0 ? 0.1 : 0.8
+                        });
+                    });
+                }
+            });
+
+            setTimeout(() => {
+                const optimalZoom = getZoomLevelByScreenSize(); // ZOOM OTIMIZADO AQUI
+                map.flyTo([-6, -45], optimalZoom, {
+                    duration: 2,
+                    easeLinearity: 0.25
+                });
+            }, 1000);
+
+            atualizarEstatisticas(AREA_TOTAL_MA);
+        }
+
+        function getEstiloSeca(properties) {
+            if (!properties || properties.Valor === undefined) {
+                return {
+                    fillColor: '#cccccc',
+                    weight: 1,
+                    opacity: 0.5,
+                    color: '#ffffff',
+                    dashArray: '1',
+                    fillOpacity: 0.8
+                };
+            }
+
+            const valor = properties.Valor;
+            
+            const cores = {
+                0: 'var(--sem-seca)',
+                1: 'var(--seca-fraca)',
+                2: 'var(--seca-moderada)',
+                3: 'var(--seca-grave)',
+                4: 'var(--seca-extrema)',
+                5: 'var(--seca-excepcional)'
+            };
+
+            const cor = cores[valor] || 'var(--sem-seca)';
+
+            if (valor === 0) {
+                return {
+                    fillColor: cor,
+                    weight: 1,
+                    opacity: 0.3,
+                    color: '#cccccc',
+                    dashArray: '2',
+                    fillOpacity: 0.1
+                };
+            }
+
+            return {
+                fillColor: cor,
+                weight: 2,
+                opacity: 1,
+                color: '#ffffff',
+                fillOpacity: 0.8
+            };
+        }
+
+        function adicionarPopupCompleto(layer, properties, areaKm2, areaTotalMaranhao) {
+            if (!properties) {
+                layer.bindPopup(`${getSecaIcone(0)} Área de Seca<br>Informações não disponíveis`);
+                return;
+            }
+
+            const descricao = descricoesSeca[properties.Valor] || 'Desconhecido';
+            const icone = iconesSeca[properties.Valor] || getSecaIcone(0);
+
+            let popupContent = `
+                <div style="min-width: 250px; max-width: 300px;">
+                    <h4 style="margin: 0 0 10px 0; color: white; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">
+                        ${icone} ${descricao}
+                    </h4>
+            `;
+
+            if (properties.Valor !== undefined) {
+                popupContent += `<p style="margin: 5px 0;"><strong>Nível de Seca:</strong> ${descricao}</p>`;
+            }
+            
+            if (areaKm2 > 0) {
+                const areaFormatada = formatNumber(areaKm2.toFixed(2));
+                const porcentagem = calcularPorcentagem(areaKm2, areaTotalMaranhao);
+                popupContent += `<p style="margin: 5px 0;"><strong>Área:</strong> ${areaFormatada} km² (${porcentagem}%)</p>`;
+            }
+
+            popupContent += `</div>`;
+            
+            layer.bindPopup(popupContent);
+            
+            const tooltipText = areaKm2 > 0 ? 
+                `${descricao} (${formatNumber(areaKm2.toFixed(1))} km²)` : 
+                descricao;
+                
+            layer.bindTooltip(tooltipText, { 
+                permanent: false, 
+                direction: 'center',
+                className: 'tooltip-seca'
+            });
+        }
+
+        function atualizarEstatisticas(areaTotalMaranhao) {
+            const categoriasComSeca = Object.keys(areaData).filter(key => {
+                return key !== 'sem_seca' && key !== 'total' && areaData[key] > 0;
+            }).length;
+            
+            document.getElementById('total-areas').textContent = categoriasComSeca;
+            document.getElementById('total-area-km').textContent = formatNumber(Math.round(areaData.total));
+            
+            document.getElementById('area-fraca').textContent = `${formatNumber(Math.round(areaData.weak))} km²`;
+            document.getElementById('percent-fraca').textContent = `(${calcularPorcentagem(areaData.weak, areaTotalMaranhao)}%)`;
+            
+            document.getElementById('area-moderada').textContent = `${formatNumber(Math.round(areaData.moderate))} km²`;
+            document.getElementById('percent-moderada').textContent = `(${calcularPorcentagem(areaData.moderate, areaTotalMaranhao)}%)`;
+            
+            document.getElementById('area-grave').textContent = `${formatNumber(Math.round(areaData.severe))} km²`;
+            document.getElementById('percent-grave').textContent = `(${calcularPorcentagem(areaData.severe, areaTotalMaranhao)}%)`;
+            
+            document.getElementById('area-extrema').textContent = `${formatNumber(Math.round(areaData.extreme))} km²`;
+            document.getElementById('percent-extrema').textContent = `(${calcularPorcentagem(areaData.extreme, areaTotalMaranhao)}%)`;
+            
+            document.getElementById('area-excepcional').textContent = `${formatNumber(Math.round(areaData.exceptional))} km²`;
+            document.getElementById('percent-excepcional').textContent = `(${calcularPorcentagem(areaData.exceptional, areaTotalMaranhao)}%)`;
+        }
+    </script>
+</body>
+</html>

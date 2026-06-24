@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Alertas Meteorológicos - Sistema de alerta meteorológico no Maranhão: Monitoramento e alertas meteorológicos para prevenção e resposta.">
+    <meta name="keywords" content="alertas meteorológicos, Maranhão, clima, previsão do tempo, SEMA">
+    <meta name="author" content="Igor Carlos Cunha Morim">
+    <title>Alertas Meteorológicos - SIMA</title>
+    
+    <!-- Favicon SIMA -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo/CPDAm/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/CPDAm/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo/CPDAm/favicon-16x16.png">
+    <link rel="icon" href="assets/images/logo/CPDAm/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/images/logo/CPDAm/favicon.ico">
+
+    <!-- Para Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/logo/CPDAm/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/logo/CPDAm/android-chrome-512x512.png">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Paleta para Alertas Meteorológicos */
+            --primary-color: #0369a1;
+            --primary-dark: #0c4a6e;
+            --secondary-color: #64748b;
+            --bg-color: #f0f9ff;
+            --bg-secondary: #e0f2fe;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #bae6fd;
+            --shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Cores específicas para Alertas Meteorológicos */
+            --accent-color: #0ea5e9;
+            --card-gradient: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+        }
+
+        .dark-mode {
+            --primary-color: #0ea5e9;
+            --primary-dark: #0369a1;
+            --secondary-color: #94a3b8;
+            --bg-color: #0a192f;
+            --bg-secondary: #09131f;
+            --bg-card: #142d4a;
+            --text-primary: #e3f2fd;
+            --text-secondary: #b0bec5;
+            --text-muted: #607d8b;
+            --border-color: #2c4a6a;
+            --shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+            
+            /* Ajustes para dark mode */
+            --accent-color: #38bdf8;
+            --card-gradient: linear-gradient(135deg, #142d4a 0%, #1a3658 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        /* Cloud Background */
+        .cloud-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.8;
+            transition: opacity 0.5s ease;
+        }
+
+        .dark-mode .cloud-background {
+            opacity: 0.6;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(var(--bg-card-rgb), 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(3, 105, 161, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-description {
+            color: var(--text-secondary);
+            text-align: justify;
+            font-size: 1.2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Controls */
+        .controls-section {
+            padding: 1.5rem 2rem;
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: rgba(var(--bg-card-rgb), 0.8);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            background: rgba(3, 105, 161, 0.1);
+        }
+
+        .stat-item i {
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        /* Cards de Alertas Meteorológicos (SIMPLIFICADOS) */
+        .alerts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .alert-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .alert-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .alert-number {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            background: var(--bg-secondary);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .alert-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .alert-timestamp {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .btn-open-pdf {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-open-pdf:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Empty and Loading States */
+        .empty-message {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-muted);
+            font-style: italic;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .empty-message i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .loading p {
+            font-size: 1.1rem;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: var(--radius);
+            color: #ef4444;
+            margin-bottom: 2rem;
+            border-left: 5px solid #ef4444;
+        }
+
+        .error-message i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .footer-copyright {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .main-content {
+                padding: 2rem;
+            }
+            
+            .page-title {
+                font-size: 2.5rem;
+            }
+            
+            .controls-section {
+                padding: 0.5rem;
+            }
+            
+            .stats {
+                gap: 1.5rem;
+                font-size: 1rem;
+            }
+            
+            .stat-item {
+                padding: 10px 16px;
+            }
+            
+            .alerts-grid {
+                grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            }
+            
+            .alert-title {
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .alerts-grid {
+                grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            }
+            
+            .alert-title {
+                font-size: 1.4rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .controls-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .alerts-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+            
+            .page-title {
+                font-size: 1.8rem;
+            }
+            
+            .page-description {
+                font-size: 1rem;
+            }
+            
+            .alert-title {
+                font-size: 1.1rem;
+                line-height: 1.3;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .alerts-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            
+            .alert-card {
+                padding: 1.2rem;
+            }
+            
+            .alert-title {
+                font-size: 1.1rem;
+            }
+            
+            .btn-open-pdf {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fundo com nuvens -->
+    <div class="cloud-background">
+        <!-- As nuvens serão criadas dinamicamente pelo JavaScript -->
+    </div>
+    
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-cloud-sun-rain"></i>
+                    <span>Alertas Meteorológicos</span>
+                </a>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="refreshAlertas()">
+                        <i class="fas fa-sync-alt"></i>
+                        Atualizar
+                    </button>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Alertas Meteorológicos</h1>
+                <p class="page-description">Sistema de alerta meteorológico para monitoramento de condições climáticas no território estadual. São emitidos alertas para eventos meteorológicos significativos que possam impactar a segurança da população e infraestrutura.</p>
+            </div>
+            
+            <div class="controls-section">
+                <div class="stats">
+                    <div class="stat-item">
+                        <i class="fas fa-cloud-sun-rain"></i>
+                        <span id="total-alertas">0 alertas</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span id="last-update">Atualização: Carregando...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="alertas-container">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando alertas meteorológicos...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-cloud-sun-rain"></i>
+                    <span>Alertas Meteorológicos - SIMA</span>
+                </div>
+                
+                <div class="footer-copyright">
+                    &copy; 2026 Sistema de Monitoramento Ambiental - SIMA/MA
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ========== TEMA ESCURO ==========
+        function carregarPreferenciasTema() {
+            const temaSalvo = localStorage.getItem('temaEscuro');
+            if (temaSalvo === 'true') {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const botaoTema = document.querySelector('.theme-toggle');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                botaoTema.innerHTML = '<i class="fas fa-sun"></i>';
+                localStorage.setItem('temaEscuro', 'true');
+            } else {
+                botaoTema.innerHTML = '<i class="fas fa-moon"></i>';
+                localStorage.setItem('temaEscuro', 'false');
+            }
+            
+            // Atualizar nuvens após trocar tema
+            setTimeout(initClouds, 100);
+        }
+
+        // ========== FUNÇÕES DOS ALERTAS METEOROLÓGICOS ==========
+        
+        // Função para buscar alertas meteorológicos
+        async function fetchAlertasMeteorologicos() {
+            try {
+                // Busca alertas meteorológicos específicos
+                const response = await fetch('/api/alertas-meteorologicos');
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar alertas meteorológicos');
+                }
+                const data = await response.json();
+                
+                return data; // Retorna os dados já filtrados pelo servidor
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                throw error;
+            }
+        }
+
+        // Função para criar cards de alerta meteorológico (simplificados)
+        function createAlertCards(alertas) {
+            if (alertas.length === 0) {
+                return '';
+            }
+            
+            let cardsHTML = '';
+            
+            alertas.forEach(alerta => {
+                // Extrair informações do título
+                const titulo = alerta.titulo || 'Alerta Meteorológico';
+                const numero = alerta.numero || 'N/A';
+                const ano = alerta.ano || new Date().getFullYear();
+                
+                // Formatar data de publicação
+                const dataPublicacao = alerta.data_publicacao || formatTimestamp(alerta.timestamp);
+                
+                cardsHTML += `
+                    <div class="alert-card" onclick="openAlertPDF('${alerta.arquivo}')">
+                        <div class="alert-header">
+                            <div>
+                                <div class="alert-number">N° ${numero}/${ano}</div>
+                                <h3 class="alert-title">${titulo}</h3>
+                            </div>
+                        </div>
+                        <div class="alert-footer">
+                            <span class="alert-timestamp">Publicado em: ${dataPublicacao}</span>
+                            <button class="btn-open-pdf" onclick="event.stopPropagation(); openAlertPDF('${alerta.arquivo}')">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>Abrir PDF</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return cardsHTML;
+        }
+
+        // Função para formatar timestamp
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return '--';
+            
+            const date = new Date(timestamp);
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Função para criar grid de alertas
+        function createAlertasGrid(alertas) {
+            return `<div class="alerts-grid">${createAlertCards(alertas)}</div>`;
+        }
+
+        // Função para abrir PDF do alerta
+        function openAlertPDF(pdfPath) {
+            if (pdfPath) {
+                // Abre o PDF em uma nova aba
+                window.open(pdfPath, '_blank');
+            } else {
+                alert('Arquivo PDF não disponível para este alerta.');
+            }
+        }
+
+        // Função para renderizar os alertas
+        async function renderAlertas() {
+            const container = document.getElementById('alertas-container');
+            const totalAlertas = document.getElementById('total-alertas');
+            const lastUpdate = document.getElementById('last-update');
+            
+            // Mostra loading
+            container.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando alertas meteorológicos...</p>
+                </div>
+            `;
+            
+            try {
+                const data = await fetchAlertasMeteorologicos();
+                const alertasData = data.data;
+                
+                // Atualiza estatísticas
+                totalAlertas.textContent = `${alertasData.length} alerta${alertasData.length !== 1 ? 's' : ''} meteorológico${alertasData.length !== 1 ? 's' : ''}`;
+                lastUpdate.textContent = `Atualização: ${new Date().toLocaleTimeString('pt-BR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'})}`;
+                
+                if (alertasData.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-message">
+                            <i class="fas fa-cloud-sun"></i>
+                            <h3>Nenhum alerta meteorológico encontrado</h3>
+                            <p>Os alertas meteorológicos serão exibidos aqui assim que estiverem disponíveis.</p>
+                            <p style="margin-top: 1rem; font-size: 0.9rem;">
+                                Verifique se existem arquivos PDF com "METEOROLÓGICO" no nome na pasta database/alertas/ano/
+                            </p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Criar grid de alertas
+                container.innerHTML = createAlertasGrid(alertasData);
+                
+            } catch (error) {
+                console.error('Erro ao renderizar alertas:', error);
+                container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar alertas</h3>
+                        <p>${error.message}</p>
+                        <p style="margin-top: 1rem; font-size: 0.9rem;">
+                            Verifique sua conexão e tente novamente.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Função para atualizar os alertas
+        function refreshAlertas() {
+            // Adicionar efeito visual de atualização
+            const refreshBtn = document.querySelector('.btn-primary');
+            const originalHTML = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
+            refreshBtn.disabled = true;
+            
+            renderAlertas();
+            
+            setTimeout(() => {
+                refreshBtn.innerHTML = originalHTML;
+                refreshBtn.disabled = false;
+            }, 2000);
+        }
+
+        // ========== NUVENS DINÂMICAS ==========
+        function initClouds() {
+            const cloudBg = document.querySelector('.cloud-background');
+            
+            // Remove nuvens existentes
+            cloudBg.innerHTML = '';
+            
+            // Cria 4 nuvens com diferentes propriedades
+            for (let i = 1; i <= 4; i++) {
+                const cloud = document.createElement('div');
+                cloud.className = `cloud cloud-${i}`;
+                
+                // Define propriedades dinâmicas
+                const size = 80 + (i * 40); // Tamanho da nuvem
+                const top = 10 + (i * 15); // Posição vertical
+                const speed = 60 + (i * 15); // Velocidade da animação
+                const delay = i * -10; // Delay para animação
+                const opacity = 0.4 + (i * 0.1); // Opacidade
+                
+                cloud.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size * 0.6}px;
+                    background: radial-gradient(circle at 30% 30%, 
+                        rgba(255, 255, 255, ${opacity}) 0%, 
+                        rgba(255, 255, 255, ${opacity * 0.7}) 20%, 
+                        rgba(0, 0, 0, ${opacity * 0.4}) 40%, 
+                        transparent 100%);
+                    border-radius: 50%;
+                    top: ${top}%;
+                    left: -100px;
+                    filter: blur(10px);
+                    animation: float-cloud ${speed}s linear infinite;
+                    animation-delay: ${delay}s;
+                    z-index: ${i};
+                `;
+                
+                // Adiciona sub-nuvens para efeito mais realista
+                for (let j = 1; j <= 3; j++) {
+                    const subCloud = document.createElement('div');
+                    const subSize = size * (0.4 + (j * 0.2));
+                    const subX = 20 + (j * 25);
+                    const subY = 30 - (j * 10);
+                    
+                    subCloud.style.cssText = `
+                        position: absolute;
+                        width: ${subSize}px;
+                        height: ${subSize * 0.8}px;
+                        background: radial-gradient(circle at 40% 40%, 
+                            rgba(255, 255, 255, ${opacity * 0.8}) 0%, 
+                            rgba(255, 255, 255, ${opacity * 0.5}) 30%, 
+                            transparent 70%);
+                        border-radius: 50%;
+                        top: ${subY}%;
+                        left: ${subX}%;
+                        filter: blur(8px);
+                    `;
+                    
+                    cloud.appendChild(subCloud);
+                }
+                
+                cloudBg.appendChild(cloud);
+            }
+            
+            // Adiciona CSS da animação
+            const style = document.createElement('style');
+            style.id = 'cloud-animation-style';
+            style.textContent = `
+                @keyframes float-cloud {
+                    0% {
+                        transform: translateX(0) translateY(0);
+                    }
+                    25% {
+                        transform: translateX(25vw) translateY(-10px);
+                    }
+                    50% {
+                        transform: translateX(50vw) translateY(0);
+                    }
+                    75% {
+                        transform: translateX(75vw) translateY(10px);
+                    }
+                    100% {
+                        transform: translateX(100vw) translateY(0);
+                    }
+                }
+                
+                /* Adiciona mais nuvens menores e mais rápidas */
+                .cloud-1 {
+                    animation-duration: 80s !important;
+                    width: 120px !important;
+                    height: 72px !important;
+                }
+                
+                .cloud-2 {
+                    animation-duration: 100s !important;
+                    top: 30% !important;
+                }
+                
+                .cloud-3 {
+                    animation-duration: 120s !important;
+                    top: 50% !important;
+                }
+                
+                .cloud-4 {
+                    animation-duration: 150s !important;
+                    top: 70% !important;
+                }
+                
+                /* Ajustes para dark mode */
+                .dark-mode .cloud,
+                .dark-mode .cloud div {
+                    background: radial-gradient(circle at 30% 30%, 
+                        rgba(224, 242, 254, 0.4) 0%, 
+                        rgba(186, 230, 253, 0.3) 20%, 
+                        rgba(125, 211, 252, 0.2) 40%, 
+                        transparent 70%) !important;
+                }
+            `;
+            
+            // Remove estilo antigo se existir
+            const oldStyle = document.getElementById('cloud-animation-style');
+            if (oldStyle) {
+                oldStyle.remove();
+            }
+            
+            document.head.appendChild(style);
+        }
+
+        // Atualização automática a cada 10 minutos
+        function startAutoRefresh() {
+            setInterval(renderAlertas, 10 * 60 * 1000);
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarPreferenciasTema();
+            initClouds();
+            renderAlertas();
+            startAutoRefresh();
+        });
+    </script>
+</body>
+</html>

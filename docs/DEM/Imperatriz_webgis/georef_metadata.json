@@ -1,0 +1,36 @@
+{
+  "imagem": {
+    "arquivo": "ortofoto_Imperatriz.png",
+    "largura": 7059,
+    "altura": 13235,
+    "formato": "PNG",
+    "tem_transparencia": true,
+    "qualidade": "PNG com transparência"
+  },
+  "georreferenciamento": {
+    "crs": "EPSG:4326 (WGS84)",
+    "bounds": {
+      "left": -47.472732133084534,
+      "bottom": -5.55820604305424,
+      "right": -47.46635484363807,
+      "top": -5.546249189983844
+    },
+    "centro": {
+      "lat": -5.552227616519042,
+      "lng": -47.4695434883613
+    }
+  },
+  "origem": {
+    "arquivo": "E:\\Igor Morim\\sima-ma\\docs\\DEM\\Imperatriz.tif",
+    "crs_original": "EPSG:31983",
+    "width_original": 7015,
+    "height_original": 13200,
+    "bounds_original": {
+      "left": 226047.8733200548,
+      "bottom": 9385062.028491694,
+      "right": 226749.3733200548,
+      "top": 9386382.028491694
+    },
+    "tem_alpha_original": true
+  }
+}

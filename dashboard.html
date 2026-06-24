@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Dashboard - SIMA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 42px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #e94560, #0f3460);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        th {
+            text-align: left;
+            padding: 12px;
+            background: rgba(233, 69, 96, 0.2);
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .btn {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            background: #c23152;
+        }
+        
+        .btn-secondary {
+            background: #0f3460;
+        }
+        
+        .btn-secondary:hover {
+            background: #0a2340;
+        }
+        
+        .grafico-barras {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            height: 200px;
+            padding: 20px 0;
+        }
+        
+        .barra {
+            flex: 1;
+            background: linear-gradient(180deg, #e94560, #0f3460);
+            border-radius: 5px 5px 0 0;
+            min-height: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 5px;
+            transition: height 0.5s;
+        }
+        
+        .barra-label {
+            font-size: 10px;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        .barra-valor {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.7;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-green { background: #00b894; }
+        .badge-blue { background: #0984e3; }
+        .badge-orange { background: #e17055; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Dashboard de Monitoramento - SIMA</h1>
+        
+        <div class="header-actions">
+            <button class="btn" onclick="atualizarTudo()">🔄 Atualizar Dados</button>
+            <button class="btn btn-secondary" onclick="window.open('/')">🏠 Ir para o Site</button>
+        </div>
+        
+        <!-- Cards de Estatísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">👥 Visitas Hoje</div>
+                <div class="stat-value" id="visitasHoje">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">📈 Total de Visitas</div>
+                <div class="stat-value" id="visitasTotal">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">📄 Páginas Populares</div>
+                <div class="stat-value" id="paginasCount">--</div>
+            </div>
+        </div>
+        
+        <!-- Gráfico de Visitas por Dia -->
+        <div class="card">
+            <h3>📅 Visitas nos Últimos 7 Dias</h3>
+            <div class="grafico-barras" id="graficoBarras">
+                <div class="loading">Carregando...</div>
+            </div>
+        </div>
+        
+        <!-- Últimos Visitantes -->
+        <div class="card">
+            <h3>🕐 Últimos Visitantes</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>IP</th>
+                            <th>Página</th>
+                            <th>Dispositivo</th>
+                            <th>Origem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaVisitantes">
+                        <tr><td colspan="5" class="loading">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Páginas Populares -->
+        <div class="card">
+            <h3>🔥 Páginas Mais Visitadas</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Página</th>
+                        <th>Visitas</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaPaginas">
+                    <tr><td colspan="3" class="loading">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function atualizarTudo() {
+            await Promise.all([
+                carregarEstatisticas(),
+                carregarUltimosVisitantes(),
+                carregarPaginasPopulares()
+            ]);
+        }
+        
+        async function carregarEstatisticas() {
+            try {
+                const res = await fetch('/admin/estatisticas');
+                const data = await res.json();
+                
+                document.getElementById('visitasHoje').textContent = data.visitasHoje;
+                document.getElementById('visitasTotal').textContent = data.visitasTotal;
+                
+                // Gráfico de barras
+                const grafico = document.getElementById('graficoBarras');
+                const dias = Object.entries(data.visitasPorDia);
+                const maxVisitas = Math.max(...dias.map(([_, v]) => v), 1);
+                
+                grafico.innerHTML = dias.map(([data, count]) => {
+                    const altura = Math.max((count / maxVisitas) * 180, 5);
+                    const dataFormatada = new Date(data + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+                    return `
+                        <div style="flex:1; display:flex; flex-direction:column; align-items:center;">
+                            <div class="barra" style="height: ${altura}px;">
+                                <span class="barra-valor">${count}</span>
+                            </div>
+                            <span class="barra-label">${dataFormatada}</span>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+        
+        async function carregarUltimosVisitantes() {
+            try {
+                const res = await fetch('/admin/ultimos-visitantes');
+                const data = await res.json();
+                
+                const tbody = document.getElementById('tabelaVisitantes');
+                
+                if (data.visitantes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhuma visita hoje</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.visitantes.map(v => `
+                    <tr>
+                        <td>${new Date(v.timestamp).toLocaleString('pt-BR')}</td>
+                        <td><code>${v.ip}</code></td>
+                        <td>${v.url}</td>
+                        <td>${extrairNavegador(v.userAgent)}</td>
+                        <td>${v.referer !== 'Direto' ? '🔗 Externo' : '📌 Direto'}</td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Erro ao carregar visitantes:', error);
+            }
+        }
+        
+        async function carregarPaginasPopulares() {
+            try {
+                const res = await fetch('/admin/paginas-populares');
+                const data = await res.json();
+                
+                document.getElementById('paginasCount').textContent = data.paginas.length;
+                
+                const tbody = document.getElementById('tabelaPaginas');
+                tbody.innerHTML = data.paginas.map((p, i) => `
+                    <tr>
+                        <td>${i + 1}º</td>
+                        <td>${p.url}</td>
+                        <td><span class="badge badge-green">${p.count} visitas</span></td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Erro ao carregar páginas:', error);
+            }
+        }
+        
+        function extrairNavegador(userAgent) {
+            if (!userAgent) return 'Desconhecido';
+            if (userAgent.includes('Chrome')) return '🌐 Chrome';
+            if (userAgent.includes('Firefox')) return '🦊 Firefox';
+            if (userAgent.includes('Safari')) return '🍎 Safari';
+            if (userAgent.includes('Edge')) return '🔷 Edge';
+            return '📱 Outro';
+        }
+        
+        // Carregar ao iniciar
+        atualizarTudo();
+        
+        // Atualizar a cada 30 segundos
+        setInterval(atualizarTudo, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS com Anti-Aliasing - Imperatriz_Orto</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        #map { 
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #e0e0e0;
+        }
+        .sidebar {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 350px;
+            max-height: 90vh;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .sidebar h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 22px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .aa-badge {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .info-panel {
+            background: rgba(248, 249, 250, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #9b59b6;
+        }
+        .info-item {
+            margin: 10px 0;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .info-value {
+            color: #34495e;
+            font-family: 'Courier New', monospace;
+            text-align: right;
+        }
+        .coordinates {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(155, 89, 182, 0.2);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(155, 89, 182, 0.3);
+        }
+        .slider-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(248, 249, 250, 0.9);
+            border-radius: 10px;
+        }
+        .slider-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .slider {
+            flex: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #ddd, #9b59b6);
+            outline: none;
+            border-radius: 4px;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border: 2px solid #9b59b6;
+        }
+        .aa-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f4ecf7, #e8daef);
+            border-radius: 10px;
+            border-left: 4px solid #9b59b6;
+        }
+        .aa-info h4 {
+            margin: 0 0 10px 0;
+            color: #6c3483;
+        }
+        .aa-info ul {
+            padding-left: 20px;
+            margin: 0;
+            font-size: 12px;
+            color: #6c3483;
+        }
+        .status {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            z-index: 2000;
+            display: none;
+        }
+        .loading {
+            display: block;
+        }
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #9b59b6, #8e44ad);
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 3px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                max-width: 280px;
+                padding: 15px;
+            }
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div class="sidebar">
+        <h2>
+            🌄 Imperatriz_Orto
+            <span class="aa-badge">ANTI-ALIASING</span>
+        </h2>
+        
+        <div class="info-panel">
+            <div class="info-item">
+                <span class="info-label">📐 Dimensões:</span>
+                <span class="info-value">7059 × 13235 px</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">🎨 Qualidade:</span>
+                <span class="info-value">PNG 59.3 MB</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">📍 Centro:</span>
+                <span class="info-value">
+                    -5.552228<br>-47.469543
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">🔧 Processamento:</span>
+                <span class="info-value">Cubic + Anti-Aliasing</span>
+            </div>
+        </div>
+        
+        <div class="slider-container">
+            <label for="opacity-slider">🔘 Opacidade da Ortofoto:</label>
+            <div class="slider-row">
+                <input type="range" min="0" max="100" value="100" class="slider" id="opacity-slider">
+                <span id="opacity-value" style="font-weight: bold; min-width: 40px;">100%</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="zoomToImage()">
+                📍 Zoom Imagem
+            </button>
+            <button onclick="toggleLayer('osm')">
+                🗺️ Toggle Mapa
+            </button>
+            <button onclick="toggleLayer('ortofoto')">
+                🖼️ Toggle Ortofoto
+            </button>
+            <button onclick="toggleSatellite()">
+                🛰️ Satélite
+            </button>
+            <button onclick="showAAInfo()">
+                🔍 Info Anti-Aliasing
+            </button>
+        </div>
+        
+        <div class="aa-info">
+            <h4>✨ Anti-Aliasing Ativo:</h4>
+            <ul>
+                <li>Bordas suavizadas (sem serrilhado)</li>
+                <li>Transição suave na transparência</li>
+                <li>Resampling Cubic de alta qualidade</li>
+                <li>Filtros de suavização aplicados</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="coordinates" id="coords">
+        Lat: -5.552228<br>Lng: -47.469543
+    </div>
+    
+    <div class="status" id="status">
+        <h3>✨ Carregando Imagem com Anti-Aliasing</h3>
+        <p>Suavizando bordas e otimizando qualidade...</p>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <p id="status-text" style="margin-top: 10px; font-size: 12px; color: #666;">Iniciando...</p>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        const CONFIG = {
+  "imagem": {
+    "arquivo": "ortofoto_imperatriz.png",
+    "largura": 7059,
+    "altura": 13235,
+    "formato": "PNG",
+    "tem_transparencia": true,
+    "qualidade": "ALTA com anti-aliasing",
+    "tamanho_mb": 59.3
+  },
+  "georreferenciamento": {
+    "crs": "EPSG:4326 (WGS84)",
+    "bounds": {
+      "left": -47.472732133084534,
+      "bottom": -5.55820604305424,
+      "right": -47.46635484363807,
+      "top": -5.546249189983844
+    },
+    "centro": {
+      "lat": -5.552227616519042,
+      "lng": -47.4695434883613
+    }
+  },
+  "processamento": {
+    "resampling": "cubic (anti-aliasing)",
+    "anti_aliasing": true,
+    "tecnicas": [
+      "smooth_filter",
+      "gaussian_blur",
+      "lab_conversion",
+      "unsharp_mask"
+    ],
+    "threshold_transparencia": 240
+  },
+  "origem": {
+    "arquivo": "E:\\Igor Morim\\sima-ma\\docs\\DEM\\Imperatriz_Orto.tif",
+    "crs_original": "EPSG:31983",
+    "tem_alpha_original": true
+  }
+};
+        
+        const IMAGE_BOUNDS = [[-5.55820604305424, -47.472732133084534], [-5.546249189983844, -47.46635484363807]];
+        const IMAGE_CENTER = [-5.552227616519042, -47.4695434883613];
+        const IMAGE_URL = "ortofoto_imperatriz.png";
+        
+        console.log('🌐 Inicializando WebGIS com Anti-Aliasing...');
+        
+        // Mapa
+        const map = L.map('map', {
+            center: IMAGE_CENTER,
+            zoom: 18,
+            minZoom: 15,
+            maxZoom: 22,
+            zoomControl: true,
+            zoomAnimation: true,
+            fadeAnimation: true
+        });
+        
+        // Controles
+        L.control.scale({ 
+            imperial: false, 
+            position: 'bottomleft',
+            maxWidth: 200
+        }).addTo(map);
+        
+        // Camadas
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19,
+            opacity: 0.9
+        });
+        
+        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '© Esri',
+            maxZoom: 19,
+            opacity: 0.9
+        });
+        
+        osmLayer.addTo(map);
+        let activeBaseLayer = 'osm';
+        
+        // Carregamento
+        const statusDiv = document.getElementById('status');
+        const progressBar = document.getElementById('progress-bar');
+        const statusText = document.getElementById('status-text');
+        
+        statusDiv.classList.add('loading');
+        updateProgress(10, 'Preparando...');
+        
+        // Imagem com anti-aliasing
+        const ortofotoLayer = L.imageOverlay(IMAGE_URL, IMAGE_BOUNDS, {
+            opacity: 1.0,
+            interactive: false,
+            attribution: 'Ortofoto © Imperatriz_Orto - Com Anti-Aliasing',
+            className: 'anti-aliased-image'
+        });
+        
+        // Carregamento progressivo
+        let loadStep = 10;
+        const loadSteps = [
+            {percent: 20, text: 'Carregando imagem otimizada...'},
+            {percent: 40, text: 'Aplicando anti-aliasing...'},
+            {percent: 60, text: 'Processando transparência...'},
+            {percent: 80, text: 'Otimizando visualização...'},
+            {percent: 100, text: 'Pronto! Imagem suavizada carregada.'}
+        ];
+        
+        loadSteps.forEach(step => {
+            setTimeout(() => {
+                updateProgress(step.percent, step.text);
+            }, loadStep);
+            loadStep += 500;
+        });
+        
+        // Adicionar imagem
+        setTimeout(() => {
+            ortofotoLayer.addTo(map);
+            updateProgress(70, 'Imagem adicionada...');
+            
+            setTimeout(() => {
+                map.fitBounds(IMAGE_BOUNDS, { padding: [50, 50] });
+                updateProgress(90, 'Ajustando visualização...');
+                
+                setTimeout(() => {
+                    updateProgress(100, 'Carregamento completo!');
+                    setTimeout(() => {
+                        statusDiv.classList.remove('loading');
+                        statusDiv.style.display = 'none';
+                        console.log('✅ Imagem com anti-aliasing carregada!');
+                    }, 500);
+                }, 500);
+            }, 500);
+        }, 1000);
+        
+        // Slider
+        const opacitySlider = document.getElementById('opacity-slider');
+        const opacityValue = document.getElementById('opacity-value');
+        
+        opacitySlider.addEventListener('input', function() {
+            const opacity = this.value / 100;
+            ortofotoLayer.setOpacity(opacity);
+            opacityValue.textContent = `${this.value}%`;
+        });
+        
+        // Funções
+        function zoomToImage() {
+            map.fitBounds(IMAGE_BOUNDS, { 
+                padding: [100, 100],
+                animate: true,
+                duration: 1
+            });
+            showNotification('📍 Zoom ajustado');
+        }
+        
+        function toggleLayer(layerType) {
+            if (layerType === 'osm') {
+                if (map.hasLayer(osmLayer)) {
+                    map.removeLayer(osmLayer);
+                    showNotification('🗺️ Mapa base oculto');
+                } else {
+                    map.addLayer(osmLayer);
+                    showNotification('🗺️ Mapa base visível');
+                }
+            } else if (layerType === 'ortofoto') {
+                if (map.hasLayer(ortofotoLayer)) {
+                    map.removeLayer(ortofotoLayer);
+                    showNotification('🖼️ Ortofoto oculta');
+                } else {
+                    ortofotoLayer.addTo(map);
+                    showNotification('🖼️ Ortofoto visível');
+                }
+            }
+        }
+        
+        function toggleSatellite() {
+            if (activeBaseLayer === 'osm') {
+                map.removeLayer(osmLayer);
+                satelliteLayer.addTo(map);
+                activeBaseLayer = 'satellite';
+                showNotification('🛰️ Modo satélite ativado');
+            } else {
+                map.removeLayer(satelliteLayer);
+                osmLayer.addTo(map);
+                activeBaseLayer = 'osm';
+                showNotification('🗺️ Modo mapa ativado');
+            }
+        }
+        
+        function showAAInfo() {
+            showNotification('✨ Anti-Aliasing: Bordas suavizadas, sem serrilhado');
+        }
+        
+        function updateProgress(percent, text) {
+            progressBar.style.width = `${percent}%`;
+            statusText.textContent = text;
+        }
+        
+        function showNotification(text) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(155, 89, 182, 0.95);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 3000;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                animation: slideIn 0.3s ease-out;
+                font-size: 14px;
+            `;
+            notification.textContent = text;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+        
+        // Coordenadas
+        map.on('mousemove', function(e) {
+            document.getElementById('coords').innerHTML = 
+                `Lat: ${e.latlng.lat.toFixed(6)}<br>Lng: ${e.latlng.lng.toFixed(6)}`;
+        });
+        
+        // CSS para anti-aliasing no navegador
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            .anti-aliased-image {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+                image-rendering: pixelated;
+            }
+            .leaflet-image-layer {
+                image-rendering: auto !important;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        console.log('✅ WebGIS com Anti-Aliasing inicializado!');
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+[
+    {
+        "22062026_0900_a_22062026_1500_06h.tif": {
+            "data_referencia": "22/06/2026 09:00",
+            "data_validade": "22/06/2026 15:00",
+            "passo_previsao_horas": 6,
+            "caminho_arquivo": "../previsao/Dados//22062026_0900_a_22062026_1500_06h.tif"
+        }
+    },
+    {
+        "22062026_0900_a_22062026_2100_12h.tif": {
+            "data_referencia": "22/06/2026 09:00",
+            "data_validade": "22/06/2026 21:00",
+            "passo_previsao_horas": 12,
+            "caminho_arquivo": "../previsao/Dados//22062026_0900_a_22062026_2100_12h.tif"
+        }
+    },
+    {
+        "22062026_0900_a_23062026_0300_18h.tif": {
+            "data_referencia": "22/06/2026 09:00",
+            "data_validade": "23/06/2026 03:00",
+            "passo_previsao_horas": 18,
+            "caminho_arquivo": "../previsao/Dados//22062026_0900_a_23062026_0300_18h.tif"
+        }
+    },
+    {
+        "22062026_0900_a_23062026_0900_24h.tif": {
+            "data_referencia": "22/06/2026 09:00",
+            "data_validade": "23/06/2026 09:00",
+            "passo_previsao_horas": 24,
+            "caminho_arquivo": "../previsao/Dados//22062026_0900_a_23062026_0900_24h.tif"
+        }
+    },
+    {
+        "22062026_0900_a_23062026_1500_30h.tif": {
+            "data_referencia": "22/06/2026 09:00",
+            "data_validade": "23/06/2026 15:00",
+            "passo_previsao_horas": 30,
+            "caminho_arquivo": "../previsao/Dados//22062026_0900_a_23062026_1500_30h.tif"
+        }
+    },
+    {
+        "22062026_0900_a_23062026_2100_36h.tif": {
+            "data_referencia": "22/06/2026 09:00",
+            "data_validade": "23/06/2026 21:00",
+            "passo_previsao_horas": 36,
+            "caminho_arquivo": "../previsao/Dados//22062026_0900_a_23062026_2100_36h.tif"
+        }
+    },
+    {
+        "22062026_0900_a_24062026_0300_42h.tif": {
+            "data_referencia": "22/06/2026 09:00",
+            "data_validade": "24/06/2026 03:00",
+            "passo_previsao_horas": 42,
+            "caminho_arquivo": "../previsao/Dados//22062026_0900_a_24062026_0300_42h.tif"
+        }
+    },
+    {
+        "22062026_0900_a_24062026_0900_48h.tif": {
+            "data_referencia": "22/06/2026 09:00",
+            "data_validade": "24/06/2026 09:00",
+            "passo_previsao_horas": 48,
+            "caminho_arquivo": "../previsao/Dados//22062026_0900_a_24062026_0900_48h.tif"
+        }
+    }
+]

@@ -1,0 +1,25 @@
+{
+  "name": "Monitor de Secas",
+  "short_name": "MonitorSecas",
+  "description": "Sistema de monitoramento de condições de seca",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "../assets/images/logo/Monitor_Secas/logo_monitor_192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../assets/images/logo/Monitor_Secas/logo_monitor_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#ffc107",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait-primary"
+}

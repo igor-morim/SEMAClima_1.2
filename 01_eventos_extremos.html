@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão: Tecnologia para preservação ambiental com monitoramento inteligente dos recursos naturais.">
+    <meta name="keywords" content="monitoramento ambiental, Maranhão, SIMA, meio ambiente, hidrologia, meteorologia, SEMA">
+    <meta name="author" content="Igor Carlos Cunha Morim">
+
+   <!-- Tipo de conteúdo -->
+    <meta property="og:type" content="website">
+
+    <!-- Nome do site/app -->
+    <meta property="og:site_name" content="SIMA - Sistema de Monitoramento Ambiental">
+
+    <!-- Para Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão">
+    <meta name="twitter:description" content="Tecnologia para preservação ambiental com monitoramento inteligente dos recursos naturais">
+
+    <!-- Tamanho da imagem -->
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Favicon SIMA -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo/CPDAm/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/CPDAm/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo/CPDAm/favicon-16x16.png">
+    <link rel="icon" href="assets/images/logo/CPDAm/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/images/logo/CPDAm/favicon.ico">
+
+    <!-- Para Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/logo/CPDAm/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/logo/CPDAm/android-chrome-512x512.png">
+
+    <title>Eventos Hidrometeorológicos Extremos - Maranhão</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-color: #003366;
+            --secondary-color: #0a5c8c;
+            --accent-color: #00a8e8;
+            --light-color: #e6f7ff;
+            --dark-color: #001a33;
+            --text-color: #333;
+            --text-light: #666;
+            --white: #fff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            padding: 20px 0;
+            box-shadow: var(--shadow);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+        }
+        
+        .logo p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+        
+        nav a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 1.1rem;
+        }
+        
+        nav a:hover {
+            color: var(--accent-color);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 40, 80, 0.8), rgba(0, 40, 80, 0.9)), url('https://images.unsplash.com/photo-1593069567131-53a0614dde1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80');
+            background-size: cover;
+            background-position: center;
+            color: var(--white);
+            text-align: center;
+            padding: 80px 20px;
+            margin-bottom: 40px;
+        }
+        
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .stat-item {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            min-width: 180px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+        
+        /* Main Content */
+        main {
+            padding: 40px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--primary-color);
+            font-size: 2rem;
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background-color: var(--accent-color);
+            margin: 10px auto;
+        }
+        
+        /* Filters */
+        .filters {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+        
+        select, input {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+        
+        /* Events Grid */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .event-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .event-img {
+            height: 220px;
+            width: 100%;
+            object-fit: cover;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        
+        .event-content {
+            padding: 25px;
+        }
+        
+        .event-date {
+            display: inline-block;
+            background-color: var(--light-color);
+            color: var(--secondary-color);
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .event-title {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .event-location {
+            color: var(--text-light);
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+        
+        .event-location i {
+            color: var(--accent-color);
+            margin-right: 8px;
+        }
+        
+        .event-description {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+        
+        .event-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        .detail-item i {
+            color: var(--accent-color);
+        }
+        
+        .read-more {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .read-more:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        /* About Section */
+        .about {
+            background-color: var(--white);
+            padding: 60px 0;
+            margin-top: 40px;
+        }
+        
+        .about-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            align-items: center;
+        }
+        
+        .about-text {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .about-text h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .about-img {
+            flex: 1;
+            min-width: 300px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .about-img img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: var(--white);
+            padding: 50px 0 20px;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-column {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-column a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-column a:hover {
+            color: var(--accent-color);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero h2 {
+                font-size: 2rem;
+            }
+            
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* No results message */
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-water"></i>
+                    <div>
+                        <h1>Eventos Hidrometeorológicos</h1>
+                        <p>Maranhão - Monitoramento e Análise</p>
+                    </div>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#eventos">Eventos</a></li>
+                        <li><a href="#sobre">Sobre</a></li>
+                        <li><a href="#contato">Contato</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h2>Eventos Hidrometeorológicos Extremos no Maranhão</h2>
+            <p>Registro histórico e informações sobre inundações, secas prolongadas, tempestades severas e outros fenômenos climáticos extremos que impactaram o estado do Maranhão.</p>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">27</div>
+                    <div class="stat-label">Eventos Registrados</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">41</div>
+                    <div class="stat-label">Municípios Afetados</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">2018-2026</div>
+                    <div class="stat-label">Período de Análise</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Tipos de Eventos</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container">
+        <h2 class="section-title" id="eventos">Eventos Registrados</h2>
+        
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label for="event-type">Tipo de Evento</label>
+                <select id="event-type">
+                    <option value="todos">Todos os Tipos</option>
+                    <option value="inundacao">Inundação</option>
+                    <option value="seca">Seca Prolongada</option>
+                    <option value="tempestade">Tempestade Severa</option>
+                    <option value="vento">Ventos Fortes</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="municipio">Município</label>
+                <select id="municipio">
+                    <option value="todos">Todos os Municípios</option>
+                    <option value="sao_luis">São Luís</option>
+                    <option value="imperatriz">Imperatriz</option>
+                    <option value="caxias">Caxias</option>
+                    <option value="sao_jose">São José de Ribamar</option>
+                    <option value="timon">Timon</option>
+                    <option value="codó">Codó</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="year">Ano</label>
+                <select id="year">
+                    <option value="todos">Todos os Anos</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                    <option value="2019">2019</option>
+                    <option value="2018">2018</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="search">Buscar</label>
+                <input type="text" id="search" placeholder="Digite para buscar...">
+            </div>
+        </div>
+
+        <!-- Events Grid -->
+        <div class="events-grid" id="events-container">
+            <!-- Event cards will be dynamically populated by JavaScript -->
+        </div>
+    </main>
+
+    <!-- About Section -->
+    <section class="about" id="sobre">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>Sobre Este Projeto</h3>
+                    <p>Esta plataforma tem como objetivo registrar e divulgar informações sobre eventos hidrometeorológicos extremos que ocorreram no estado do Maranhão, auxiliando no entendimento dos padrões climáticos e na gestão de riscos.</p>
+                    <p>Os dados apresentados são coletados de fontes oficiais como a Defesa Civil do Maranhão, o Instituto Nacional de Meteorologia (INMET) e o Centro Nacional de Monitoramento e Alertas de Desastres Naturais (CEMADEN).</p>
+                    <p>Através deste registro histórico, esperamos contribuir para a conscientização sobre as mudanças climáticas e seus impactos na região, além de fornecer informações valiosas para pesquisadores, gestores públicos e a população em geral.</p>
+                </div>
+                <div class="about-img">
+                    <img src="https://images.unsplash.com/photo-1592210454359-9043f067919b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Mapa do Maranhão com indicadores de eventos climáticos">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contato">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Eventos Hidrometeorológicos</h3>
+                    <p>Registro histórico de eventos climáticos extremos no estado do Maranhão.</p>
+                    <p>Monitoramento e análise para gestão de riscos e conscientização pública.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Fontes de Dados</h3>
+                    <ul>
+                        <li><a href="#">Defesa Civil do Maranhão</a></li>
+                        <li><a href="#">INMET - Instituto Nacional de Meteorologia</a></li>
+                        <li><a href="#">CEMADEN</a></li>
+                        <li><a href="#">Secretaria de Meio Ambiente - MA</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contato</h3>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> contato@eventosma.org.br</li>
+                        <li><i class="fas fa-phone"></i> (98) 3214-5678</li>
+                        <li><i class="fas fa-map-marker-alt"></i> São Luís - MA, Brasil</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2026 Eventos Hidrometeorológicos do Maranhão. Todos os direitos reservados.</p>
+                <p>Desenvolvido para fins educativos e informativos.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Event data
+        const events = [
+            {
+                id: 1,
+                title: "Inundação em São Luís",
+                date: "Março 2023",
+                location: "São Luís",
+                municipality: "sao_luis",
+                type: "inundacao",
+                year: 2023,
+                image: "assets/images/default/CPDAm.png",
+                description: "Fortes chuvas causaram inundações em vários bairros da capital, com alagamentos que atingiram mais de 1,5 metro em algumas regiões.",
+                intensity: "Alta",
+                affectedAreas: "Centro, Cohafuma, Vila Mauro Fecury",
+                fatalities: 0,
+                displaced: 1200
+            },
+            {
+                id: 2,
+                title: "Seca Prolongada no Sul do Estado",
+                date: "Agosto 2022",
+                location: "Região Sul do MA",
+                municipality: "imperatriz",
+                type: "seca",
+                year: 2022,
+                image: "assets/images/default/CPDAm.png",
+                description: "Período de estiagem prolongada afetou a agricultura e o abastecimento de água em vários municípios da região sul do estado.",
+                intensity: "Média",
+                affectedAreas: "Imperatriz, Balsas, Carolina",
+                fatalities: 0,
+                displaced: 0
+            },
+            {
+                id: 3,
+                title: "Tempestade Severa em Codó",
+                date: "Dezembro 2021",
+                location: "Codó",
+                municipality: "codó",
+                type: "tempestade",
+                year: 2021,
+                image: "assets/images/default/CPDAm.png",
+                description: "Tempestade com ventos fortes e granizo causou danos em residências e comércios, além de interromper o fornecimento de energia elétrica.",
+                intensity: "Alta",
+                affectedAreas: "Centro, Bairro de Fátima, Vila São Francisco",
+                fatalities: 1,
+                displaced: 350
+            },
+            {
+                id: 4,
+                title: "Inundação em São José de Ribamar",
+                date: "Abril 2020",
+                location: "São José de Ribamar",
+                municipality: "sao_jose",
+                type: "inundacao",
+                year: 2020,
+                image: "assets/images/default/CPDAm.png",
+                description: "Chuvas intensas causaram alagamentos em diversas partes do município, com transbordamento de rios e córregos.",
+                intensity: "Média",
+                affectedAreas: "Centro, Panaquatira, Vila Itamar",
+                fatalities: 0,
+                displaced: 800
+            },
+            {
+                id: 5,
+                title: "Ventos Fortes em Timon",
+                date: "Novembro 2019",
+                location: "Timon",
+                municipality: "timon",
+                type: "vento",
+                year: 2019,
+                image: "assets/images/default/CPDAm.png",
+                description: "Rajadas de vento superiores a 80 km/h causaram queda de árvores e danos em estruturas públicas e privadas.",
+                intensity: "Alta",
+                affectedAreas: "Parque Piauí, Centro, Santo Antônio",
+                fatalities: 0,
+                displaced: 150
+            },
+            {
+                id: 6,
+                title: "Seca na Região de Caxias",
+                date: "Setembro 2018",
+                location: "Caxias e Região",
+                municipality: "caxias",
+                type: "seca",
+                year: 2018,
+                image: "assets/images/default/CPDAm.png",
+                description: "Período de estiagem prolongada afetou a produção agrícola e reduziu significativamente o nível dos reservatórios de água.",
+                intensity: "Alta",
+                affectedAreas: "Caxias, Aldeias Altas, Coelho Neto",
+                fatalities: 0,
+                displaced: 0
+            }
+        ];
+
+        // Function to render events
+        function renderEvents(filteredEvents) {
+            const eventsContainer = document.getElementById('events-container');
+            
+            if (filteredEvents.length === 0) {
+                eventsContainer.innerHTML = '<div class="no-results"><h3>Nenhum evento encontrado com os filtros selecionados</h3><p>Tente ajustar os filtros para ver os eventos.</p></div>';
+                return;
+            }
+            
+            eventsContainer.innerHTML = filteredEvents.map(event => `
+                <div class="event-card">
+                    <img src="${event.image}" alt="${event.title}" class="event-img">
+                    <div class="event-content">
+                        <div class="event-date">${event.date}</div>
+                        <h3 class="event-title">${event.title}</h3>
+                        <div class="event-location">
+                            <i class="fas fa-map-marker-alt"></i> ${event.location}, Maranhão
+                        </div>
+                        <p class="event-description">${event.description}</p>
+                        
+                        <div class="event-details">
+                            <div class="detail-item">
+                                <i class="fas fa-tint"></i>
+                                <span>Tipo: ${getEventTypeName(event.type)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Intensidade: ${event.intensity}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Deslocados: ${event.displaced}</span>
+                            </div>
+                        </div>
+                        
+                        <a href="#" class="read-more">Ver Detalhes</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Function to get event type name
+        function getEventTypeName(type) {
+            const typeNames = {
+                'inundacao': 'Inundação',
+                'seca': 'Seca Prolongada',
+                'tempestade': 'Tempestade Severa',
+                'vento': 'Ventos Fortes'
+            };
+            return typeNames[type] || type;
+        }
+
+        // Filter events based on selections
+        function filterEvents() {
+            const typeFilter = document.getElementById('event-type').value;
+            const municipalityFilter = document.getElementById('municipio').value;
+            const yearFilter = document.getElementById('year').value;
+            const searchFilter = document.getElementById('search').value.toLowerCase();
+            
+            const filtered = events.filter(event => {
+                // Filter by type
+                if (typeFilter !== 'todos' && event.type !== typeFilter) return false;
+                
+                // Filter by municipality
+                if (municipalityFilter !== 'todos' && event.municipality !== municipalityFilter) return false;
+                
+                // Filter by year
+                if (yearFilter !== 'todos' && event.year !== parseInt(yearFilter)) return false;
+                
+                // Filter by search text
+                if (searchFilter && !(
+                    event.title.toLowerCase().includes(searchFilter) ||
+                    event.description.toLowerCase().includes(searchFilter) ||
+                    event.location.toLowerCase().includes(searchFilter) ||
+                    getEventTypeName(event.type).toLowerCase().includes(searchFilter)
+                )) return false;
+                
+                return true;
+            });
+            
+            renderEvents(filtered);
+        }
+
+        // Initialize the page with all events
+        document.addEventListener('DOMContentLoaded', function() {
+            renderEvents(events);
+            
+            // Add event listeners to filters
+            document.getElementById('event-type').addEventListener('change', filterEvents);
+            document.getElementById('municipio').addEventListener('change', filterEvents);
+            document.getElementById('year').addEventListener('change', filterEvents);
+            document.getElementById('search').addEventListener('input', filterEvents);
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

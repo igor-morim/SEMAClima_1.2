@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mapa Simples - Imperatriz</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { 
+            height: 100vh;
+            width: 100vw;
+        }
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 5px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 300px;
+        }
+        .controls h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .coordinates {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .zoom-info {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <h3>🗺️ Imperatriz</h3>
+        <p><strong>Ponto:</strong> -5.552228, -47.469543<br>
+    </div>
+
+    <div class="coordinates" id="coords">
+        Lat: -5.552228<br>
+        Lng: -47.469543
+    </div>
+
+    <div id="map"></div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Configurações
+        const imageBounds = [
+            [-5.55820604305424, -47.472732133084534],
+            [-5.546249189983844, -47.46635484363807]
+        ];
+        
+        const imageCenter = [-5.552227616519042, -47.4695434883613];
+        const imageUrl = "E:\\Igor Morim\\sima-ma\\docs\\DEM\\Imperatriz_webgis\\ortofoto_Imperatriz.png";
+        
+        // Inicializar mapa com zoom inicial
+        const map = L.map('map').setView(imageCenter, 18);
+        
+        // Usar camada com zoom máximo alto (Stadia Maps tem até 22)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 22,
+            subdomains: 'abcd',
+            opacity: 0.9
+        }).addTo(map);
+        
+        // Adicionar imagem com transparência
+        const imageLayer = L.imageOverlay(imageUrl, imageBounds, {
+            opacity: 1.0,
+            interactive: false
+        }).addTo(map);
+        
+        // Funções de controle
+        function zoomToBounds() {
+            map.fitBounds(imageBounds, { 
+                padding: [50, 50],
+                maxZoom: 22  // Forçar zoom máximo no fitBounds
+            });
+            updateCoords('Zoom ajustado para imagem');
+        }
+        
+        function zoomMax() {
+            // Ir para o centro com zoom máximo
+            map.setView(imageCenter, 22);
+            updateCoords('Zoom máximo ativado (nível 22)');
+        }
+        
+        function resetView() {
+            map.setView(imageCenter, 18);
+            updateCoords('Vista inicial restaurada');
+        }
+        
+        // Atualizar coordenadas
+        function updateCoords(message) {
+            const center = map.getCenter();
+            document.getElementById('coords').innerHTML = 
+                `Lat: ${center.lat.toFixed(6)}<br>Lng: ${center.lng.toFixed(6)}`;
+            console.log('💬 ' + message);
+        }
+        
+        // Atualizar coordenadas em tempo real
+        map.on('mousemove', function(e) {
+            document.getElementById('coords').innerHTML = 
+                `Lat: ${e.latlng.lat.toFixed(6)}<br>Lng: ${e.latlng.lng.toFixed(6)}`;
+        });
+        
+        // Zoom automático inicial
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                zoomToBounds();
+            }, 1000);
+        });
+        
+        // Log de inicialização
+        console.log('✅ Mapa simplificado inicializado');
+        console.log('Bounds:', imageBounds);
+        console.log('Zoom máximo disponível: 22');
+        
+    </script>
+</body>
+</html>

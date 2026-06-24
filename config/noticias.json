@@ -1,0 +1,44 @@
+{
+  "noticias": [
+    {
+      "image": "assets/images/noticias/02.jpg",
+      "category": "Manutenções",
+      "title": "Estação de Santa Helena",
+      "excerpt": "Equipe Tecnica realiza manuntenção na estação do municipio de Santa Helena",
+      "date": "06/17/2025",
+      "link": "#manuntenção"
+    },
+    {
+      "image": "assets/images/noticias/03.jpg",
+      "category": "Monitoramento",
+      "title": "Medição de Vazão",
+      "excerpt": "O CPDAm e o SBAP realização a medição de vazão das nascente do rio Maracâ",
+      "date": "09/29/2025",
+      "link": "#medição"
+    },
+    {
+      "image": "assets/images/noticias/04.jpg",
+      "category": "Vistoria",
+      "title": "Vistoria no Lago Açú",
+      "excerpt": "A SEMA realizou a vistoria no municipio de Conceição do Lago Açú, no trecho do rio Grajaú",
+      "date": "10/15/2025",
+      "link": "#vistoria"
+    },
+    {
+      "image": "assets/images/noticias/01.jpg",
+      "category": "Meio Ambiente",
+      "title": "Meandros de Viana",
+      "excerpt": "A SEMA, por meio do Centro de Prevenção de Desastres Ambientais (CPDAm), participou da audiência pública para tratar da situação atual dos meandros na região de Viana.",
+      "date": "11/06/2025",
+      "link": "#workshop"
+    },
+    {
+      "image": "assets/images/noticias/05.jpg",
+      "category": "Visita",
+      "title": "Visita da SGB",
+      "excerpt": "A SEMA recebeu o diretor da RETE/PI para tratar sobre futuras parcerias no ano de 2026",
+      "date": "02/12/2026",
+      "link": "#visita"
+    }
+  ]
+}

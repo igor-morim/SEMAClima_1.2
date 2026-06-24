@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SEMAClima - Sistema de Monitoramento Ambiental do Maranhão: Tecnologia para preservação ambiental com monitoramento inteligente dos recursos naturais.">
+    <meta name="keywords" content="monitoramento ambiental, Maranhão, SIMA, meio ambiente, hidrologia, meteorologia, SEMA">
+    <meta name="author" content="Igor Carlos Cunha Morim">
+    <title>SEMA-CLIMA - Sistema de Monitoramento Ambiental</title>
+
+    <!-- ========== OPEN GRAPH PARA WHATSAPP ========== -->
+    <!-- URL do site -->
+    <!--meta property="og:url" content="https://pm26f52g-3000.brs.devtunnels.ms/"--> <!--PC Igor Sala -->
+    <!--meta property="og:url" content="https://rd04m00s-3000.brs.devtunnels.ms/"-->
+    <meta property="og:url" content="https://8wzh4s08-3000.brs.devtunnels.ms/">
+    
+    <!-- Título que aparecerá no WhatsApp -->
+    <meta property="og:title" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão">
+    <!-- Descrição que aparecerá -->
+    <meta property="og:description" content="Tecnologia para preservação ambiental com monitoramento inteligente dos recursos naturais do Maranhão">
+
+    <!-- IMAGEM: Use uma das suas imagens existentes -->
+    <meta property="og:image" content="https://8wzh4s08-3000.brs.devtunnels.ms/assets/images/logo/CPDAm/android-chrome-512x512.png">
+    <!--meta property="og:image" content="https://rd04m00s-3000.brs.devtunnels.ms/assets/images/logo/CPDAm/android-chrome-512x512.png"-->
+    <!--meta property="og:image" content="https://pm26f52g-3000.brs.devtunnels.ms/assets/images/logo/CPDAm/android-chrome-512x512.png"-->
+    <!--meta property="og:image" content="https://pm26f52g-3000.brs.devtunnels.ms/assets/images/equipe/willie-nelson.JPG"-->
+
+    <!-- Tipo de conteúdo -->
+    <meta property="og:type" content="website">
+
+    <!-- Nome do site/app -->
+    <meta property="og:site_name" content="SIMA - Sistema de Monitoramento Ambiental">
+    <!--meta property="og:site_name" content="SIMA - Sistema de Monitoramento Ambiental"-->
+
+    <!-- Para Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão">
+    <meta name="twitter:description" content="Tecnologia para preservação ambiental com monitoramento inteligente dos recursos naturais">
+    <meta name="twitter:image" content="https://8wzh4s08-3000.brs.devtunnels.ms/assets/images/logo/CPDAm/android-chrome-512x512.png">
+    <!--meta name="twitter:image" content="https://rd04m00s-3000.brs.devtunnels.ms/assets/images/logo/CPDAm/android-chrome-512x512.png"-->
+
+    <!-- Tamanho da imagem -->
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <!-- ============================================= -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Favicon SIMA -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo/CPDAm/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/CPDAm/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo/CPDAm/favicon-16x16.png">
+    <link rel="icon" href="assets/images/logo/CPDAm/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/images/logo/CPDAm/favicon.ico">
+
+    <!-- Para Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/logo/CPDAm/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/logo/CPDAm/android-chrome-512x512.png">
+
+    <!-- Meta tags para tema -->
+    <script src="https://unpkg.com/lenis@1.0.45/dist/lenis.min.js"></script>
+    <meta name="theme-color" content="#1a5d1a">
+    <meta name="msapplication-TileColor" content="#1a5d1a">
+    <meta name="msapplication-TileImage" content="assets/images/logo/CPDAm/mstile-150x150.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Lexend+Deca:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=TASA+Explorer:wght@400..800&display=swap" rel="stylesheet">
+    
+    <!-- Preload de recursos críticos -->
+    <link rel="preload" href="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" as="image">
+    
+    <style>
+        :root {
+            --primary: #1a5d1a;
+            --primary-light: #2e8b57;
+            --primary-dark: #0d3d0d;
+            --secondary: #4caf50;
+            --accent-blue: #2196f3;
+            --accent-orange: #ff9800;
+            --accent-purple: #9c27b0;
+            --accent-red: #f44336;
+            --accent-teal: #009688;
+            --accent-amber: #ffc107;
+            --accent-indigo: #3f51b5;
+            --accent-cyan: #00bcd4;
+            --text: #2e3a46;
+            --text-light: #6b7280;
+            --background: #f9fbf9;
+            --card-bg: #ffffff;
+            --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, #66bb6a 100%);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.15);
+            --border-radius: 12px;
+            --border-radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --transition-slow: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Lexend Deca', 'Segoe UI', sans-serif;
+        }
+        
+        /* ========== SCROLLBAR PERSONALIZADA ========== */
+        ::-webkit-scrollbar {
+            width: 14px;
+            height: 14px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: linear-gradient(to bottom, 
+                #f8f9fa 0%, 
+                #e9ecef 50%, 
+                #f8f9fa 100%);
+            border-radius: 12px;
+            margin: 4px 0;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, 
+                var(--primary) 0%, 
+                var(--primary-light) 50%, 
+                var(--primary) 100%);
+            border-radius: 12px;
+            min-height: 70px;
+            max-height: 150px;
+            border: 3px solid #f1f1f1;
+            background-clip: content-box;
+            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, 
+                var(--primary-dark) 0%, 
+                var(--primary) 50%, 
+                var(--primary-dark) 100%);
+            min-height: 90px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(to bottom, 
+                #0d3d0d 0%, 
+                #1a5d1a 50%, 
+                #0d3d0d 100%);
+        }
+
+        /* Para Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-light) #f1f1f1;
+        }
+
+        /* Para IE/Edge Legacy */
+        body {
+            -ms-overflow-style: -ms-autohiding-scrollbar;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            scroll-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+        }
+        
+        .container {
+            width: 96%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* ========== HEADER ========== */
+        header {
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--text);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        header.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: var(--shadow-md);
+            padding: 0.7rem 0;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .logo-icon {
+            width: 180px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-slow);
+            flex-shrink: 0;
+        }
+
+        .logo-icon img {
+            width: 120%;
+            height: 120%;
+            object-fit: contain;
+            transition: var(--transition-slow);
+        }
+
+        .logo:hover .logo-icon img {
+            transform: scale(1.05);
+        }
+        
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            flex: 1;
+            margin-left: 10px;
+        }
+        
+        .logo-main {
+            font-size: 1.4rem;
+            font-weight: 700;
+            line-height: 1;
+            color: var(--primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .logo-sub {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            margin-top: 2px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Menu Mobile */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 0.5rem;
+            z-index: 1001;
+            transition: var(--transition);
+            border-radius: 6px;
+        }
+        
+        .mobile-menu-toggle:hover {
+            background: rgba(26, 93, 26, 0.1);
+        }
+        
+        nav {
+            transition: var(--transition);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+            margin: 0;
+            padding: 0;
+        }
+        
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0;
+            position: relative;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .overlay.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* ========== HERO SECTION ========== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: 
+                linear-gradient(rgba(26, 93, 26, 0.5), rgba(13, 61, 13, 0.6)),
+                url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 80%, rgba(76, 175, 80, 0.1) 0%, transparent 50%),
+                       radial-gradient(circle at 80% 20%, rgba(33, 150, 243, 0.1) 0%, transparent 50%);
+            z-index: 1;
+        }
+        
+        .hero-content {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 4rem 0 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            color: white;
+        }
+        
+        .hero h1 {
+            font-size: 3.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            margin: 0 auto 2.5rem;
+            font-weight: 400;
+            max-width: 600px;
+            opacity: 0.95;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--gradient-secondary);
+            color: white;
+            padding: 1rem 2.2rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-md);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            color: white;
+            text-align: center;
+            opacity: 0.8;
+            animation: bounce 2s infinite;
+        }
+        
+        .scroll-indicator i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .scroll-indicator span {
+            font-size: 0.8rem;
+            display: block;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0) translateX(-50%);
+            }
+            40% {
+                transform: translateY(-10px) translateX(-50%);
+            }
+            60% {
+                transform: translateY(-5px) translateX(-50%);
+            }
+        }
+        
+        /* ========== MODULES SECTION ========== */
+        .modules-section {
+            padding: 4rem 0 2rem 0;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(76, 175, 80, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(33, 150, 243, 0.05) 0%, transparent 40%),
+                white;
+            position: relative;
+            scroll-margin-top: 80px;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3.5rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 0.8rem;
+            position: relative;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
+        }
+        
+        /* Grid de Módulos */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 7rem 2rem;
+            margin-top: 1rem;
+        }
+        
+        /* Card Retangular */
+        .module-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            padding: 1.2rem 1.5rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            cursor: pointer;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.5s;
+        }
+        
+        .module-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .module-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        /* Container do logo */
+        .module-icon-container {
+            flex-shrink: 0;
+            margin-right: 1.5rem;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        
+        .module-card:hover .module-icon-container {
+            transform: scale(1.1);
+        }
+        
+        /* Estilos para logos dos módulos (apenas primeiro e segundo) */
+        .logo-modulo {
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            background-color: #ffffff;
+        }
+        
+        .logo-modulo-1 {
+            background-image: url('assets/images/logo/CPDAm/android-chrome-512x512.png');
+        }
+
+        .logo-modulo-2 {
+            background-image: url('assets/images/logo/SRH.png');
+        }
+        
+        /* Estilo para ícones */
+        .icon-modulo {
+            font-size: 2.8rem;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            color: white;
+        }
+        
+        /* Cores específicas para cada ícone */
+        .icon-srh { 
+            background: linear-gradient(135deg, #009688 0%, #00796b 100%);
+        }
+        .icon-srf { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        }
+        
+        .icon-sgr { 
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #ba68c8 100%);
+        }
+        
+        .icon-sev { 
+            background: linear-gradient(135deg, var(--accent-teal) 0%, #4db6ac 100%);
+        }
+        
+        .icon-sea { 
+            background: linear-gradient(135deg, var(--accent-amber) 0%, #ffd54f 100%);
+            color: var(--text);
+        }
+        
+        .icon-sf { 
+            background: linear-gradient(135deg, var(--accent-red) 0%, #ef5350 100%);
+        }
+        
+        .icon-spm { 
+            background: linear-gradient(135deg, var(--accent-indigo) 0%, #7986cb 100%);
+        }
+        
+        .icon-sla { 
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, #26c6da 100%);
+        }
+        
+        /* Conteúdo do card */
+        .module-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+        }
+        
+        .module-card h3 {
+            font-size: 1.4rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+        
+        .module-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.4;
+        }
+        
+        /* ========== ESTILOS PARA CARDS "EM BREVE" ========== */
+        .module-card.coming-soon {
+            background-color: #f5f5f5;
+            border-color: #e0e0e0;
+            cursor: default;
+            opacity: 0.8;
+            position: relative;
+        }
+        
+        .module-card.coming-soon::before {
+            background: linear-gradient(135deg, #808080 0%, #a0a0a0 100%);
+        }
+        
+        .module-card.coming-soon:hover {
+            transform: none;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .module-card.coming-soon .module-icon-container {
+            background-color: #e0e0e0;
+        }
+        
+        .module-card.coming-soon .icon-modulo {
+            background: linear-gradient(135deg, #808080 0%, #a0a0a0 100%);
+            color: #ffffff;
+        }
+        
+        .module-card.coming-soon .logo-modulo {
+            background-color: #e0e0e0;
+            filter: grayscale(80%);
+            opacity: 0.8;
+        }
+        
+        .module-card.coming-soon h3 {
+            color: #666666;
+        }
+        
+        .module-card.coming-soon p {
+            color: #888888;
+        }
+        
+        .module-card.coming-soon:hover .module-icon-container {
+            transform: none;
+        }
+        
+        /* Badge "Em Breve" */
+        .coming-soon-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #757575;
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            z-index: 1;
+        }
+        
+        .spacer {
+            height: 2rem;
+        }
+        
+        /* ========== FOOTER ========== */
+        footer {
+            background: 
+                linear-gradient(rgba(13, 61, 13, 0.95), rgba(8, 42, 8, 0.98)),
+                url('https://images.unsplash.com/photo-1476231682828-37e571bc172f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            color: white;
+            padding: 4rem 0 2rem;
+            position: relative;
+            scroll-margin-top: 80px;
+            margin-top: 2rem;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1.8rem;
+            color: #a5d6a7;
+            font-weight: 600;
+        }
+        
+        .footer-column p, .footer-column li {
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 1rem;
+            font-weight: 400;
+            font-size: 0.95rem;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column a {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 400;
+        }
+        
+        .footer-column a:hover {
+            color: #a5d6a7;
+        }
+
+        .email-link {
+            color: white !important;
+            text-decoration: none;
+        }
+
+        .email-link:hover {
+            color: #a5d6a7 !important;
+            text-decoration: underline;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        
+        .social-links a:hover {
+            background-color: var(--secondary);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+        
+        .maranhao-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.8rem 1.2rem;
+            border-radius: 6px;
+            margin-top: 1.2rem;
+            font-size: 0.9rem;
+        }
+        
+        .flags-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;
+            margin: 2.5rem 0;
+            padding: 2rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .flag-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .flag-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .flag {
+            width: 110px;
+            height: 77px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 4px;
+        }
+
+        .flag:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .flag-brazil {
+            background-image: url('assets/images/logo/bandeira/brasil.jpg');
+            background-color: #009c3b;
+        }
+
+        .flag-maranhao {
+            background-image: url('assets/images/logo/bandeira/maranhao.avif');
+            background-color: #0d3d0d;
+        }
+
+        .flag-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .developer-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-top: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .developer-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .developer-info:hover::before {
+            left: 100%;
+        }
+        
+        .developer-info:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .developer-info h4 {
+            color: #a5d6a7;
+            margin-bottom: 1.2rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .developer-info p {
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1rem;
+        }
+        
+        .developer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.2rem;
+        }
+        
+        .developer-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #a5d6a7;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        
+        .developer-link:hover {
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* ========== BOTÃO VOLTAR AO TOPO ========== */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 55px;
+            height: 55px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            opacity: 0;
+            visibility: hidden;
+            z-index: 999;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* ========== ANIMAÇÕES ========== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes subtleFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-3px);
+            }
+        }
+        
+        @keyframes heroReveal {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        .animate-bounce-in {
+            animation: bounceIn 0.8s ease-out forwards;
+        }
+        
+        .animate-subtle-float {
+            animation: subtleFloat 3s ease-in-out infinite;
+        }
+        
+        .hero-reveal {
+            animation: heroReveal 1.2s ease-out forwards;
+        }
+        
+        .hero-slide-up {
+            animation: heroReveal 1.2s ease-out 0.4s forwards;
+            opacity: 0;
+        }
+        
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        .delay-500 { animation-delay: 0.5s; }
+        
+        [data-animate] {
+            opacity: 0;
+        }
+
+        html {
+            scroll-padding-top: 80px;
+        }
+        
+        /* ========== RESPONSIVIDADE ========== */
+        @media (max-width: 1024px) {
+            .modules-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: row;
+                gap: 0.5rem;
+                flex-wrap: nowrap;
+            }
+            
+            .logo {
+                flex: 1;
+                min-width: 0;
+                gap: 8px;
+            }
+            
+            .logo-icon {
+                width: 120px;
+                height: 30px;
+            }
+            
+            .logo-text {
+                margin-left: 5px;
+            }
+            
+            .logo-main {
+                font-size: 1.2rem;
+            }
+            
+            .logo-sub {
+                font-size: 0.65rem;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+                order: 2;
+            }
+            
+            nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                max-width: 300px;
+                height: 100vh;
+                background: white;
+                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+                transition: right 0.3s ease;
+                z-index: 1000;
+                padding: 5rem 2rem 2rem;
+            }
+            
+            nav.active {
+                right: 0;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav a {
+                display: block;
+                padding: 1rem;
+                border-radius: 8px;
+                transition: var(--transition);
+            }
+            
+            nav a:hover {
+                background: rgba(26, 93, 26, 0.1);
+            }
+            
+            .hero {
+                background-attachment: scroll;
+                padding: 2rem 0;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+                padding: 0 1rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+                padding: 0 1rem;
+                margin-bottom: 2rem;
+            }
+            
+            .btn {
+                padding: 0.9rem 1.5rem;
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .modules-section {
+                padding: 6rem 0 4rem 0;
+            }
+            
+            .section-title {
+                margin-bottom: 2.5rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2rem;
+            }
+            
+            .modules-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                max-width: 500px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            
+            .module-card {
+                padding: 1.5rem;
+                height: 110px;
+            }
+            
+            .module-icon-container {
+                width: 70px;
+                height: 70px;
+                margin-right: 1.5rem;
+            }
+            
+            .module-card h3 {
+                font-size: 1.3rem;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+            
+            .footer-column {
+                text-align: center;
+            }
+            
+            .social-links {
+                justify-content: center;
+            }
+            
+            .developer-info {
+                padding: 1.5rem;
+            }
+            
+            .developer-info p {
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+            
+            .developer-links {
+                flex-wrap: wrap;
+            }
+            
+            .flags-container {
+                gap: 2rem;
+                margin: 2rem 0;
+                padding: 1.5rem 0;
+            }
+            
+            .flag {
+                width: 90px;
+                height: 63px;
+            }
+            
+            .flag-label {
+                font-size: 0.9rem;
+            }
+            
+            .back-to-top {
+                bottom: 30px;
+                right: 30px;
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.6rem;
+            }
+            
+            .module-card {
+                flex-direction: column;
+                text-align: center;
+                height: auto;
+                min-height: 160px;
+                padding: 1.5rem;
+            }
+            
+            .module-icon-container {
+                margin-right: 0;
+                margin-bottom: 1rem;
+                width: 60px;
+                height: 60px;
+            }
+            
+            .flags-container {
+                gap: 1.5rem;
+            }
+            
+            .flag {
+                width: 80px;
+                height: 56px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon animate-subtle-float">
+                        <img src="assets/images/logo/SEMA/2023/IDVISUAL_GOVMA_SEMA.png" alt="SEMA Logo">
+                    </div>
+                    <div class="logo-text">
+                        <div class="logo-main">SEMA-CLIMA</div>
+                        <div class="logo-sub">Sistema Integrado de Monitoramento Ambiental</div>
+                    </div>
+                </div>
+                
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <nav id="mainNav">
+                    <ul>
+                        <li><a href="#inicio">Início</a></li>
+                        <li><a href="#modulos">Módulos</a></li>
+                        <li><a href="#contato">Contato</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <div class="overlay" id="overlay"></div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="inicio">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-reveal" style="opacity: 0;">Sistema Integrado de Monitoramento Ambiental</h1>
+                <p class="hero-slide-up" style="opacity: 0;">Inteligência Geoespacial para a Governança Ambiental e Resiliência Climática do Maranhão.</p>
+                <div>
+                    <a href="#modulos" class="btn animate-bounce-in delay-400" style="opacity: 0; animation-delay: 0.8s;"><i class="fas fa-seedling"></i> Explorar Sistema</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Indicador de Scroll -->
+        <div class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
+            <span>Role para explorar</span>
+        </div>
+    </section>
+
+    <!-- Modules Section -->
+    <section class="modules-section" id="modulos">
+        <div class="container">
+            <div class="section-title" data-animate="fade-in-up">
+                <h2>Módulos do Sistema</h2>
+            </div>
+            <div class="modules-grid">
+                <!-- Módulo 1 - CPDAm (logo) - JÁ TEM PÁGINA -->
+                <div class="module-card" onclick="window.open('CPDAm.html', '_blank')" data-animate="fade-in-up">
+                    <div class="module-icon-container">
+                        <div class="logo-modulo logo-modulo-1"></div>
+                    </div>
+                    <div class="module-content">
+                        <h3>CPDAm</h3>
+                        <p>Centro de Prevenção a Desastres Ambientais.</p>
+                    </div>
+                </div>
+
+                <!-- Módulo 2 - SRH (logo) - SEM PÁGINA -->
+                <div class="module-card" onclick="window.open('index_CNAH.html', '_blank')" data-animate="fade-in-up">
+                    <div class="module-icon-container">
+                        <div class="icon-modulo icon-srh">
+                            <i class="fas fa-water"></i>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <h3>SRH</h3>
+                        <p>Superintendência de Recursos Hídricos.</p>
+                    </div>
+                </div>
+
+                <!-- Módulo 3 - SRF (ícone) - SEM PÁGINA -->
+                <div class="module-card coming-soon" data-animate="fade-in-up">
+                    <div class="module-icon-container">
+                        <div class="icon-modulo icon-srf">
+                            <i class="fas fa-tree"></i>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <h3>SRF</h3>
+                        <p>Superintendência de Recursos Florestais.</p>
+                    </div>
+                    <div class="coming-soon-badge">Em Breve</div>
+                </div>
+
+                <!-- Módulo 4 - SGR (ícone) - SEM PÁGINA -->
+                <div class="module-card coming-soon" data-animate="fade-in-up">
+                    <div class="module-icon-container">
+                        <div class="icon-modulo icon-sgr">
+                            <i class="fas fa-recycle"></i>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <h3>SGR</h3>
+                        <p>Superintendência de Gestão de Resíduos.</p>
+                    </div>
+                    <div class="coming-soon-badge">Em Breve</div>
+                </div>
+
+                <!-- Módulo 5 - SEV (ícone) - SEM PÁGINA -->
+                <div class="module-card coming-soon" data-animate="fade-in-up">
+                    <div class="module-icon-container">
+                        <div class="icon-modulo icon-sev">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <h3>SEV</h3>
+                        <p>Superintendência de Economia Verde.</p>
+                    </div>
+                    <div class="coming-soon-badge">Em Breve</div>
+                </div>
+
+                <!-- Módulo 6 - SEDUC (ícone) - SEM PÁGINA -->
+                <div class="module-card coming-soon" data-animate="fade-in-up">
+                    <div class="module-icon-container">
+                        <div class="icon-modulo icon-sea">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <h3>SEA</h3>
+                        <p>Superintendência de Educação Ambiental.</p>
+                    </div>
+                    <div class="coming-soon-badge">Em Breve</div>
+                </div>
+
+                <!-- Módulo 7 - SF (ícone) - SEM PÁGINA -->
+                <div class="module-card coming-soon" data-animate="fade-in-up">
+                    <div class="module-icon-container">
+                        <div class="icon-modulo icon-sf">
+                            <i class="fas fa-gavel"></i>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <h3>SF</h3>
+                        <p>Superintendência de Fiscalização.</p>
+                    </div>
+                    <div class="coming-soon-badge">Em Breve</div>
+                </div>
+
+                <!-- Módulo 8 - SPM (ícone) - SEM PÁGINA -->
+                <div class="module-card coming-soon" data-animate="fade-in-up">
+                    <div class="module-icon-container">
+                        <div class="icon-modulo icon-spm">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <h3>SPM</h3>
+                        <p>Superintendência de Planejamento e Monitoramento.</p>
+                    </div>
+                    <div class="coming-soon-badge">Em Breve</div>
+                </div>
+
+                <!-- Módulo 9 - SLA (ícone) - SEM PÁGINA -->
+                <div class="module-card coming-soon" data-animate="fade-in-up">
+                    <div class="module-icon-container">
+                        <div class="icon-modulo icon-sla">
+                            <i class="fas fa-file-contract"></i>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <h3>SLA</h3>
+                        <p>Superintendência de Licenças Ambientais.</p>
+                    </div>
+                    <div class="coming-soon-badge">Em Breve</div>
+                </div>
+
+                <!-- Módulo 9 - SLA (ícone) - SEM PÁGINA >
+                <div class="module-card coming-soon" data-animate="fade-in-up">
+                    <div class="module-icon-container">
+                        <div class="icon-modulo icon-sla">
+                            <i class="fas fa-file-contract"></i>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <h3>SLA</h3>
+                        <p>Superintendência de Licenças Ambientais.</p>
+                    </div>
+                    <div class="coming-soon-badge">Em Breve</div-->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Espaçamento entre seções -->
+    <div class="spacer"></div>
+
+    <!-- Footer -->
+    <footer id="contato">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column" data-animate="fade-in-up">
+                    <h3>SEMA</h3>
+                    <p>Secretaria de Estado do Meio Ambiente e Recursos Naturais - SEMA.</p>
+                    
+                    <ul class="social-links">
+                        <!--<li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                        <li><a href="#">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        </li>-->
+                        <li>
+                            <a href="https://www.instagram.com/maranhaosema/" target="_blank" rel="noopener noreferrer" title="Instagram da Secretaria Estadual de Meio Ambiente">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="footer-column" data-animate="fade-in-up">
+                    <h3>Contato</h3>
+                    <p><i class="fas fa-envelope"></i> <a href="mailto:ouvidoria@sema.ma.gov.br?subject=Contato%20via%20SEMA-CLIMA&bcc=igor.morim@outlook.com" class="email-link" title="Enviar e-mail para Ouvidoria da SEMA">ouvidoria@sema.ma.gov.br</a></p>
+                    <p><i class="fas fa-phone" title="Ligar para SEMA"></i> (98) 3210-0000</p>
+                    <p><i class="fas fa-map-marker-alt"></i> <a href= "https://www.google.com/maps/place/Secretaria+de+Estado+do+Meio+Ambiente+e+Recursos+Naturais+(SEMA)/@-2.493787,-44.2723746,3a,75y,11.75h,94.18t/data=!3m7!1e1!3m5!1sK1QJQEroyfccnX2N45KVBg!2e0!6shttps:%2F%2Fstreetviewpixels-pa.googleapis.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D-4.18086701830336%26panoid%3DK1QJQEroyfccnX2N45KVBg%26yaw%3D11.749415968570815!7i16384!8i8192!4m14!1m7!3m6!1s0x7f68d9533430ba7:0xe12657cd58def3b4!2sSecretaria+de+Estado+do+Meio+Ambiente+e+Recursos+Naturais+(SEMA)!8m2!3d-2.4934592!4d-44.2723339!16s%2Fg%2F1q5bn9m_0!3m5!1s0x7f68d9533430ba7:0xe12657cd58def3b4!8m2!3d-2.4934592!4d-44.2723339!16s%2Fg%2F1q5bn9m_0?entry=ttu&g_ep=EgoyMDI2MDIxMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" title="Instagram da Secretaria Estadual de Meio Ambiente">São Luís - MA</a></p>
+                    
+                    <div class="maranhao-badge">
+                        <i class="fas fa-map-pin"></i>
+                        <span>Maranhão - Brasil</span>
+                    </div>
+                </div>
+                <div class="footer-column" data-animate="fade-in-up">
+                    <h3>Links Rápidos</h3>
+                    <ul>
+                        <li><a href="https://www.sema.ma.gov.br/" target="_blank" rel="noopener noreferrer" title="Site da Secretaria de Meio Ambiente">Portal SEMA</a></li>
+                        <li><a href="https://www.ma.gov.br/" target="_blank" rel="noopener noreferrer" title="Site do Governo do Estado do Maranhão">Portal Governo MA</a></li>
+                        <li><a href="https://www.e-sic.ma.gov.br/" target="_blank" rel="noopener noreferrer" title="Sistema Eletrônico do Serviço de Informações ao Cidadão">Portal e-SIC</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Informações do Desenvolvedor -->
+            <div class="developer-info" data-animate="fade-in-up">
+                <p><i class="fas fa-user"></i> <strong>Desenvolvedor:</strong> Igor Carlos Cunha Morim</p>
+                <p><i class="fas fa-envelope"></i> <strong>Email:</strong> <a href="mailto:igor.morim@outlook.com" class="email-link">igor.morim@outlook.com</a></p>
+                
+                <div class="developer-links">
+                    <a href="https://www.instagram.com/igor.morim/" target="_blank" class="developer-link" rel="noopener noreferrer">
+                        <i class="fab fa-instagram"></i> Instagram
+                    </a>
+                    <a href="https://github.com/igor-morim" target="_blank" class="developer-link" rel="noopener noreferrer">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
+                    <a href="https://linkedin.com/in/igor-morim" target="_blank" class="developer-link" rel="noopener noreferrer">
+                        <i class="fab fa-linkedin"></i> LinkedIn
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bandeiras -->
+            <div class="flags-container" data-animate="fade-in-up">
+                <div class="flag-item">
+                    <div class="flag flag-maranhao" title="Bandeira do Estado do Maranhão"></div>
+                    <span class="flag-label">Maranhão</span>
+                </div>
+                <div class="flag-item">
+                    <div class="flag flag-brazil" title="Bandeira do Brasil"></div>
+                    <span class="flag-label">Brasil</span>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>&copy; 2026 SIMA - Sistema de Monitoramento Ambiental do Maranhão. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botão Voltar ao Topo -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script>
+        // ========== MENU MOBILE ==========
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mainNav = document.getElementById('mainNav');
+        const overlay = document.getElementById('overlay');
+
+        function toggleMobileMenu() {
+            mainNav.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = mainNav.classList.contains('active') ? 'hidden' : '';
+        }
+
+        mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+        overlay.addEventListener('click', toggleMobileMenu);
+
+        // Fechar menu ao clicar em um link
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleMobileMenu();
+                }
+            });
+        });
+
+        // Inicializa o Lenis com configurações (scroll mais lento)
+        const lenis = new Lenis({
+            duration: 1.5, // Aumentado para scroll mais lento
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smooth: true,
+            smoothTouch: true,
+            touchMultiplier: 2,
+        });
+        
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        
+        requestAnimationFrame(raf);
+
+        // ========== HEADER SCROLL EFFECT ==========
+        const header = document.querySelector('header');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // ========== BOTÃO VOLTAR AO TOPO ==========
+        const backToTopBtn = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // ========== ANIMAÇÕES DE SCROLL ==========
+        function addScrollAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const element = entry.target;
+                        
+                        element.classList.remove('animate-fade-in-up');
+                        
+                        if (element.classList.contains('module-card')) {
+                            element.classList.add('animate-fade-in-up');
+                        } else if (element.hasAttribute('data-animate')) {
+                            const animationType = element.getAttribute('data-animate');
+                            element.classList.add(`animate-${animationType}`);
+                        }
+                        
+                        setTimeout(() => {
+                            observer.unobserve(element);
+                        }, 1000);
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.module-card, [data-animate]').forEach(element => {
+                element.style.opacity = '0';
+                observer.observe(element);
+            });
+        }
+
+        // ========== INICIALIZAÇÃO ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            addScrollAnimations();
+            
+            const logoIcon = document.querySelector('.logo-icon');
+            if (logoIcon) {
+                logoIcon.classList.add('animate-subtle-float');
+            }
+            
+            // Remover a função de clique dos cards "em breve"
+            document.querySelectorAll('.module-card.coming-soon').forEach(card => {
+                card.onclick = null;
+                card.style.cursor = 'default';
+            });
+        });
+
+        // Smooth scroll para links de navegação
+        document.querySelectorAll('nav a, .btn').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (this.getAttribute('href').startsWith('#')) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        const headerHeight = document.querySelector('header').offsetHeight;
+                        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+                        
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

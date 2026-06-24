@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS - Pedreiras_Trizidela</title>
+    
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+        #map { 
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #e0e0e0;
+        }
+        .sidebar {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-width: 320px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .sidebar h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 8px;
+        }
+        .info-panel {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .info-item {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #2c3e50;
+            display: inline-block;
+            width: 120px;
+        }
+        .info-value {
+            color: #34495e;
+        }
+        .coordinates {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        button {
+            padding: 10px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 140px;
+        }
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+        .slider-container {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .slider-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        .slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            outline: none;
+            border-radius: 3px;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #3498db;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .transparency-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f4f8;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #2c3e50;
+        }
+        .transparency-info ul {
+            padding-left: 15px;
+            margin-top: 5px;
+        }
+        .status {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            z-index: 2000;
+            display: none;
+        }
+        .loading {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                max-width: 280px;
+                padding: 15px;
+            }
+            button { min-width: 120px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mapa -->
+    <div id="map"></div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>🌄 WebGIS - Pedreiras_Trizidela</h2>
+        
+        <div class="info-panel">
+            <div class="info-item">
+                <span class="info-label">📍 Local:</span>
+                <span class="info-value">Pedreiras_Trizidela</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">📐 Dimensões:</span>
+                <span class="info-value">4175 × 10000 px</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">🎨 Formato:</span>
+                <span class="info-value">PNG com transparência</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">🗺️ Extensão:</span>
+                <span class="info-value">
+                    -44.611150, -4.574284<br>
+                    -44.603062, -4.554912
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">📊 Centro:</span>
+                <span class="info-value">
+                    -4.564598, -44.607106
+                </span>
+            </div>
+        </div>
+        
+        <div class="slider-container">
+            <label for="opacity-slider">🔘 Opacidade da Ortofoto:</label>
+            <input type="range" min="0" max="100" value="100" class="slider" id="opacity-slider">
+            <div id="opacity-value" style="text-align: center; margin-top: 5px; font-size: 12px;">100%</div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="zoomToImage()" title="Zoom para a área da imagem">
+                📍 Zoom para Imagem
+            </button>
+            <button onclick="toggleLayer('osm')" title="Alternar mapa base">
+                🗺️ Alternar Mapa Base
+            </button>
+            <button onclick="toggleLayer('ortofoto')" title="Alternar ortofoto">
+                🖼️ Alternar Ortofoto
+            </button>
+            <button onclick="downloadMetadata()" title="Baixar metadados">
+                📄 Metadados
+            </button>
+        </div>
+        
+        <div class="transparency-info">
+            <strong>💡 Transparência Ativa:</strong>
+            <ul>
+                <li>Áreas brancas são transparentes</li>
+                <li>Use o slider para ajustar opacidade</li>
+                <li>Perfeito para sobrepor em mapas</li>
+            </ul>
+        </div>
+        
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #7f8c8d;">
+            <p><strong>🎮 Controles:</strong></p>
+            <ul style="padding-left: 15px; margin-top: 5px;">
+                <li>Scroll: Zoom in/out</li>
+                <li>Arraste: Mover mapa</li>
+                <li>Clique: Ver coordenadas</li>
+                <li>Zoom ideal: 18+</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Coordenadas -->
+    <div class="coordinates" id="coords">
+        Lat: -4.564598<br>Lng: -44.607106
+    </div>
+    
+    <!-- Status -->
+    <div class="status" id="status">
+        <h3>Carregando...</h3>
+        <p>Aguarde enquanto a imagem é carregada</p>
+        <div style="margin-top: 15px; width: 100%; height: 4px; background: #eee; border-radius: 2px;">
+            <div id="progress-bar" style="width: 0%; height: 100%; background: #3498db; border-radius: 2px; transition: width 0.3s;"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // CONFIGURAÇÕES DO WEBGIS
+        const CONFIG = {
+  "imagem": {
+    "arquivo": "ortofoto_Pedreiras_Trizidela.png",
+    "largura": 4175,
+    "altura": 10000,
+    "formato": "PNG",
+    "tem_transparencia": true,
+    "qualidade": "PNG com transpar\u00eancia"
+  },
+  "georreferenciamento": {
+    "crs": "EPSG:4326 (WGS84)",
+    "bounds": {
+      "left": -44.61115012664845,
+      "bottom": -4.574283541728669,
+      "right": -44.603061774003095,
+      "top": -4.5549119122780635
+    },
+    "centro": {
+      "lat": -4.564597727003367,
+      "lng": -44.607105950325774
+    }
+  },
+  "origem": {
+    "arquivo": "E:\\Igor Morim\\sima-ma\\docs\\DEM\\Pedreiras_Trizidela.tif",
+    "crs_original": "EPSG:31983",
+    "width_original": 17921,
+    "height_original": 42817,
+    "bounds_original": {
+      "left": 543133.8365921454,
+      "bottom": 9494381.777421415,
+      "right": 544029.8865921454,
+      "top": 9496522.627421414
+    },
+    "tem_alpha_original": true
+  }
+};
+        
+        const Pedreiras_Trizidela_BOUNDS = [[-4.574283541728669, -44.61115012664845], [-4.5549119122780635, -44.603061774003095]];
+        const Pedreiras_Trizidela_CENTER = [-4.564597727003367, -44.607105950325774];
+        const Pedreiras_Trizidela_URL = "E:\\Igor Morim\\sima-ma\\docs\\DEM\\Pedreiras_Trizidela_webgis\\ortofoto_Pedreiras_Trizidela.png";  // Agora é PNG com transparência
+        
+        console.log('🌐 Inicializando WebGIS com transparência...');
+        console.log('Configuração:', CONFIG);
+        console.log('Bounds da imagem:', Pedreiras_Trizidela_BOUNDS);
+        console.log('Centro:', Pedreiras_Trizidela_CENTER);
+        
+        // 1. INICIALIZAR MAPA COM ZOOM ALTO
+        const map = L.map('map', {
+            center: Pedreiras_Trizidela_CENTER,
+            zoom: 18,
+            zoomControl: true
+        });
+        
+        // 2. ADICIONAR CONTROLES
+        L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+        
+        // 3. CAMADA OPENSTREETMAP (BASE) - Escolher um estilo que combine
+        //const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        //    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        //    maxZoom: 19,
+        //    opacity: 0.9
+        //}).addTo(map);
+
+        const osmLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+              attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+              minZoom: 6,
+              maxZoom: 22,
+              opacity: 1.0
+        }).addTo(map);
+        
+        // 4. CAMADA DA ORTOFOTO COM TRANSPARÊNCIA
+        // MOSTRAR STATUS DE CARREGAMENTO
+        document.getElementById('status').classList.add('loading');
+        document.getElementById('progress-bar').style.width = '30%';
+        
+        // Criar camada de imagem com opacidade inicial
+        const ortofotoLayer = L.imageOverlay(Pedreiras_Trizidela_URL, Pedreiras_Trizidela_BOUNDS, {
+            opacity: 1.0,  // Iniciar com 100% de opacidade
+            interactive: false,
+            attribution: 'Ortofoto © <a href="https://www.sema.ma.gov.br/sala-de-situacao">CPDAm</a>',
+            className: 'transparent-image'  // Classe CSS adicional
+        });
+        
+        // Adicionar a camada após um breve delay
+        setTimeout(() => {
+            ortofotoLayer.addTo(map);
+            document.getElementById('progress-bar').style.width = '70%';
+            
+            // Ajustar zoom para a imagem
+            setTimeout(() => {
+                map.fitBounds(Pedreiras_Trizidela_BOUNDS);
+                document.getElementById('progress-bar').style.width = '100%';
+                
+                // Esconder status
+                setTimeout(() => {
+                    document.getElementById('status').classList.remove('loading');
+                    document.getElementById('status').style.display = 'none';
+                    console.log('✅ Imagem PNG com transparência carregada com sucesso!');
+                    
+                    // Verificar transparência
+                    console.log('🔍 Áreas brancas devem estar transparentes');
+                    console.log('🎯 Use o slider para ajustar a opacidade');
+                }, 500);
+            }, 500);
+        }, 1000);
+        
+        // 5. CONFIGURAR SLIDER DE OPACIDADE
+        const opacitySlider = document.getElementById('opacity-slider');
+        const opacityValue = document.getElementById('opacity-value');
+        
+        opacitySlider.addEventListener('input', function() {
+            const opacity = this.value / 100;
+            ortofotoLayer.setOpacity(opacity);
+            opacityValue.textContent = `${this.value}%`;
+            console.log(`🎚️ Opacidade ajustada para: ${opacity.toFixed(2)}`);
+        });
+        
+        // 6. ADICIONAR MARCADOR NO CENTRO
+        L.marker(Pedreiras_Trizidela_CENTER, {
+            icon: L.divIcon({
+                className: 'center-marker',
+                html: '<div style="background: #e74c3c; width: 12px; height: 12px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>',
+                iconSize: [18, 18]
+            })
+        }).addTo(map)
+        .bindPopup(`
+            <div style="text-align: center;">
+                <h4 style="margin: 0 0 8px 0; color: #2c3e50;">🌄 Centro da Ortofoto</h4>
+                <p style="margin: 0; font-size: 13px;">
+                    <strong>Lat:</strong> -4.564598<br>
+                    <strong>Lng:</strong> -44.607106
+                </p>
+                <hr style="margin: 8px 0;">
+                <p style="margin: 0; font-size: 12px; color: #7f8c8d;">
+                    Pedreiras_Trizidela<br>
+                    4175×10000px<br>
+                    <strong>Formato:</strong> PNG com transparência
+                </p>
+            </div>
+        `)
+        .openPopup();
+        
+        // 7. ADICIONAR CONTORNO DA IMAGEM PARA REFERÊNCIA
+        const imageOutline = L.rectangle(Pedreiras_Trizidela_BOUNDS, {
+            color: '#e74c3c',
+            weight: 2,
+            fillColor: 'transparent',
+            dashArray: '5, 5',
+            opacity: 0.7
+        }).addTo(map);
+        
+        // 8. FUNÇÕES DE CONTROLE
+        function zoomToImage() {
+            map.fitBounds(Pedreiras_Trizidela_BOUNDS, { padding: [50, 50] });
+            showMessage('Zoom ajustado para a imagem');
+        }
+        
+        function toggleLayer(layerType) {
+            if (layerType === 'osm') {
+                if (map.hasLayer(osmLayer)) {
+                    map.removeLayer(osmLayer);
+                    showMessage('Mapa base oculto');
+                } else {
+                    map.addLayer(osmLayer);
+                    showMessage('Mapa base visível');
+                }
+            } else if (layerType === 'ortofoto') {
+                if (map.hasLayer(ortofotoLayer)) {
+                    map.removeLayer(ortofotoLayer);
+                    map.removeLayer(imageOutline);
+                    showMessage('Ortofoto oculta');
+                } else {
+                    ortofotoLayer.addTo(map);
+                    imageOutline.addTo(map);
+                    showMessage('Ortofoto visível');
+                }
+            }
+        }
+        
+        function downloadMetadata() {
+            // Criar link para download do JSON
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(CONFIG, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "georef_metadata.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            document.body.removeChild(downloadAnchor);
+            showMessage('Metadados baixados!');
+        }
+        
+        function showMessage(text) {
+            console.log('💬 ' + text);
+            // Poderia adicionar um toast notification aqui
+        }
+        
+        // 9. ATUALIZAR COORDENADAS EM TEMPO REAL
+        map.on('mousemove', function(e) {
+            document.getElementById('coords').innerHTML = 
+                `Lat: ${e.latlng.lat.toFixed(6)}<br>Lng: ${e.latlng.lng.toFixed(6)}`;
+        });
+        
+        // 10. ZOOM INICIAL AUTOMÁTICO
+        window.addEventListener('load', function() {
+            setTimeout(zoomToImage, 1500);
+        });
+        
+        // 11. ADICIONAR ESTILO CSS PARA IMAGEM TRANSPARENTE
+        const style = document.createElement('style');
+        style.textContent = `
+            .transparent-image {
+                mix-blend-mode: multiply;  /* Melhor combinação com mapa base */
+            }
+            .leaflet-image-layer {
+                /* Estilos adicionais se necessário */
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 12. LOG DE INICIALIZAÇÃO
+        console.log('✅ WebGIS com transparência inicializado com sucesso!');
+        console.log('📁 Imagem:', Pedreiras_Trizidela_URL);
+        console.log('🎨 Áreas brancas estão transparentes');
+        console.log('🎚️ Use o slider para ajustar opacidade');
+        
+    </script>
+</body>
+</html>

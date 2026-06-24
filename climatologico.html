@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão: Tecnologia para preservação ambiental com monitoramento inteligente dos recursos naturais.">
+    <meta name="keywords" content="monitoramento ambiental, Maranhão, SIMA, meio ambiente, hidrologia, meteorologia, SEMA">
+    <meta name="author" content="Igor Carlos Cunha Morim">
+
+   <!-- Tipo de conteúdo -->
+    <meta property="og:type" content="website">
+
+    <!-- Nome do site/app -->
+    <meta property="og:site_name" content="SIMA - Sistema de Monitoramento Ambiental">
+
+    <!-- Para Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão">
+    <meta name="twitter:description" content="Tecnologia para preservação ambiental com monitoramento inteligente dos recursos naturais">
+
+    <!-- Tamanho da imagem -->
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Favicon SIMA -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo/CPDAm/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/CPDAm/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo/CPDAm/favicon-16x16.png">
+    <link rel="icon" href="assets/images/logo/CPDAm/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/images/logo/CPDAm/favicon.ico">
+
+    <!-- Para Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/logo/CPDAm/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/logo/CPDAm/android-chrome-512x512.png">
+
+
+    <title>SEMA-CLIMA - Dados Climatológicos INMET</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .container-fluid {
+            padding: 20px 30px;
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .estacao-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .estacao-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,.15);
+        }
+        
+        .estacao-card.selected {
+            background-color: #e3f2fd;
+            border-left-width: 6px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 450px;
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .chart-wrapper {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            width: 100%;
+        }
+        
+        .grafico-titulo {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            font-weight: 600;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .missing-data-badge {
+            background-color: #ffc107;
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-cloud-sun"></i> SIMA MA - Dados Climatológicos INMET
+            </a>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <!-- Cabeçalho -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <i class="bi bi-map"></i> Monitoramento Climatológico - Maranhão
+                        </h4>
+                        <p class="text-muted mb-0">
+                            Dados horários do INMET - <strong>Plotagem exata com lacunas</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading active" id="loading">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2">Carregando dados climatológicos...</p>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div id="mainContent" style="display: none;">
+            <div class="row">
+                <!-- Lista de Estações -->
+                <div class="col-lg-3">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <i class="bi bi-list-ul"></i> Estações
+                            <span class="badge bg-light text-dark float-end" id="estacoesCount">0</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="p-2">
+                                <input type="text" class="form-control" id="buscaEstacao" placeholder="Buscar estação...">
+                            </div>
+                            <div class="list-group list-group-flush" id="estacoesList" style="max-height: 600px; overflow-y: auto;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área dos Gráficos -->
+                <div class="col-lg-9">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white" id="estacaoSelecionadaTitulo">
+                            <i class="bi bi-info-circle"></i> Selecione uma estação
+                        </div>
+                        <div class="card-body">
+                            <div id="estacaoInfo" style="display: none;">
+                                <!-- Informações da Estação -->
+                                <div class="row mb-4">
+                                    <div class="col-md-8">
+                                        <h3 id="estacaoNome"></h3>
+                                        <p class="text-muted">
+                                            <i class="bi bi-geo-alt"></i> <span id="estacaoMunicipio"></span><br>
+                                            <i class="bi bi-pin-map"></i> Lat: <span id="estacaoLat"></span> | Lon: <span id="estacaoLon"></span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="stats-card">
+                                            <div class="small">Total de Registros</div>
+                                            <div class="h2 mb-0" id="estacaoRegistros">0</div>
+                                            <div class="small mt-2" id="estacaoPeriodo"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Cards de Estatísticas -->
+                                <div class="row mb-4">
+                                    <div class="col-md-4">
+                                        <div class="card text-center border-0 bg-light">
+                                            <div class="card-body">
+                                                <i class="bi bi-thermometer-half fs-1 text-danger"></i>
+                                                <h3 id="estacaoTempMedia">-</h3>
+                                                <small>Temperatura Média</small>
+                                                <div class="small text-muted">
+                                                    Min: <span id="estacaoTempMin">-</span> | Max: <span id="estacaoTempMax">-</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card text-center border-0 bg-light">
+                                            <div class="card-body">
+                                                <i class="bi bi-droplet fs-1 text-info"></i>
+                                                <h3 id="estacaoChuva">-</h3>
+                                                <small>Chuva Total</small>
+                                                <div class="small text-muted">
+                                                    Período selecionado
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card text-center border-0 bg-light">
+                                            <div class="card-body">
+                                                <i class="bi bi-moisture fs-1 text-success"></i>
+                                                <h3 id="estacaoUmidade">-</h3>
+                                                <small>Umidade Média</small>
+                                                <div class="small text-muted">
+                                                    Min: <span id="estacaoUmiMin">-</span> | Max: <span id="estacaoUmiMax">-</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Controles de Período -->
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label>Data Início</label>
+                                        <input type="date" class="form-control" id="dataInicio">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Data Fim</label>
+                                        <input type="date" class="form-control" id="dataFim">
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <button class="btn btn-primary w-100" id="btnAtualizar">
+                                            <i class="bi bi-arrow-repeat"></i> Atualizar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="btn-group w-100">
+                                            <button class="btn btn-outline-primary" id="btnHoje">Hoje</button>
+                                            <button class="btn btn-outline-primary" id="btnOntem">Ontem</button>
+                                            <button class="btn btn-outline-primary" id="btn7dias">7 dias</button>
+                                            <button class="btn btn-outline-primary" id="btn15dias">15 dias</button>
+                                            <button class="btn btn-outline-primary" id="btn30dias">30 dias</button>
+                                            <button class="btn btn-outline-primary" id="btnTudo">Todos</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Informação do Período -->
+                                <div class="alert alert-info" id="periodoInfo">
+                                    Carregando dados...
+                                </div>
+
+                                <!-- Gráfico de Temperatura -->
+                                <div class="chart-wrapper">
+                                    <div class="grafico-titulo">
+                                        <i class="bi bi-thermometer-half text-danger"></i> Temperatura (°C) - Dados Horários
+                                        <span class="missing-data-badge" id="tempMissingBadge"></span>
+                                    </div>
+                                    <div class="chart-container">
+                                        <canvas id="graficoTemperatura"></canvas>
+                                    </div>
+                                </div>
+
+                                <!-- Gráfico de Chuva -->
+                                <div class="chart-wrapper">
+                                    <div class="grafico-titulo">
+                                        <i class="bi bi-droplet text-info"></i> Precipitação (mm) - Dados Horários
+                                        <span class="missing-data-badge" id="chuvaMissingBadge"></span>
+                                    </div>
+                                    <div class="chart-container">
+                                        <canvas id="graficoChuva"></canvas>
+                                    </div>
+                                </div>
+
+                                <!-- Gráfico de Umidade -->
+                                <div class="chart-wrapper">
+                                    <div class="grafico-titulo">
+                                        <i class="bi bi-moisture text-success"></i> Umidade (%) - Dados Horários
+                                        <span class="missing-data-badge" id="umidadeMissingBadge"></span>
+                                    </div>
+                                    <div class="chart-container">
+                                        <canvas id="graficoUmidade"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mensagem quando nenhuma estação selecionada -->
+                            <div id="nenhumaEstacaoSelecionada" class="text-center py-5">
+                                <i class="bi bi-cloud-arrow-up fs-1 text-muted"></i>
+                                <h5 class="mt-3 text-muted">Selecione uma estação para visualizar os dados horários</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Variáveis globais
+        let estacoes = [];
+        let dadosCompletos = [];
+        let estacaoSelecionada = null;
+        let graficos = {};
+
+        // ========== FUNÇÕES DE DATA SEM FUSO ==========
+        
+        function parseDataSemFuso(dataStr) {
+            if (!dataStr) return null;
+            
+            let ano, mes, dia, hora, minuto;
+            
+            // Formato ISO: "2026-02-08 13:00:00" ou "2026-02-08T13:00:00"
+            const regex = /(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/;
+            const match = dataStr.match(regex);
+            
+            if (match) {
+                ano = parseInt(match[1]);
+                mes = parseInt(match[2]);
+                dia = parseInt(match[3]);
+                hora = parseInt(match[4]);
+                minuto = parseInt(match[5]);
+            } else {
+                return null;
+            }
+            
+            return {
+                ano, mes, dia, hora, minuto,
+                toComparable: function() {
+                    return this.ano * 1000000 + this.mes * 10000 + this.dia * 100 + this.hora;
+                },
+                toLabel: function() {
+                    return `${this.dia.toString().padStart(2,'0')}/${this.mes.toString().padStart(2,'0')} ${this.hora.toString().padStart(2,'0')}h`;
+                },
+                toDateStr: function() {
+                    return `${this.ano}-${this.mes.toString().padStart(2,'0')}-${this.dia.toString().padStart(2,'0')}`;
+                }
+            };
+        }
+
+        function formatarDataExibicao(dataObj) {
+            if (!dataObj) return '-';
+            return `${dataObj.dia.toString().padStart(2,'0')}/${dataObj.mes.toString().padStart(2,'0')}/${dataObj.ano} ${dataObj.hora.toString().padStart(2,'0')}:${dataObj.minuto.toString().padStart(2,'0')}`;
+        }
+
+        // ========== PROCESSAMENTO ==========
+
+        function processarDados(dadosBrutos) {
+            return dadosBrutos.map(d => {
+                if (!d.data_hora) return null;
+                
+                const dataObj = parseDataSemFuso(d.data_hora);
+                if (!dataObj) return null;
+                
+                return {
+                    cd_estacao: d.cd_estacao,
+                    nome: d.nome,
+                    data_obj: dataObj,
+                    data_hora_original: d.data_hora,
+                    chuva: d.chuva !== null && d.chuva !== undefined ? Number(d.chuva) : null,
+                    temperatura: d.temperatura_instantanea !== null && d.temperatura_instantanea !== undefined ? Number(d.temperatura_instantanea) : null,
+                    umidade: d.umidade_instantanea !== null && d.umidade_instantanea !== undefined ? Number(d.umidade_instantanea) : null
+                };
+            }).filter(d => d !== null);
+        }
+
+        // ========== INICIALIZAÇÃO ==========
+
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDadosIniciais();
+            
+            document.getElementById('buscaEstacao').addEventListener('input', filtrarEstacoes);
+            document.getElementById('btnAtualizar').addEventListener('click', atualizarGraficos);
+            
+            document.getElementById('btnHoje').addEventListener('click', () => setPeriodo('hoje'));
+            document.getElementById('btnOntem').addEventListener('click', () => setPeriodo('ontem'));
+            document.getElementById('btn7dias').addEventListener('click', () => setPeriodo(7));
+            document.getElementById('btn15dias').addEventListener('click', () => setPeriodo(15));
+            document.getElementById('btn30dias').addEventListener('click', () => setPeriodo(30));
+            document.getElementById('btnTudo').addEventListener('click', () => setPeriodo('tudo'));
+        });
+
+        async function carregarDadosIniciais() {
+            try {
+                document.getElementById('loading').classList.add('active');
+                
+                await Promise.all([
+                    carregarTodosDados(),
+                    carregarEstacoes()
+                ]);
+                
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('mainContent').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        async function carregarTodosDados() {
+            try {
+                const response = await fetch('/api/dados-climatologicos');
+                const data = await response.json();
+                
+                if (data.message === 'success') {
+                    dadosCompletos = processarDados(data.dados || []);
+                    console.log(`📊 ${dadosCompletos.length} registros processados`);
+                    
+                    // Estatísticas de dados faltantes
+                    const totalRegistros = dadosCompletos.length;
+                    const comTemperatura = dadosCompletos.filter(d => d.temperatura !== null).length;
+                    const comChuva = dadosCompletos.filter(d => d.chuva !== null).length;
+                    const comUmidade = dadosCompletos.filter(d => d.umidade !== null).length;
+                    
+                    console.log(`📊 Temperatura: ${comTemperatura}/${totalRegistros} (${((comTemperatura/totalRegistros)*100).toFixed(1)}%)`);
+                    console.log(`📊 Chuva: ${comChuva}/${totalRegistros} (${((comChuva/totalRegistros)*100).toFixed(1)}%)`);
+                    console.log(`📊 Umidade: ${comUmidade}/${totalRegistros} (${((comUmidade/totalRegistros)*100).toFixed(1)}%)`);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        async function carregarEstacoes() {
+            try {
+                const response = await fetch('/api/estacoes-climatologicas');
+                const data = await response.json();
+                
+                if (data.message === 'success') {
+                    estacoes = data.data || [];
+                    document.getElementById('estacoesCount').textContent = estacoes.length;
+                    renderizarListaEstacoes();
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        function renderizarListaEstacoes() {
+            const lista = document.getElementById('estacoesList');
+            lista.innerHTML = '';
+            
+            estacoes.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+            
+            estacoes.forEach(estacao => {
+                const registros = dadosCompletos.filter(d => d.cd_estacao == estacao.codigo).length;
+                
+                const item = document.createElement('a');
+                item.href = '#';
+                item.className = `list-group-item list-group-item-action estacao-card ${estacaoSelecionada?.codigo === estacao.codigo ? 'selected' : ''}`;
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">${estacao.nome || 'Sem nome'}</h6>
+                            <small class="text-muted">${estacao.municipio || ''}</small>
+                        </div>
+                        <span class="badge bg-secondary">${registros}</span>
+                    </div>
+                `;
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    selecionarEstacao(estacao.codigo);
+                });
+                lista.appendChild(item);
+            });
+        }
+
+        function filtrarEstacoes() {
+            const termo = document.getElementById('buscaEstacao').value.toLowerCase();
+            const items = document.getElementById('estacoesList').getElementsByClassName('list-group-item');
+            
+            Array.from(items).forEach(item => {
+                item.style.display = item.textContent.toLowerCase().includes(termo) ? '' : 'none';
+            });
+        }
+
+        async function selecionarEstacao(codigo) {
+            try {
+                estacaoSelecionada = estacoes.find(e => e.codigo == codigo);
+                if (!estacaoSelecionada) return;
+                
+                renderizarListaEstacoes();
+                
+                document.getElementById('estacaoInfo').style.display = 'block';
+                document.getElementById('nenhumaEstacaoSelecionada').style.display = 'none';
+                document.getElementById('estacaoSelecionadaTitulo').innerHTML = 
+                    `<i class="bi bi-info-circle"></i> ${estacaoSelecionada.nome}`;
+                
+                document.getElementById('estacaoNome').textContent = estacaoSelecionada.nome;
+                document.getElementById('estacaoMunicipio').textContent = estacaoSelecionada.municipio || 'Não informado';
+                document.getElementById('estacaoLat').textContent = estacaoSelecionada.latitude?.toFixed(4) || '-';
+                document.getElementById('estacaoLon').textContent = estacaoSelecionada.longitude?.toFixed(4) || '-';
+                
+                // Configurar período padrão (últimos 7 dias)
+                setPeriodo(7);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        function setPeriodo(tipo) {
+            if (!estacaoSelecionada) return;
+            
+            const dadosEstacao = dadosCompletos.filter(d => d.cd_estacao == estacaoSelecionada.codigo);
+            if (dadosEstacao.length === 0) return;
+            
+            const datas = dadosEstacao.map(d => d.data_obj).sort((a, b) => a.toComparable() - b.toComparable());
+            const dataMin = datas[0];
+            const dataMax = datas[datas.length - 1];
+            
+            let dataInicio, dataFim;
+            
+            if (tipo === 'hoje') {
+                dataFim = dataMax;
+                dataInicio = {
+                    ano: dataMax.ano,
+                    mes: dataMax.mes,
+                    dia: dataMax.dia,
+                    hora: 0,
+                    minuto: 0
+                };
+            } else if (tipo === 'ontem') {
+                let dia = dataMax.dia - 1;
+                let mes = dataMax.mes;
+                let ano = dataMax.ano;
+                
+                if (dia < 1) {
+                    mes -= 1;
+                    if (mes < 1) {
+                        mes = 12;
+                        ano -= 1;
+                    }
+                    const ultimosDias = [31,28,31,30,31,30,31,31,30,31,30,31];
+                    dia = ultimosDias[mes - 1];
+                }
+                
+                dataInicio = { ano, mes, dia, hora: 0, minuto: 0 };
+                dataFim = { ano: dataMax.ano, mes: dataMax.mes, dia: dataMax.dia, hora: 23, minuto: 59 };
+            } else if (tipo === 'tudo') {
+                dataInicio = dataMin;
+                dataFim = dataMax;
+            } else {
+                // número de dias
+                const dias = tipo;
+                let dia = dataMax.dia - dias;
+                let mes = dataMax.mes;
+                let ano = dataMax.ano;
+                
+                while (dia < 1) {
+                    mes -= 1;
+                    if (mes < 1) {
+                        mes = 12;
+                        ano -= 1;
+                    }
+                    const ultimosDias = [31,28,31,30,31,30,31,31,30,31,30,31];
+                    dia += ultimosDias[mes - 1];
+                }
+                
+                dataInicio = { ano, mes, dia, hora: 0, minuto: 0 };
+                dataFim = { ano: dataMax.ano, mes: dataMax.mes, dia: dataMax.dia, hora: 23, minuto: 59 };
+            }
+            
+            // Adicionar método toComparable
+            dataInicio.toComparable = function() { return this.ano * 1000000 + this.mes * 10000 + this.dia * 100 + this.hora; };
+            dataFim.toComparable = function() { return this.ano * 1000000 + this.mes * 10000 + this.dia * 100 + this.hora; };
+            
+            document.getElementById('dataInicio').value = `${dataInicio.ano}-${dataInicio.mes.toString().padStart(2,'0')}-${dataInicio.dia.toString().padStart(2,'0')}`;
+            document.getElementById('dataFim').value = `${dataFim.ano}-${dataFim.mes.toString().padStart(2,'0')}-${dataFim.dia.toString().padStart(2,'0')}`;
+            
+            atualizarGraficos();
+        }
+
+        function atualizarGraficos() {
+            if (!estacaoSelecionada) return;
+            
+            const dataInicioStr = document.getElementById('dataInicio').value;
+            const dataFimStr = document.getElementById('dataFim').value;
+            
+            if (!dataInicioStr || !dataFimStr) return;
+            
+            // Converter datas para objetos comparáveis
+            const [anoInicio, mesInicio, diaInicio] = dataInicioStr.split('-').map(Number);
+            const [anoFim, mesFim, diaFim] = dataFimStr.split('-').map(Number);
+            
+            const inicio = { ano: anoInicio, mes: mesInicio, dia: diaInicio, hora: 0, minuto: 0 };
+            const fim = { ano: anoFim, mes: mesFim, dia: diaFim, hora: 23, minuto: 59 };
+            
+            inicio.toComparable = function() { return this.ano * 1000000 + this.mes * 10000 + this.dia * 100 + this.hora; };
+            fim.toComparable = function() { return this.ano * 1000000 + this.mes * 10000 + this.dia * 100 + this.hora; };
+            
+            // Filtrar dados da estação no período
+            const dadosEstacao = dadosCompletos
+                .filter(d => d.cd_estacao == estacaoSelecionada.codigo)
+                .filter(d => {
+                    const comp = d.data_obj.toComparable();
+                    return comp >= inicio.toComparable() && comp <= fim.toComparable();
+                })
+                .sort((a, b) => a.data_obj.toComparable() - b.data_obj.toComparable());
+            
+            if (dadosEstacao.length === 0) {
+                document.getElementById('periodoInfo').innerHTML = `
+                    <i class="bi bi-exclamation-triangle"></i> 
+                    Nenhum dado encontrado para o período selecionado.
+                `;
+                return;
+            }
+            
+            // Atualizar estatísticas
+            atualizarEstatisticas(dadosEstacao);
+            
+            // Preparar dados para os gráficos
+            const labels = dadosEstacao.map(d => d.data_obj.toLabel());
+            
+            const temperaturas = dadosEstacao.map(d => d.temperatura);
+            const chuvas = dadosEstacao.map(d => d.chuva);
+            const umidades = dadosEstacao.map(d => d.umidade);
+            
+            // Calcular estatísticas de dados faltantes
+            const totalPontos = dadosEstacao.length;
+            const tempValidos = temperaturas.filter(t => t !== null).length;
+            const chuvaValidos = chuvas.filter(c => c !== null).length;
+            const umidadeValidos = umidades.filter(u => u !== null).length;
+            
+            document.getElementById('tempMissingBadge').textContent = 
+                `${totalPontos - tempValidos} horas sem dados`;
+            document.getElementById('chuvaMissingBadge').textContent = 
+                `${totalPontos - chuvaValidos} horas sem dados`;
+            document.getElementById('umidadeMissingBadge').textContent = 
+                `${totalPontos - umidadeValidos} horas sem dados`;
+            
+            // Informação do período
+            document.getElementById('periodoInfo').innerHTML = `
+                <i class="bi bi-calendar-range"></i> 
+                Período: ${formatarDataExibicao(inicio)} até ${formatarDataExibicao(fim)} | 
+                ${dadosEstacao.length} horas de dados |
+                <span class="badge bg-warning">Dados faltantes: ${totalPontos - tempValidos} (temp), ${totalPontos - chuvaValidos} (chuva), ${totalPontos - umidadeValidos} (umi)</span>
+            `;
+            
+            // Destruir gráficos existentes
+            if (graficos.temperatura) graficos.temperatura.destroy();
+            if (graficos.chuva) graficos.chuva.destroy();
+            if (graficos.umidade) graficos.umidade.destroy();
+            
+            // Gráfico de Temperatura
+            const ctxTemp = document.getElementById('graficoTemperatura').getContext('2d');
+            graficos.temperatura = new Chart(ctxTemp, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Temperatura (°C)',
+                        data: temperaturas,
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: (context) => {
+                            const value = context.raw;
+                            return value === null ? '#ccc' : '#e74c3c';
+                        },
+                        spanGaps: false, // Não conecta pontos com dados faltantes
+                        tension: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const valor = context.parsed.y;
+                                    return valor !== null ? `Temperatura: ${valor.toFixed(1)}°C` : 'Dado não disponível';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            title: { display: true, text: 'Temperatura (°C)' }
+                        },
+                        x: {
+                            ticks: { 
+                                maxRotation: 45, 
+                                minRotation: 45,
+                                maxTicksLimit: 30
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de Chuva
+            const ctxChuva = document.getElementById('graficoChuva').getContext('2d');
+            graficos.chuva = new Chart(ctxChuva, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Chuva (mm)',
+                        data: chuvas,
+                        backgroundColor: (context) => {
+                            const value = context.raw;
+                            return value === null ? '#e9ecef' : '#3498db';
+                        },
+                        borderColor: '#2980b9',
+                        borderWidth: value => value === null ? 0 : 1,
+                        borderRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const valor = context.parsed.y;
+                                    return valor !== null ? `Chuva: ${valor.toFixed(1)} mm` : 'Dado não disponível';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            title: { display: true, text: 'Precipitação (mm)' }
+                        },
+                        x: {
+                            ticks: { 
+                                maxRotation: 45, 
+                                minRotation: 45,
+                                maxTicksLimit: 30
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de Umidade
+            const ctxUmi = document.getElementById('graficoUmidade').getContext('2d');
+            graficos.umidade = new Chart(ctxUmi, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Umidade (%)',
+                        data: umidades,
+                        borderColor: '#27ae60',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: (context) => {
+                            const value = context.raw;
+                            return value === null ? '#ccc' : '#27ae60';
+                        },
+                        spanGaps: false,
+                        tension: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const valor = context.parsed.y;
+                                    return valor !== null ? `Umidade: ${valor.toFixed(0)}%` : 'Dado não disponível';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Umidade (%)' }
+                        },
+                        x: {
+                            ticks: { 
+                                maxRotation: 45, 
+                                minRotation: 45,
+                                maxTicksLimit: 30
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function atualizarEstatisticas(dados) {
+            document.getElementById('estacaoRegistros').textContent = dados.length;
+            
+            // Período
+            if (dados.length > 0) {
+                const primeira = dados[0].data_obj;
+                const ultima = dados[dados.length - 1].data_obj;
+                document.getElementById('estacaoPeriodo').textContent = 
+                    `${primeira.dia}/${primeira.mes} ${primeira.hora}h - ${ultima.dia}/${ultima.mes} ${ultima.hora}h`;
+            }
+            
+            // Temperaturas
+            const temps = dados.map(d => d.temperatura).filter(t => t !== null);
+            if (temps.length > 0) {
+                const media = temps.reduce((a, b) => a + b, 0) / temps.length;
+                const min = Math.min(...temps);
+                const max = Math.max(...temps);
+                
+                document.getElementById('estacaoTempMedia').textContent = media.toFixed(1) + '°C';
+                document.getElementById('estacaoTempMin').textContent = min.toFixed(1) + '°C';
+                document.getElementById('estacaoTempMax').textContent = max.toFixed(1) + '°C';
+            }
+            
+            // Chuvas
+            const chuvas = dados.map(d => d.chuva).filter(c => c !== null);
+            if (chuvas.length > 0) {
+                const total = chuvas.reduce((a, b) => a + b, 0);
+                document.getElementById('estacaoChuva').textContent = total.toFixed(1) + ' mm';
+            }
+            
+            // Umidade
+            const umidades = dados.map(d => d.umidade).filter(u => u !== null);
+            if (umidades.length > 0) {
+                const media = umidades.reduce((a, b) => a + b, 0) / umidades.length;
+                const min = Math.min(...umidades);
+                const max = Math.max(...umidades);
+                
+                document.getElementById('estacaoUmidade').textContent = media.toFixed(0) + '%';
+                document.getElementById('estacaoUmiMin').textContent = min.toFixed(0) + '%';
+                document.getElementById('estacaoUmiMax').textContent = max.toFixed(0) + '%';
+            }
+        }
+    </script>
+</body>
+</html>

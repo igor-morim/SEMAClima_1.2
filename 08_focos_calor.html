@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão: Tecnologia para preservação ambiental com monitoramento inteligente dos recursos naturais.">
+    <meta name="keywords" content="monitoramento ambiental, Maranhão, SIMA, meio ambiente, hidrologia, meteorologia, SEMA">
+    <meta name="author" content="Igor Carlos Cunha Morim">
+
+   <!-- Tipo de conteúdo -->
+    <meta property="og:type" content="website">
+
+    <!-- Nome do site/app -->
+    <meta property="og:site_name" content="SIMA - Sistema de Monitoramento Ambiental">
+
+    <!-- Para Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão">
+    <meta name="twitter:description" content="Tecnologia para preservação ambiental com monitoramento inteligente dos recursos naturais">
+
+    <!-- Tamanho da imagem -->
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Favicon SIMA -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo/CPDAm/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/CPDAm/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo/CPDAm/favicon-16x16.png">
+    <link rel="icon" href="assets/images/logo/CPDAm/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/images/logo/CPDAm/favicon.ico">
+
+    <!-- Para Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/logo/CPDAm/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/logo/CPDAm/android-chrome-512x512.png">
+
+
+    <title>SEMA CLIMA - Monitoramento de Focos de Calor</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #F5F5F5;
+            color: #121212;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 350px;
+            background: linear-gradient(to bottom, #121212, #2D2D2D);
+            color: #FFFFFF;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #4A4A4A;
+        }
+
+        .logo i {
+            font-size: 28px;
+            color: #FF6B35;
+            margin-right: 10px;
+        }
+
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .logo-subtitle {
+            font-size: 14px;
+            color: #FF9E7A;
+            margin-top: 3px;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+        }
+
+        .panel-title i {
+            margin-right: 8px;
+            color: #FF6B35;
+        }
+
+        .stats-container {
+            background-color: #2D2D2D;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #FF6B35;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #4A4A4A;
+        }
+
+        .stat-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .high { color: #FF6B35; }
+        .medium { color: #FF9E7A; }
+        .low { color: #FFD166; }
+
+        .controls-container {
+            background-color: #2D2D2D;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #D45A2A;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #FFFFFF;
+        }
+
+        .date-range {
+            display: flex;
+            gap: 10px;
+        }
+
+        .date-input {
+            flex: 1;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #4A4A4A;
+            background-color: #2D2D2D;
+            color: #FFFFFF;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #FF6B35;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #4A4A4A;
+            background-color: #2D2D2D;
+            color: #FFFFFF;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #FF6B35;
+        }
+
+        .legend {
+            background-color: #2D2D2D;
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #FF6B35;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .legend-text {
+            font-size: 14px;
+        }
+
+        /* Mapa */
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .map-btn {
+            background-color: #121212;
+            border: none;
+            border-radius: 5px;
+            width: 40px;
+            height: 40px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FF6B35;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .map-btn:hover {
+            background-color: #FF6B35;
+            color: #121212;
+        }
+
+        .heat-source-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(18, 18, 18, 0.95);
+            border-radius: 10px;
+            padding: 15px;
+            width: 300px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: none;
+            border-left: 4px solid #FF6B35;
+            color: #FFFFFF;
+        }
+
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #4A4A4A;
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: #FF6B35;
+        }
+
+        .close-info {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #FF9E7A;
+        }
+
+        .info-content {
+            font-size: 14px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #FF9E7A;
+        }
+
+        .info-value {
+            color: #FFFFFF;
+        }
+
+        .update-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #FF6B35;
+            color: #FFFFFF;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .update-btn:hover {
+            background-color: #D45A2A;
+        }
+
+        .ma-highlight {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(18, 18, 18, 0.9);
+            color: #FFFFFF;
+            padding: 10px 15px;
+            border-radius: 5px;
+            z-index: 1000;
+            font-size: 14px;
+            border-left: 4px solid #FF6B35;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsividade */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 40vh;
+            }
+            
+            .map-container {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar com controles e informações -->
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-fire"></i>
+                <div>
+                    <h1>Monitoramento de Focos de Calor</h1>
+                    <div class="logo-subtitle">Estado do Maranhão - Sistema WebGIS</div>
+                </div>
+            </div>
+
+            <div class="stats-container">
+                <h2 class="panel-title"><i class="fas fa-chart-bar"></i> Estatísticas MA</h2>
+                <div class="stat-item">
+                    <span class="stat-label">Focos ativos (24h)</span>
+                    <span class="stat-value high" id="active-fires">83</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Alta intensidade</span>
+                    <span class="stat-value high" id="high-intensity">24</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Média intensidade</span>
+                    <span class="stat-value medium" id="medium-intensity">38</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Baixa intensidade</span>
+                    <span class="stat-value low" id="low-intensity">21</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Municípios afetados</span>
+                    <span class="stat-value" id="municipalities">17</span>
+                </div>
+            </div>
+
+            <div class="controls-container">
+                <h2 class="panel-title"><i class="fas fa-sliders-h"></i> Controles</h2>
+                <div class="control-group">
+                    <label class="control-label">Período de análise</label>
+                    <div class="date-range">
+                        <input type="date" class="date-input" id="start-date" value="2023-08-01">
+                        <input type="date" class="date-input" id="end-date" value="2023-08-07">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Intensidade dos focos</label>
+                    <select id="intensity-filter">
+                        <option value="all">Todos os focos</option>
+                        <option value="high">Alta intensidade</option>
+                        <option value="medium">Média intensidade</option>
+                        <option value="low">Baixa intensidade</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Região do MA</label>
+                    <select id="region-filter">
+                        <option value="all">Todo o estado</option>
+                        <option value="north">Norte (Amazônia)</option>
+                        <option value="south">Sul (Cerrado)</option>
+                        <option value="east">Leste (Cocais)</option>
+                        <option value="west">Oeste (Pré-Amazônia)</option>
+                    </select>
+                </div>
+                <button class="update-btn" id="update-btn">
+                    <i class="fas fa-sync-alt"></i> Atualizar Dados
+                </button>
+            </div>
+
+            <div class="legend">
+                <h2 class="panel-title"><i class="fas fa-map"></i> Legenda</h2>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #FF6B35;"></div>
+                    <div class="legend-text">Alta intensidade (acima de 70°C)</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #FF9E7A;"></div>
+                    <div class="legend-text">Média intensidade (50-70°C)</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #FFD166;"></div>
+                    <div class="legend-text">Baixa intensidade (abaixo de 50°C)</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #2D2D2D; border-radius: 0;"></div>
+                    <div class="legend-text">Áreas protegidas</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #4A4A4A; border-radius: 0;"></div>
+                    <div class="legend-text">Áreas rurais críticas</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa -->
+        <div class="map-container">
+            <div id="map"></div>
+            
+            <div class="ma-highlight">
+                <i class="fas fa-map-marker-alt" style="color: #FF6B35;"></i>
+                Estado do Maranhão - Monitoramento de Queimadas
+            </div>
+            
+            <div class="map-controls">
+                <button class="map-btn" id="zoom-in" title="Zoom In">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="map-btn" id="zoom-out" title="Zoom Out">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="map-btn" id="locate-btn" title="Centralizar no MA">
+                    <i class="fas fa-crosshairs"></i>
+                </button>
+                <button class="map-btn" id="fullscreen-btn" title="Tela Cheia">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+
+            <div class="heat-source-info" id="heat-source-info">
+                <div class="info-header">
+                    <div class="info-title">Detalhes do Foco de Calor</div>
+                    <button class="close-info" id="close-info">&times;</button>
+                </div>
+                <div class="info-content">
+                    <div class="info-row">
+                        <span class="info-label">ID:</span>
+                        <span class="info-value" id="info-id">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Intensidade:</span>
+                        <span class="info-value" id="info-intensity">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Temperatura:</span>
+                        <span class="info-value" id="info-temperature">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Data:</span>
+                        <span class="info-value" id="info-date">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Município:</span>
+                        <span class="info-value" id="info-municipality">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Risco:</span>
+                        <span class="info-value" id="info-risk">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Centralizar no Maranhão
+        const map = L.map('map').setView([-5.4026, -45.1166], 7);
+
+        // Camadas base com tema escuro
+        const baseLayers = {
+            'Satélite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            }),
+            'Topográfico': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+            }),
+            'Escuro': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            })
+        };
+
+        // Adicionar camada padrão (escura para combinar com a paleta)
+        baseLayers['Escuro'].addTo(map);
+
+        // Adicionar contorno do Maranhão
+        const maranhaoBounds = L.polygon([
+            [[-1.0, -42.0], [-1.0, -48.0], [-10.0, -48.0], [-10.0, -42.0], [-1.0, -42.0]]
+        ], {
+            color: '#FF6B35',
+            fillColor: 'transparent',
+            weight: 3,
+            opacity: 0.8,
+            fillOpacity: 0
+        }).bindPopup('<strong>Estado do Maranhão</strong><br>Área de monitoramento de focos de calor').addTo(map);
+
+        // Dados simulados de focos de calor no Maranhão
+        const heatSourcesMA = [
+            { id: 1, lat: -5.0892, lng: -42.8014, intensity: 'high', temperature: 78, date: '2023-08-05', municipality: 'Teresina (fronteira)', region: 'south', risk: 'Alto' },
+            { id: 2, lat: -5.5208, lng: -47.4775, intensity: 'high', temperature: 85, date: '2023-08-05', municipality: 'Imperatriz', region: 'south', risk: 'Alto' },
+            { id: 3, lat: -3.6667, lng: -45.3800, intensity: 'medium', temperature: 65, date: '2023-08-05', municipality: 'Pinheiro', region: 'north', risk: 'Médio' },
+            { id: 4, lat: -4.8333, lng: -43.3500, intensity: 'medium', temperature: 58, date: '2023-08-04', municipality: 'Caxias', region: 'east', risk: 'Médio' },
+            { id: 5, lat: -5.5000, lng: -45.2500, intensity: 'low', temperature: 45, date: '2023-08-04', municipality: 'Barra do Corda', region: 'west', risk: 'Baixo' },
+            { id: 6, lat: -2.5500, lng: -44.0500, intensity: 'medium', temperature: 62, date: '2023-08-03', municipality: 'São Luís', region: 'north', risk: 'Médio' },
+            { id: 7, lat: -5.1500, lng: -46.1500, intensity: 'high', temperature: 72, date: '2023-08-03', municipality: 'Açailândia', region: 'south', risk: 'Alto' },
+            { id: 8, lat: -6.7667, lng: -43.0167, intensity: 'low', temperature: 42, date: '2023-08-02', municipality: 'Floriano', region: 'south', risk: 'Baixo' },
+            { id: 9, lat: -4.4500, lng: -43.8833, intensity: 'high', temperature: 81, date: '2023-08-02', municipality: 'Codó', region: 'east', risk: 'Alto' },
+            { id: 10, lat: -5.8833, lng: -46.6833, intensity: 'medium', temperature: 56, date: '2023-08-01', municipality: 'Grajaú', region: 'west', risk: 'Médio' },
+            { id: 11, lat: -2.9000, lng: -44.2500, intensity: 'low', temperature: 48, date: '2023-08-01', municipality: 'Raposa', region: 'north', risk: 'Baixo' },
+            { id: 12, lat: -5.3167, lng: -44.3833, intensity: 'medium', temperature: 59, date: '2023-07-31', municipality: 'Bacabal', region: 'east', risk: 'Médio' },
+            { id: 13, lat: -6.7500, lng: -44.0333, intensity: 'high', temperature: 77, date: '2023-07-31', municipality: 'Balsas', region: 'south', risk: 'Alto' },
+            { id: 14, lat: -4.1333, lng: -45.7833, intensity: 'low', temperature: 43, date: '2023-07-30', municipality: 'Santa Inês', region: 'north', risk: 'Baixo' },
+            { id: 15, lat: -3.0417, lng: -45.0000, intensity: 'medium', temperature: 61, date: '2023-07-30', municipality: 'Viana', region: 'north', risk: 'Médio' }
+        ];
+
+        // Áreas protegidas no Maranhão (simuladas)
+        const protectedAreasMA = L.polygon([
+            [[-3.0, -45.5], [-3.5, -46.0], [-3.2, -46.5], [-2.7, -46.0], [-3.0, -45.5]]
+        ], {
+            color: '#2D2D2D',
+            fillColor: '#2D2D2D',
+            fillOpacity: 0.2,
+            weight: 2
+        }).bindPopup('<strong>Reserva Biológica do Gurupi</strong><br>Área protegida - Monitoramento intensivo');
+
+        const ruralAreasMA = L.polygon([
+            [[-5.5, -46.5], [-6.0, -47.0], [-5.5, -47.5], [-5.0, -47.0], [-5.5, -46.5]]
+        ], {
+            color: '#4A4A4A',
+            fillColor: '#4A4A4A',
+            fillOpacity: 0.2,
+            weight: 2
+        }).bindPopup('<strong>Área Rural Crítica</strong><br>Alto risco de expansão de queimadas');
+
+        // Adicionar camadas ao mapa
+        protectedAreasMA.addTo(map);
+        ruralAreasMA.addTo(map);
+
+        // Adicionar focos de calor ao mapa
+        const heatSourceMarkers = L.layerGroup();
+
+        function addHeatSources(sources) {
+            heatSourceMarkers.clearLayers();
+            
+            sources.forEach(source => {
+                let markerColor;
+                if (source.intensity === 'high') markerColor = '#FF6B35';
+                else if (source.intensity === 'medium') markerColor = '#FF9E7A';
+                else markerColor = '#FFD166';
+
+                const marker = L.circleMarker([source.lat, source.lng], {
+                    radius: 10,
+                    fillColor: markerColor,
+                    color: '#121212',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+
+                marker.bindPopup(`
+                    <div style="color: #121212;">
+                        <strong style="color: #FF6B35;">Foco de Calor #${source.id}</strong><br>
+                        <strong>Intensidade:</strong> ${source.intensity === 'high' ? 'Alta' : source.intensity === 'medium' ? 'Média' : 'Baixa'}<br>
+                        <strong>Temperatura:</strong> ${source.temperature}°C<br>
+                        <strong>Data:</strong> ${source.date}<br>
+                        <strong>Município:</strong> ${source.municipality}<br>
+                        <strong>Risco:</strong> ${source.risk}
+                    </div>
+                `);
+
+                marker.on('click', function() {
+                    document.getElementById('info-id').textContent = source.id;
+                    document.getElementById('info-intensity').textContent = 
+                        source.intensity === 'high' ? 'Alta' : source.intensity === 'medium' ? 'Média' : 'Baixa';
+                    document.getElementById('info-temperature').textContent = source.temperature + '°C';
+                    document.getElementById('info-date').textContent = source.date;
+                    document.getElementById('info-municipality').textContent = source.municipality;
+                    document.getElementById('info-risk').textContent = source.risk;
+                    
+                    document.getElementById('heat-source-info').style.display = 'block';
+                });
+
+                heatSourceMarkers.addLayer(marker);
+            });
+            
+            heatSourceMarkers.addTo(map);
+        }
+
+        // Inicializar com todos os focos
+        addHeatSources(heatSourcesMA);
+
+        // Controles do mapa
+        document.getElementById('zoom-in').addEventListener('click', () => {
+            map.zoomIn();
+        });
+
+        document.getElementById('zoom-out').addEventListener('click', () => {
+            map.zoomOut();
+        });
+
+        document.getElementById('locate-btn').addEventListener('click', () => {
+            map.setView([-5.4026, -45.1166], 7);
+        });
+
+        document.getElementById('fullscreen-btn').addEventListener('click', () => {
+            const container = document.querySelector('.container');
+            if (!document.fullscreenElement) {
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        document.getElementById('close-info').addEventListener('click', () => {
+            document.getElementById('heat-source-info').style.display = 'none';
+        });
+
+        // Atualizar dados
+        document.getElementById('update-btn').addEventListener('click', () => {
+            const intensityFilter = document.getElementById('intensity-filter').value;
+            const regionFilter = document.getElementById('region-filter').value;
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            
+            // Filtrar fontes de calor
+            let filteredSources = heatSourcesMA.filter(source => {
+                if (intensityFilter !== 'all' && source.intensity !== intensityFilter) return false;
+                if (regionFilter !== 'all' && source.region !== regionFilter) return false;
+                return true;
+            });
+            
+            // Atualizar estatísticas
+            const highCount = filteredSources.filter(s => s.intensity === 'high').length;
+            const mediumCount = filteredSources.filter(s => s.intensity === 'medium').length;
+            const lowCount = filteredSources.filter(s => s.intensity === 'low').length;
+            
+            document.getElementById('active-fires').textContent = filteredSources.length;
+            document.getElementById('high-intensity').textContent = highCount;
+            document.getElementById('medium-intensity').textContent = mediumCount;
+            document.getElementById('low-intensity').textContent = lowCount;
+            document.getElementById('municipalities').textContent = 
+                new Set(filteredSources.map(s => s.municipality)).size;
+            
+            // Atualizar marcadores no mapa
+            addHeatSources(filteredSources);
+            
+            // Feedback visual
+            const btn = document.getElementById('update-btn');
+            btn.innerHTML = '<i class="fas fa-check"></i> Dados Atualizados';
+            btn.style.backgroundColor = '#4A4A4A';
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Dados';
+                btn.style.backgroundColor = '#FF6B35';
+            }, 2000);
+        });
+
+        // Controle de camadas (alterado para botões)
+        document.getElementById('region-filter').addEventListener('change', function() {
+            document.getElementById('update-btn').click();
+        });
+
+        document.getElementById('intensity-filter').addEventListener('change', function() {
+            document.getElementById('update-btn').click();
+        });
+
+        // Detectar mudança de tamanho de tela
+        window.addEventListener('resize', function() {
+            map.invalidateSize();
+        });
+
+        // Adicionar camada de calor (heatmap) para efeito visual
+        const heatMapLayer = L.layerGroup().addTo(map);
+        
+        // Adicionar pontos de calor para o heatmap
+        heatSourcesMA.forEach(source => {
+            const intensity = source.intensity === 'high' ? 0.8 : source.intensity === 'medium' ? 0.5 : 0.3;
+            L.circle([source.lat, source.lng], {
+                color: 'transparent',
+                fillColor: '#FF6B35',
+                fillOpacity: intensity * 0.3,
+                radius: source.intensity === 'high' ? 15000 : source.intensity === 'medium' ? 10000 : 5000
+            }).addTo(heatMapLayer);
+        });
+    </script>
+</body>
+</html>

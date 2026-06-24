@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="HydroDocs - Sistema de Documentos do SIMA MA: Acesso centralizado a documentos, relatórios e arquivos do sistema hidrológico.">
+    <meta name="keywords" content="documentos, relatórios, arquivos, SIMA, Maranhão, hidrologia">
+    <meta name="author" content="Sistema de Monitoramento Ambiental - SIMA/MA">
+    <title>Acervo Digital - Plataforma de Arquivos</title>
+    
+    <!-- Favicon SIMA -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo/CPDAm/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/CPDAm/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo/CPDAm/favicon-16x16.png">
+    <link rel="icon" href="assets/images/logo/CPDAm/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/images/logo/CPDAm/favicon.ico">
+
+    <!-- Para Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/logo/CPDAm/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/logo/CPDAm/android-chrome-512x512.png">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Paleta Azul padronizada (mesma do Alertas Hidrológicos) */
+            --primary-color: #0369a1;
+            --primary-dark: #0c4a6e;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --bg-color: #f0f9ff;
+            --bg-secondary: #e0f2fe;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #bae6fd;
+            --shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Cores específicas padronizadas */
+            --accent-color: #0ea5e9;
+            --unavailable-color: #95a5a6;
+            --unavailable-bg: #ecf0f194;
+            --card-gradient: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+        }
+
+        .dark-mode {
+            --primary-color: #0ea5e9;
+            --primary-dark: #0369a1;
+            --secondary-color: #94a3b8;
+            --bg-color: #0a192f;
+            --bg-secondary: #09131f;
+            --bg-card: #142d4a;
+            --text-primary: #e3f2fd;
+            --text-secondary: #b0bec5;
+            --text-muted: #607d8b;
+            --border-color: #2c4a6a;
+            --shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+            
+            /* Ajustes para dark mode */
+            --accent-color: #60a5fa;
+            --unavailable-color: #78909c;
+            --unavailable-bg: #37474f;
+            --card-gradient: linear-gradient(135deg, #142d4a 0%, #1a3658 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ========== NOTIFICAÇÕES TOAST ========== */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 350px;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border-left: 4px solid var(--primary-color);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: slideInRight 0.3s ease, fadeOut 0.3s ease 4.7s forwards;
+            transform: translateX(100%);
+            opacity: 0;
+            animation-fill-mode: forwards;
+            border: 1px solid var(--border-color);
+        }
+
+        .toast.success {
+            border-left-color: var(--success-color);
+        }
+
+        .toast.error {
+            border-left-color: var(--danger-color);
+        }
+
+        .toast.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .toast.info {
+            border-left-color: var(--info-color);
+        }
+
+        .toast-icon {
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .toast-close:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        @keyframes slideInRight {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        /* Header - Padronizado com Glass Effect */
+        .header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(186, 230, 253, 0.5);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .dark-mode .header {
+            background: rgba(20, 45, 74, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(44, 74, 106, 0.5);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        /* Menu Hamburger para Mobile */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 0.5rem;
+            min-height: 44px;
+            min-width: 44px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ========== SKELETON LOADING ========== */
+        .skeleton-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .skeleton-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, 
+                var(--bg-secondary) 25%, 
+                var(--border-color) 50%, 
+                var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        .skeleton-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .skeleton-title {
+            height: 1.5rem;
+            width: 70%;
+            margin-bottom: 0.75rem;
+        }
+
+        .skeleton-text {
+            height: 0.875rem;
+            width: 90%;
+            margin-bottom: 0.5rem;
+        }
+
+        .skeleton-text.short {
+            width: 60%;
+        }
+
+        .skeleton-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .skeleton-tag {
+            height: 1.5rem;
+            width: 4rem;
+            border-radius: 12px;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-description {
+            color: var(--text-secondary);
+            text-align: justify;
+            font-size: 1.2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .info-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .info-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .info-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Files Section - Estilo padronizado */
+        .files-section {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        .search-input:focus {
+            outline: none;
+        }
+
+        .clear-search {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            display: none;
+            min-height: 44px;
+            min-width: 44px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-search:hover {
+            color: var(--text-primary);
+        }
+
+        /* ========== PAGINAÇÃO ========== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .pagination-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 44px;
+            min-height: 44px;
+            justify-content: center;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0 1rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+            min-height: 44px;
+            min-width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter-tag:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .filter-tag.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .file-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .file-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 100%;
+            border-radius: var(--radius) 0 0 var(--radius);
+            transition: var(--transition);
+        }
+
+        .file-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .file-card:hover::before {
+            width: 12px;
+        }
+
+        .file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .file-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .file-icon.pdf {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+        }
+
+        .file-icon.doc, .file-icon.docx {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+        }
+
+        .file-icon.xls, .file-icon.xlsx, .file-icon.csv {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+        }
+
+        .file-icon.ppt, .file-icon.pptx {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+        }
+
+        .file-icon.jpg, .file-icon.jpeg, .file-icon.png, .file-icon.gif, .file-icon.img {
+            background: linear-gradient(135deg, #9f7aea, #805ad5);
+        }
+
+        .file-icon.zip, .file-icon.rar, .file-icon.gz, .file-icon.tar {
+            background: linear-gradient(135deg, #ed64a6, #d53f8c);
+        }
+
+        .file-icon.txt, .file-icon.rtf, .file-icon.md {
+            background: linear-gradient(135deg, #a0aec0, #718096);
+        }
+
+        .file-icon.geojson, .file-icon.json {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+
+        .file-icon.kml, .file-icon.kmz {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .file-icon.shp, .file-icon.dbf, .file-icon.shx, .file-icon.prj {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .file-icon.xml, .file-icon.html, .file-icon.htm {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+        }
+
+        .file-icon.odt, .file-icon.ods, .file-icon.odp {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .file-icon.exe, .file-icon.msi, .file-icon.dmg {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+        }
+
+        .file-icon.default {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .file-action {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .file-action:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .file-action.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .file-action.disabled:hover {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .file-content {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            word-break: break-word;
+        }
+
+        .file-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .file-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .file-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .file-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .file-tag {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .file-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .file-size {
+            font-size: 0.75rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .file-category {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        /* Loading State - Padronizado */
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .loading-spinner {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State - Padronizado */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+            color: var(--text-muted);
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        /* Footer - Padronizado */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: var(--transition);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-link:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-copyright {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* ========== RESPONSIVIDADE MELHORADA ========== */
+        @media (max-width: 1024px) {
+            .files-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            
+            .skeleton-container {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .menu-toggle {
+                display: flex;
+            }
+            
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--bg-card);
+                border-bottom: 1px solid var(--border-color);
+                padding: 1rem;
+                flex-direction: column;
+                box-shadow: var(--shadow);
+                z-index: 100;
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .header-content {
+                flex-wrap: nowrap;
+            }
+            
+            .logo span {
+                font-size: 1.2rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .page-title {
+                font-size: 1.8rem;
+            }
+            
+            .page-description {
+                font-size: 1rem;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            
+            .search-box {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .files-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .skeleton-container {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .file-card {
+                padding: 1.2rem;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .files-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .skeleton-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .page-description {
+                font-size: 0.9rem;
+            }
+            
+            .filter-tag {
+                font-size: 0.8rem;
+                padding: 0.5rem 1rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .file-card {
+                padding: 1rem;
+            }
+            
+            .page-title {
+                font-size: 1.3rem;
+            }
+            
+            .page-description {
+                font-size: 0.85rem;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .filters {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Container para notificações Toast -->
+        <div id="toast-container"></div>
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu de navegação">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <a href="index.html" class="logo" aria-label="HydroDocs - Página inicial">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Acervo Digital</span>
+                </a>
+                
+                <!--<nav class="nav-links" id="nav-links" aria-label="Navegação principal">
+                    <a href="#inicio" class="nav-link active" aria-current="page">Início</a>
+                    <a href="#sobre" class="nav-link">Sobre</a>
+                    <a href="#ajuda" class="nav-link">Ajuda</a>
+                    <a href="#contato" class="nav-link">Contato</a>
+                </nav>-->
+                
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="refreshFiles()" title="Atualizar lista de arquivos" aria-label="Atualizar lista de arquivos">
+                        <i class="fas fa-sync-alt"></i>
+                        Atualizar
+                    </button>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Acervo Digital - Sistema de Documentos</h1>
+                <p class="page-description">Acesso centralizado a documentos, relatórios e arquivos do Sistema de Monitoramento Ambiental do Maranhão. Encontre relatórios técnicos, dados ortorretificados, manuais e apresentações.</p>
+            </div>
+
+            <!-- Files Section -->
+            <section class="files-section" aria-labelledby="files-section-title">
+                <div class="section-header">
+                    <h2 class="section-title" id="files-section-title">
+                        <i class="fas fa-folder-open"></i>
+                        Arquivos Disponíveis (<span id="file-count">0</span> arquivos)
+                    </h2>
+                    
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="search-input" placeholder="Buscar por nome, tags ou descrição..." 
+                               id="search-input" aria-label="Buscar arquivos">
+                        <button class="clear-search" id="clear-search" aria-label="Limpar busca" title="Limpar busca">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filters">
+                    <button class="filter-tag active" data-filter="all" aria-label="Mostrar todos os arquivos" aria-pressed="true">
+                        Todos
+                    </button>
+                    <button class="filter-tag" data-filter="relatorios" aria-label="Filtrar por relatórios" aria-pressed="false">
+                        Relatórios
+                    </button>
+                    <button class="filter-tag" data-filter="dados" aria-label="Filtrar por dados" aria-pressed="false">
+                        Dados
+                    </button>
+                    <button class="filter-tag" data-filter="gis" aria-label="Filtrar por dados GIS" aria-pressed="false">
+                        GIS
+                    </button>
+                    <button class="filter-tag" data-filter="manuais" aria-label="Filtrar por manuais" aria-pressed="false">
+                        Manuais
+                    </button>
+                    <button class="filter-tag" data-filter="apresentacoes" aria-label="Filtrar por apresentações" aria-pressed="false">
+                        Apresentações
+                    </button>
+                    <button class="filter-tag" data-filter="imagens" aria-label="Filtrar por imagens" aria-pressed="false">
+                        Imagens
+                    </button>
+                    <button class="filter-tag" data-filter="arquivos" aria-label="Filtrar por arquivos compactados" aria-pressed="false">
+                        Compactados
+                    </button>
+                </div>
+                
+                <!-- Skeleton Loading -->
+                <div class="skeleton-container" id="skeleton-container">
+                    <!-- Gerado dinamicamente pelo JavaScript -->
+                </div>
+                
+                <!-- Files Grid -->
+                <div class="files-grid" id="files-grid" style="display: none;"></div>
+                
+                <!-- Paginação -->
+                <div class="pagination" id="pagination">
+                    <button class="pagination-btn" id="prev-page" disabled aria-label="Página anterior">
+                        <i class="fas fa-chevron-left"></i>
+                        Anterior
+                    </button>
+                    <span class="pagination-info" id="page-info">Página 1 de 1</span>
+                    <button class="pagination-btn" id="next-page" disabled aria-label="Próxima página">
+                        Próxima
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <!-- Loading State -->
+                <div id="loading-state" class="loading-state" style="display: none;">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                    <h3>Carregando arquivos...</h3>
+                    <p>Aguarde enquanto o sistema busca os documentos disponíveis.</p>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <div class="empty-icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h3>Nenhum arquivo encontrado</h3>
+                    <p>Não foram encontrados arquivos na pasta acervo ou houve um erro ao carregá-los.</p>
+                    <button class="btn btn-primary" onclick="refreshFiles()" style="margin-top: 1rem;">
+                        <i class="fas fa-sync-alt"></i>
+                        Tentar novamente
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-water"></i>
+                    <span>Acervo Digital</span>
+                </div>
+                
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Termos de Uso</a>
+                    <a href="#" class="footer-link">Política de Privacidade</a>
+                    <a href="#" class="footer-link">Contato</a>
+                </div>
+                
+                <div class="footer-copyright">
+                    &copy; 2026 Sistema de Monitoramento Ambiental - SEMA-Clima
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ========== CONSTANTES E CONFIGURAÇÕES ==========
+        const CONFIG = {
+            ITEMS_PER_PAGE: 12,
+            CACHE_KEY: 'hydrodocs_cache',
+            CACHE_DURATION: 5 * 60 * 1000, // 5 minutos
+            API_URL: '/api/arquivos-acervo',
+            VIEWABLE_TYPES: [
+                'pdf',
+                'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'svg', 'img',
+                'txt', 'rtf', 'md',
+                'html', 'htm', 'xml',
+                'json', 'geojson',
+                'kml', 'kmz'
+            ],
+            FILE_ICONS: {
+                'pdf': 'file-pdf',
+                'txt': 'file-alt', 'rtf': 'file-alt', 'md': 'file-alt',
+                'jpg': 'file-image', 'jpeg': 'file-image', 'png': 'file-image',
+                'gif': 'file-image', 'bmp': 'file-image', 'tiff': 'file-image',
+                'svg': 'file-image', 'img': 'file-image',
+                'doc': 'file-word', 'docx': 'file-word', 'odt': 'file-word',
+                'xls': 'file-excel', 'xlsx': 'file-excel', 'csv': 'file-csv',
+                'ods': 'file-excel',
+                'ppt': 'file-powerpoint', 'pptx': 'file-powerpoint', 'odp': 'file-powerpoint',
+                'zip': 'file-archive', 'rar': 'file-archive', '7z': 'file-archive',
+                'gz': 'file-archive', 'tar': 'file-archive',
+                'json': 'file-code', 'geojson': 'map',
+                'kml': 'map-marker', 'kmz': 'map-marker-alt',
+                'shp': 'layer-group', 'dbf': 'database', 'shx': 'layer-group', 'prj': 'globe',
+                'xml': 'code', 'html': 'code', 'htm': 'code',
+                'exe': 'cog', 'msi': 'cog', 'dmg': 'apple', 'app': 'apple'
+            }
+        };
+
+        // ========== ESTADO GLOBAL ==========
+        let state = {
+            currentFiles: [],
+            filteredFiles: [],
+            currentFilter: 'all',
+            currentSearch: '',
+            currentPage: 1,
+            totalPages: 1,
+            isLoading: false,
+            lastCacheTime: null
+        };
+
+        // ========== SISTEMA DE NOTIFICAÇÕES TOAST ==========
+        class NotificationSystem {
+            static show(message, type = 'info', duration = 5000) {
+                const container = document.getElementById('toast-container');
+                if (!container) return;
+                
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.setAttribute('role', 'alert');
+                toast.setAttribute('aria-live', 'polite');
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-circle',
+                    warning: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+                
+                const titles = {
+                    success: 'Sucesso!',
+                    error: 'Erro!',
+                    warning: 'Aviso!',
+                    info: 'Informação'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type] || 'fa-info-circle'}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${titles[type] || 'Notificação'}</div>
+                        <div class="toast-message">${this.escapeHtml(message)}</div>
+                    </div>
+                    <button class="toast-close" aria-label="Fechar notificação">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                container.appendChild(toast);
+                
+                // Animação de entrada
+                setTimeout(() => {
+                    toast.style.animation = 'slideInRight 0.3s ease forwards';
+                }, 10);
+                
+                // Fechar ao clicar no botão
+                const closeBtn = toast.querySelector('.toast-close');
+                closeBtn.addEventListener('click', () => this.close(toast));
+                
+                // Fechar automaticamente
+                if (duration > 0) {
+                    setTimeout(() => this.close(toast), duration);
+                }
+                
+                return toast;
+            }
+            
+            static close(toast) {
+                toast.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+            
+            static success(message, duration = 5000) {
+                return this.show(message, 'success', duration);
+            }
+            
+            static error(message, duration = 5000) {
+                return this.show(message, 'error', duration);
+            }
+            
+            static warning(message, duration = 5000) {
+                return this.show(message, 'warning', duration);
+            }
+            
+            static info(message, duration = 5000) {
+                return this.show(message, 'info', duration);
+            }
+            
+            static escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // ========== GERENCIAMENTO DE CACHE ==========
+        class CacheManager {
+            static get() {
+                try {
+                    const cached = localStorage.getItem(CONFIG.CACHE_KEY);
+                    if (!cached) return null;
+                    
+                    const parsed = JSON.parse(cached);
+                    state.lastCacheTime = parsed.timestamp;
+                    
+                    // Verificar se o cache expirou
+                    if (Date.now() - parsed.timestamp > CONFIG.CACHE_DURATION) {
+                        localStorage.removeItem(CONFIG.CACHE_KEY);
+                        return null;
+                    }
+                    
+                    return parsed.data;
+                } catch (error) {
+                    console.error('Erro ao ler cache:', error);
+                    return null;
+                }
+            }
+            
+            static set(data) {
+                try {
+                    const cacheData = {
+                        data: data,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem(CONFIG.CACHE_KEY, JSON.stringify(cacheData));
+                    state.lastCacheTime = cacheData.timestamp;
+                } catch (error) {
+                    console.error('Erro ao salvar cache:', error);
+                }
+            }
+            
+            static clear() {
+                localStorage.removeItem(CONFIG.CACHE_KEY);
+                state.lastCacheTime = null;
+            }
+            
+            static isCacheValid() {
+                if (!state.lastCacheTime) return false;
+                return Date.now() - state.lastCacheTime <= CONFIG.CACHE_DURATION;
+            }
+        }
+
+        // ========== UTILITÁRIOS ==========
+        class Utils {
+            static podeSerVisualizado(tipoArquivo) {
+                return CONFIG.VIEWABLE_TYPES.includes(tipoArquivo.toLowerCase());
+            }
+            
+            static obterIconeTipo(tipo) {
+                return CONFIG.FILE_ICONS[tipo.toLowerCase()] || 'file';
+            }
+            
+            static formatarData(dataString) {
+                try {
+                    const data = new Date(dataString);
+                    return data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR').substring(0, 5);
+                } catch {
+                    return 'Data inválida';
+                }
+            }
+            
+            static formatarTamanho(bytes) {
+                if (typeof bytes !== 'number' || isNaN(bytes)) return 'N/A';
+                if (bytes === 0) return '0 Bytes';
+                
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            static escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            static debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+        }
+
+        // ========== MANIPULAÇÃO DE ARQUIVOS ==========
+        class FileManager {
+            static filtrarPorCategoria(arquivos, categoria) {
+                if (categoria === 'all') return arquivos;
+                
+                return arquivos.filter(arquivo => {
+                    const categoriaArquivo = arquivo.categoria ? arquivo.categoria.toLowerCase() : '';
+                    const nome = arquivo.nome.toLowerCase();
+                    const descricao = arquivo.descricao ? arquivo.descricao.toLowerCase() : '';
+                    const tipo = arquivo.tipo ? arquivo.tipo.toLowerCase() : '';
+                    
+                    switch(categoria) {
+                        case 'relatorios':
+                            return nome.includes('relatório') || nome.includes('relatorio') || 
+                                nome.includes('report') || categoriaArquivo.includes('relatorio') ||
+                                descricao.includes('relatório');
+                        case 'dados':
+                            return tipo === 'csv' || tipo === 'xls' || tipo === 'xlsx' || tipo === 'json' ||
+                                nome.includes('dados') || nome.includes('data') || categoriaArquivo.includes('dados');
+                        case 'gis':
+                            return tipo === 'geojson' || tipo === 'kml' || tipo === 'kmz' || tipo === 'shp' ||
+                                nome.includes('gis') || nome.includes('geojson') || nome.includes('shapefile') ||
+                                categoriaArquivo.includes('gis');
+                        case 'manuais':
+                            return nome.includes('manual') || nome.includes('guia') || 
+                                categoriaArquivo.includes('manual') || descricao.includes('manual');
+                        case 'apresentacoes':
+                            return tipo === 'ppt' || tipo === 'pptx' ||
+                                nome.includes('apresentação') || nome.includes('apresentacao') ||
+                                categoriaArquivo.includes('apresentacao');
+                        case 'imagens':
+                            return tipo === 'jpg' || tipo === 'jpeg' || 
+                                tipo === 'png' || tipo === 'gif' || tipo === 'svg' ||
+                                categoriaArquivo.includes('imagem');
+                        case 'arquivos':
+                            return tipo === 'zip' || tipo === 'rar' || tipo === 'gz' || tipo === '7z' || tipo === 'tar';
+                        default:
+                            return false;
+                    }
+                });
+            }
+            
+            static buscarArquivos(arquivos, termo) {
+                if (!termo.trim()) return arquivos;
+                
+                const term = termo.toLowerCase();
+                return arquivos.filter(arquivo => 
+                    arquivo.nome.toLowerCase().includes(term) ||
+                    (arquivo.descricao && arquivo.descricao.toLowerCase().includes(term)) ||
+                    (arquivo.tags && arquivo.tags.some(tag => tag.toLowerCase().includes(term))) ||
+                    (arquivo.pasta && arquivo.pasta.toLowerCase().includes(term))
+                );
+            }
+        }
+
+        // ========== INTERFACE DO USUÁRIO ==========
+        class UI {
+            static mostrarLoading(mostrar) {
+                const loadingState = document.getElementById('loading-state');
+                const skeletonContainer = document.getElementById('skeleton-container');
+                
+                if (mostrar) {
+                    loadingState.style.display = 'block';
+                    skeletonContainer.style.display = 'grid';
+                    this.mostrarSkeleton();
+                    document.getElementById('files-grid').style.display = 'none';
+                    document.getElementById('pagination').style.display = 'none';
+                } else {
+                    loadingState.style.display = 'none';
+                    skeletonContainer.style.display = 'none';
+                }
+            }
+            
+            static mostrarSkeleton() {
+                const container = document.getElementById('skeleton-container');
+                container.innerHTML = '';
+                
+                for (let i = 0; i < CONFIG.ITEMS_PER_PAGE; i++) {
+                    const skeleton = document.createElement('div');
+                    skeleton.className = 'skeleton-card';
+                    skeleton.innerHTML = `
+                        <div class="skeleton skeleton-icon"></div>
+                        <div class="skeleton skeleton-title"></div>
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text short"></div>
+                        <div class="skeleton-tags">
+                            <div class="skeleton skeleton-tag"></div>
+                            <div class="skeleton skeleton-tag"></div>
+                        </div>
+                    `;
+                    container.appendChild(skeleton);
+                }
+            }
+            
+            static mostrarArquivos(arquivos) {
+                const container = document.getElementById('files-grid');
+                const emptyState = document.getElementById('empty-state');
+                const pagination = document.getElementById('pagination');
+                
+                if (arquivos.length === 0) {
+                    container.innerHTML = '';
+                    container.style.display = 'none';
+                    pagination.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+                
+                emptyState.style.display = 'none';
+                container.innerHTML = '';
+                
+                // Calcular paginação
+                const startIndex = (state.currentPage - 1) * CONFIG.ITEMS_PER_PAGE;
+                const endIndex = startIndex + CONFIG.ITEMS_PER_PAGE;
+                const paginatedFiles = arquivos.slice(startIndex, endIndex);
+                
+                paginatedFiles.forEach(arquivo => {
+                    const podeVisualizar = Utils.podeSerVisualizado(arquivo.tipo);
+                    const card = document.createElement('div');
+                    card.className = 'file-card';
+                    card.setAttribute('role', 'article');
+                    card.setAttribute('aria-label', `Arquivo: ${Utils.escapeHtml(arquivo.nome)}`);
+                    
+                    const visualizarBtnHTML = podeVisualizar 
+                        ? `<button class="file-action" onclick="visualizarArquivo('${Utils.escapeHtml(arquivo.caminho)}', '${Utils.escapeHtml(arquivo.nome)}')" 
+                                  title="Visualizar" aria-label="Visualizar arquivo ${Utils.escapeHtml(arquivo.nome)}">
+                               <i class="fas fa-eye"></i>
+                           </button>`
+                        : `<button class="file-action disabled" 
+                                  title="Visualização não disponível para este tipo de arquivo" 
+                                  aria-label="Visualização não disponível" disabled>
+                               <i class="fas fa-eye-slash"></i>
+                           </button>`;
+                    
+                    card.innerHTML = `
+                        <div class="file-header">
+                            <div class="file-icon ${arquivo.tipo}" aria-hidden="true">
+                                <i class="fas fa-${Utils.obterIconeTipo(arquivo.tipo)}"></i>
+                            </div>
+                            <div class="file-actions">
+                                ${visualizarBtnHTML}
+                                <button class="file-action" 
+                                        onclick="downloadArquivo('${Utils.escapeHtml(arquivo.caminho)}', '${Utils.escapeHtml(arquivo.nome)}')" 
+                                        title="Download" 
+                                        aria-label="Baixar arquivo ${Utils.escapeHtml(arquivo.nome)}">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="file-content">
+                            <h3 class="file-name">${Utils.escapeHtml(arquivo.nome)}</h3>
+                            
+                            <div class="file-meta">
+                                <div class="file-meta-item">    
+                                    <i class="fas fa-folder" aria-hidden="true"></i>
+                                    <span>Pasta: ${Utils.escapeHtml(arquivo.pasta)}</span>
+                                </div>
+                                <div class="file-meta-item">
+                                    <i class="fas fa-calendar" aria-hidden="true"></i>
+                                    <span>Modificado: ${Utils.formatarData(arquivo.data_modificacao)}</span>
+                                </div>
+                                ${arquivo.categoria ? `
+                                <div class="file-meta-item">
+                                    <i class="fas fa-tag" aria-hidden="true"></i>
+                                    <span>Categoria: ${Utils.escapeHtml(arquivo.categoria)}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                            
+                            ${arquivo.tags && arquivo.tags.length > 0 ? `
+                            <div class="file-tags" aria-label="Tags do arquivo">
+                                ${arquivo.tags.map(tag => `<span class="file-tag">${Utils.escapeHtml(tag)}</span>`).join('')}
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="file-footer">
+                            <span class="file-size">${Utils.formatarTamanho(arquivo.tamanho_bytes || 0)}</span>
+                            <span class="file-category" aria-label="Tipo do arquivo: ${arquivo.tipo.toUpperCase()}">
+                                ${arquivo.tipo.toUpperCase()}
+                            </span>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+                
+                container.style.display = 'grid';
+                this.atualizarPaginacao(arquivos.length);
+            }
+            
+            static atualizarPaginacao(totalItems) {
+                const pagination = document.getElementById('pagination');
+                const prevBtn = document.getElementById('prev-page');
+                const nextBtn = document.getElementById('next-page');
+                const pageInfo = document.getElementById('page-info');
+                
+                state.totalPages = Math.ceil(totalItems / CONFIG.ITEMS_PER_PAGE);
+                
+                if (state.totalPages > 1) {
+                    pagination.style.display = 'flex';
+                    prevBtn.disabled = state.currentPage === 1;
+                    nextBtn.disabled = state.currentPage === state.totalPages;
+                    pageInfo.textContent = `Página ${state.currentPage} de ${state.totalPages}`;
+                } else {
+                    pagination.style.display = 'none';
+                }
+            }
+            
+            static atualizarContador(total, filtrados) {
+                const countElement = document.getElementById('file-count');
+                if (countElement) {
+                    countElement.textContent = filtrados;
+                }
+            }
+            
+            static atualizarEstadoBusca(termo) {
+                const clearBtn = document.getElementById('clear-search');
+                clearBtn.style.display = termo ? 'flex' : 'none';
+            }
+        }
+
+        // ========== FUNÇÕES PRINCIPAIS ==========
+        async function carregarArquivos() {
+            if (state.isLoading) return;
+            
+            state.isLoading = true;
+            UI.mostrarLoading(true);
+            
+            try {
+                // Tentar carregar do cache primeiro
+                const cachedData = CacheManager.get();
+                if (cachedData) {
+                    state.currentFiles = cachedData;
+                    NotificationSystem.info('Dados carregados do cache');
+                    processarArquivos();
+                    
+                    // Carregar dados atualizados em segundo plano
+                    buscarDadosAtualizados();
+                } else {
+                    // Buscar dados da API
+                    await buscarDadosAtualizados();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar arquivos:', error);
+                NotificationSystem.error('Erro ao carregar arquivos. Verifique sua conexão.');
+                UI.mostrarLoading(false);
+                document.getElementById('empty-state').style.display = 'block';
+            } finally {
+                state.isLoading = false;
+            }
+        }
+        
+        async function buscarDadosAtualizados() {
+            try {
+                const response = await fetch(CONFIG.API_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro na requisição: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.message === "success") {
+                    state.currentFiles = result.data.map((file, index) => ({
+                        ...file,
+                        id: file.id || `file-${index}-${Date.now()}`,
+                        tamanho_bytes: file.tamanho_bytes || 0
+                    }));
+                    
+                    // Salvar no cache
+                    CacheManager.set(state.currentFiles);
+                    
+                    if (!CacheManager.isCacheValid()) {
+                        NotificationSystem.success('Arquivos carregados com sucesso');
+                    }
+                    
+                    processarArquivos();
+                } else {
+                    throw new Error(result.error || 'Erro desconhecido ao carregar arquivos');
+                }
+            } catch (error) {
+                console.error('Erro na API:', error);
+                
+                // Se não há cache, mostrar erro
+                if (!CacheManager.get()) {
+                    throw error;
+                } else {
+                    NotificationSystem.warning('Usando dados em cache (pode estar desatualizado)');
+                }
+            }
+        }
+        
+        function processarArquivos() {
+            // Aplicar filtros
+            let arquivosFiltrados = FileManager.filtrarPorCategoria(state.currentFiles, state.currentFilter);
+            arquivosFiltrados = FileManager.buscarArquivos(arquivosFiltrados, state.currentSearch);
+            
+            state.filteredFiles = arquivosFiltrados;
+            
+            // Atualizar UI
+            UI.atualizarContador(state.currentFiles.length, arquivosFiltrados.length);
+            UI.mostrarArquivos(arquivosFiltrados);
+            UI.mostrarLoading(false);
+        }
+        
+        function filtrarArquivos() {
+            state.currentPage = 1;
+            processarArquivos();
+        }
+        
+        function buscarArquivos(termo) {
+            state.currentSearch = termo;
+            state.currentPage = 1;
+            UI.atualizarEstadoBusca(termo);
+            filtrarArquivos();
+        }
+        
+        function mudarPagina(direcao) {
+            const novaPagina = state.currentPage + direcao;
+            if (novaPagina < 1 || novaPagina > state.totalPages) return;
+            
+            state.currentPage = novaPagina;
+            
+            // Atualizar apenas a paginação
+            UI.atualizarPaginacao(state.filteredFiles.length);
+            UI.mostrarArquivos(state.filteredFiles);
+            
+            // Scroll suave para o topo da seção
+            document.querySelector('.files-section').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+        
+        function visualizarArquivo(caminho, nome) {
+            const extensao = caminho.split('.').pop().toLowerCase();
+            
+            if (!Utils.podeSerVisualizado(extensao)) {
+                NotificationSystem.warning('Visualização não disponível para este tipo de arquivo. Use o download.');
+                return;
+            }
+            
+            // Abrir em nova aba para visualização
+            window.open(caminho, '_blank');
+            NotificationSystem.info(`Abrindo "${nome}" para visualização`);
+        }
+        
+        function downloadArquivo(caminho, nome) {
+            try {
+                const link = document.createElement('a');
+                link.href = caminho;
+                link.download = nome;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                NotificationSystem.success(`Download de "${nome}" iniciado`);
+            } catch (error) {
+                console.error('Erro ao iniciar download:', error);
+                NotificationSystem.error('Erro ao iniciar download. Tente novamente.');
+            }
+        }
+        
+        function refreshFiles() {
+            // Limpar cache e recarregar
+            CacheManager.clear();
+            carregarArquivos();
+            NotificationSystem.info('Atualizando lista de arquivos...');
+        }
+
+        // ========== TEMA ESCURO ==========
+        function carregarPreferenciasTema() {
+            const temaSalvo = localStorage.getItem('temaEscuro');
+            if (temaSalvo === 'true') {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+                document.querySelector('.theme-toggle').setAttribute('aria-label', 'Alternar para tema claro');
+            } else {
+                document.querySelector('.theme-toggle').setAttribute('aria-label', 'Alternar para tema escuro');
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const botaoTema = document.querySelector('.theme-toggle');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                botaoTema.innerHTML = '<i class="fas fa-sun"></i>';
+                botaoTema.setAttribute('aria-label', 'Alternar para tema claro');
+                localStorage.setItem('temaEscuro', 'true');
+            } else {
+                botaoTema.innerHTML = '<i class="fas fa-moon"></i>';
+                botaoTema.setAttribute('aria-label', 'Alternar para tema escuro');
+                localStorage.setItem('temaEscuro', 'false');
+            }
+        }
+
+        // ========== INICIALIZAÇÃO ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar tema
+            carregarPreferenciasTema();
+            
+            // Configurar menu mobile
+            const menuToggle = document.getElementById('menu-toggle');
+            const navLinks = document.getElementById('nav-links');
+            
+            if (menuToggle && navLinks) {
+                menuToggle.addEventListener('click', () => {
+                    navLinks.classList.toggle('active');
+                    menuToggle.setAttribute('aria-expanded', navLinks.classList.contains('active'));
+                });
+                
+                // Fechar menu ao clicar fora
+                document.addEventListener('click', (event) => {
+                    if (!menuToggle.contains(event.target) && !navLinks.contains(event.target)) {
+                        navLinks.classList.remove('active');
+                        menuToggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+            
+            // Configurar filtros
+            document.querySelectorAll('.filter-tag').forEach(tag => {
+                tag.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // Atualizar estado dos botões
+                    document.querySelectorAll('.filter-tag').forEach(t => {
+                        t.classList.remove('active');
+                        t.setAttribute('aria-pressed', 'false');
+                    });
+                    
+                    tag.classList.add('active');
+                    tag.setAttribute('aria-pressed', 'true');
+                    
+                    // Atualizar filtro
+                    state.currentFilter = tag.dataset.filter;
+                    filtrarArquivos();
+                });
+            });
+            
+            // Configurar busca com debounce
+            const searchInput = document.getElementById('search-input');
+            const clearSearchBtn = document.getElementById('clear-search');
+            
+            const debouncedSearch = Utils.debounce(() => {
+                buscarArquivos(searchInput.value);
+            }, 300);
+            
+            searchInput.addEventListener('input', debouncedSearch);
+            
+            // Permitir busca com Enter
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    buscarArquivos(searchInput.value);
+                }
+            });
+            
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                buscarArquivos('');
+                searchInput.focus();
+            });
+            
+            // Configurar paginação
+            document.getElementById('prev-page').addEventListener('click', () => {
+                mudarPagina(-1);
+            });
+            
+            document.getElementById('next-page').addEventListener('click', () => {
+                mudarPagina(1);
+            });
+            
+            // Fechar notificações com ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const toasts = document.querySelectorAll('.toast');
+                    toasts.forEach(toast => {
+                        const closeBtn = toast.querySelector('.toast-close');
+                        if (closeBtn) closeBtn.click();
+                    });
+                }
+            });
+            
+            // Carregar arquivos
+            carregarArquivos();
+            
+            // Expor funções globais
+            window.refreshFiles = refreshFiles;
+            window.visualizarArquivo = visualizarArquivo;
+            window.downloadArquivo = downloadArquivo;
+            window.toggleTheme = toggleTheme;
+        });
+    </script>
+</body>
+</html>

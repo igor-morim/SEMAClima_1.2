@@ -1,0 +1,16 @@
+{
+    "usuarios": [
+        {
+            "id": 1,
+            "nome": "Igor Morim",
+            "email": "igor.morim@sema.ma.gov.br",
+            "senha": "dhv8mrOoQXuUD79WmNsvRk:APA91bH3jbfTkYb9PZqdMnGqWVKrVhD9WR_fDh-avDXhEuVLGKDstHimJM7HELrrUVUDb8cfk5vqtvWaPbxCTz8B1vO8euhANUg6_eXmZGFwglTB2cU2duU"
+        },
+        {
+            "id": 2,
+            "nome": "Italo",
+            "email": "italo.barros@sema.ma.gov.br",
+            "senha": "dZ4D9WZtQtaNbY7GGIXdzR:APA91bEzMI2a10sxD3IqJagTmxok4GElk9dB-87ebwvvn0mzxIRkkgtJgkt7lIDlWUtGhubaLUFzK-86irutCgy7R-Kr-vEDLj3Z3ubJmqwshu711JLo3cA"
+        }
+    ]
+}

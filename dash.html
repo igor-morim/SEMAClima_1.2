@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMA MA - Dashboard Climatológico</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background: #f8f9fa; }
+        .dashboard-card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .dashboard-card:hover { transform: translateY(-5px); }
+        .map-container {
+            height: 400px;
+            background: #e9ecef;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-speedometer2"></i> Dashboard Climatológico
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card dashboard-card bg-primary text-white">
+                    <div class="card-body">
+                        <h6><i class="bi bi-thermometer-half"></i> Temperatura Média</h6>
+                        <h2 id="tempMediaDash">27.5°C</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card dashboard-card bg-success text-white">
+                    <div class="card-body">
+                        <h6><i class="bi bi-droplet"></i> Chuva Total</h6>
+                        <h2 id="chuvaTotalDash">145.2 mm</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card dashboard-card bg-info text-white">
+                    <div class="card-body">
+                        <h6><i class="bi bi-moisture"></i> Umidade Média</h6>
+                        <h2 id="umidadeMediaDash">78%</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card dashboard-card bg-warning text-white">
+                    <div class="card-body">
+                        <h6><i class="bi bi-wind"></i> Vento Médio</h6>
+                        <h2 id="ventoMedioDash">12.3 km/h</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-8">
+                <div class="card dashboard-card">
+                    <div class="card-header bg-white">
+                        <h5><i class="bi bi-graph-up"></i> Evolução Temporal</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="graficoEvolucao"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card dashboard-card">
+                    <div class="card-header bg-white">
+                        <h5><i class="bi bi-pie-chart"></i> Distribuição</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="graficoDistribuicao"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card dashboard-card">
+                    <div class="card-header bg-white">
+                        <h5><i class="bi bi-map"></i> Mapa de Estações</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="map-container">
+                            <i class="bi bi-pin-map-fill fs-1"></i>
+                            <p class="mt-2">Mapa será integrado com Leaflet/Google Maps</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript para o dashboard
+        async function carregarDashboard() {
+            try {
+                const response = await fetch('/api/estatisticas-climatologicas');
+                const data = await response.json();
+                
+                if (data.message === 'success') {
+                    const stats = data.estatisticas;
+                    
+                    document.getElementById('tempMediaDash').textContent = 
+                        stats.temperatura?.media?.toFixed(1) + '°C' || 'N/A';
+                    document.getElementById('chuvaTotalDash').textContent = 
+                        stats.chuva?.acumulada_total?.toFixed(1) + ' mm' || 'N/A';
+                    document.getElementById('umidadeMediaDash').textContent = 
+                        stats.umidade?.media?.toFixed(0) + '%' || 'N/A';
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+        
+        carregarDashboard();
+    </script>
+</body>
+</html>

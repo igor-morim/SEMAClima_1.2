@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão: Sobre o Monitor de Secas">
+    <meta name="keywords" content="sobre monitor secas, informações, equipe, metodologia, Maranhão">
+    <meta name="author" content="Igor Carlos Cunha Morim">
+    <title>Sobre - Monitor de Secas</title>
+
+    <link rel="icon" href="../assets/images/logo/Monitor_Secas/favicon/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="../assets/images/logo/Monitor_Secas/manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/logo/Monitor_Secas/logo_monitor_16.png"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/logo/Monitor_Secas/logo_monitor_32.png"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/logo/Monitor_Secas/logo_monitor_180.png"/>
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/logo/Monitor_Secas/logo_monitor_192.png"/>
+    <link rel="icon" type="image/png" sizes="512x512" href="../assets/images/logo/Monitor_Secas/logo_monitor_512.png"/>
+    
+    <meta name="msapplication-TileColor" content="#ffc107">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #D2691E;
+            --secondary: #8B4513;
+            --accent: #CD853F;
+            --success: #556B2F;
+            --warning: #B8860B;
+            --danger: #8B0000;
+            --dark: #2F1B0A;
+            --light: #F5F5DC;
+            --gray: #A9A9A9;
+            --card-bg: rgba(139, 69, 19, 0.15);
+            --glass-bg: rgba(160, 82, 45, 0.2);
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            
+            --seca-fraca: #FFFF00;
+            --seca-moderada: #FFAA00;
+            --seca-grave: #FF5500;
+            --seca-extrema: #CC0000;
+            --seca-excepcional: #800000;
+            --sem-seca: transparent;
+        }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #2F1B0A 0%, #5D4037 100%);
+            min-height: 100vh;
+            color: var(--light);
+            overflow-x: hidden;
+            font-size: 17px;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar responsiva - AGORA FIXA */
+        .sidebar {
+            width: 70px;
+            background: rgba(47, 27, 10, 0.95);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: fixed; /* Torna a sidebar fixa */
+            height: 100vh; /* Ocupa toda a altura da viewport */
+            top: 0; /* Fixa no topo */
+            left: 0; /* Fixa na esquerda */
+        }
+        
+        .sidebar:hover {
+            width: 280px;
+        }
+        
+        .logo {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .logo-icon {
+            font-size: 2.2em;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        
+        .logo-text {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar:hover .logo-text {
+            opacity: 1;
+        }
+        
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 5px;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            color: var(--gray);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(160, 82, 45, 0.3);
+            color: var(--accent);
+            border-right: 3px solid var(--accent);
+        }
+        
+        .nav-item i {
+            font-size: 1.4em;
+            margin-right: 20px;
+            min-width: 24px;
+        }
+        
+        .nav-text {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .sidebar:hover .nav-text {
+            opacity: 1;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding: 20px;
+            overflow-y: auto;
+            overflow: hidden;
+            margin-left: 70px; /* Adiciona margem para compensar a sidebar fixa */
+            width: calc(100% - 70px); /* Ajusta a largura considerando a sidebar */
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            margin-right: 55px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .page-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            background: white;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #D2691E, #CD853F, transparent);
+            border-radius: 3px;
+        }
+        
+        .page-description {
+            color: var(--gray);
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 1.1em;
+            padding: 15px 20px;
+            background: rgba(47, 27, 10, 0.5);
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .content-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .section {
+            background: rgba(47, 27, 10, 0.7);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent), var(--primary));
+            border-radius: 5px 0 0 5px;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.4);
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        .section-title i {
+            font-size: 1.2em;
+            color: var(--primary);
+        }
+        
+        .section-content {
+            line-height: 1.7;
+            text-align: justify;
+            text-justify: inter-word;
+        }
+        
+        .section-content p {
+            margin-bottom: 15px;
+        }
+        
+        .section-content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .section-content li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 10px;
+        }
+        
+        .section-content li::before {
+            content: '•';
+            color: var(--accent);
+            font-weight: bold;
+            position: absolute;
+            left: -15px;
+        }
+        
+        /* Estilos para o organograma */
+        .organograma {
+            margin-top: 25px;
+        }
+        
+        .coordenacao-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .rede-observadores {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .rede-observadores::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--primary), transparent);
+        }
+        
+        .rede-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 15px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .observadores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .institution-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            border-left: 3px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .institution-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 30px 30px 0;
+            border-color: transparent rgba(160, 82, 45, 0.2) transparent transparent;
+        }
+        
+        .institution-card.coordenacao {
+            border-left: 4px solid var(--accent);
+            background: rgba(160, 82, 45, 0.1);
+        }
+        
+        .institution-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .institution-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+        
+        .institution-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: contain;
+            background: white;
+            padding: 5px;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+        
+        .institution-card:hover .institution-logo {
+            transform: scale(1.1);
+        }
+        
+        .institution-info {
+            flex: 1;
+        }
+        
+        .institution-name {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        
+        .institution-role {
+            color: var(--accent);
+            font-size: 0.85em;
+            font-weight: 500;
+            padding: 3px 8px;
+            background: rgba(205, 133, 63, 0.2);
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .institution-description {
+            font-size: 0.9em;
+            color: var(--light);
+            line-height: 1.5;
+        }
+        
+        .process-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .process-step {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .process-step:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+        }
+        
+        .step-number {
+            background: var(--accent);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+            font-size: 0.9em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        
+        .legend-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .legend-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .legend-label {
+            font-weight: 500;
+            color: var(--light);
+            font-size: 0.9em;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 25px;
+            background: rgba(160, 82, 45, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .back-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .back-button:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-button:hover::before {
+            left: 100%;
+        }
+        
+        /* Estilos para as equipes */
+        .equipes-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .equipe-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 3px solid var(--accent);
+            transition: all 0.3s ease;
+        }
+        
+        .equipe-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .equipe-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .membro-lista {
+            list-style-type: none;
+            margin-left: 0;
+        }
+        
+        .membro-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .membro-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            padding-left: 10px;
+            border-radius: 5px;
+        }
+        
+        .membro-item:last-child {
+            border-bottom: none;
+        }
+        
+        .membro-nome {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 3px;
+            font-size: 0.95em;
+        }
+        
+        .membro-formacao {
+            font-size: 0.85em;
+            color: var(--gray);
+        }
+        
+        /* Parceiros section */
+        .parceiros-section {
+            margin-top: 30px;
+        }
+        
+        .parceiros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .parceiro-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .parceiro-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--primary), transparent);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .parceiro-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .parceiro-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .parceiro-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin: 0 auto 10px;
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .parceiro-card:hover .parceiro-logo {
+            transform: scale(1.1);
+        }
+        
+        .parceiro-nome {
+            font-weight: 600;
+            color: white;
+            font-size: 0.9em;
+        }
+        
+        /* Estilos para o formulário de participação */
+        .participacao-section {
+            background: rgba(47, 27, 10, 0.7);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            border-left: 5px solid var(--success);
+        }
+        
+        .participacao-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(85, 107, 47, 0.1) 0%, transparent 100%);
+            z-index: -1;
+        }
+        
+        .participacao-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .participacao-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--success);
+            border-radius: 2px;
+        }
+        
+        .participacao-description {
+            margin-bottom: 25px;
+            line-height: 1.6;
+            text-align: justify;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-label i {
+            color: var(--accent);
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--light);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+
+        /* Estilo específico para o select da Área de Atuação */
+        #area-atuacao {
+            color: #F5F5DC !important;
+            border: 2px solid rgba(205, 133, 63, 0.3) !important;
+            border-radius: 8px !important;
+            padding: 12px 15px !important;
+            font-size: 0.95em !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+        }
+
+        /* Hover effect */
+        #area-atuacao:hover {
+            border-color: var(--accent) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        /* Focus effect */
+        #area-atuacao:focus {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px rgba(205, 133, 63, 0.2) !important;
+            outline: none !important;
+        }
+
+        /* Estilo para as opções do dropdown */
+        #area-atuacao option {
+            background: rgba(47, 27, 10, 0.98) !important;
+            color: #F5F5DC !important;
+            padding: 12px 15px !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            font-size: 0.95em !important;
+        }
+
+        /* Estilo para opção selecionada */
+        #area-atuacao option:checked {
+            background: rgba(205, 133, 63, 0.3) !important;
+            color: #424242 !important;
+        }
+
+        /* Estilo para opção em hover (funciona em alguns navegadores) */
+        #area-atuacao option:hover {
+            background: rgba(205, 133, 63, 0.2) !important;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 2px rgba(205, 133, 63, 0.2);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .submit-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 30px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .submit-button:hover:not(:disabled) {
+            background: #658036;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(85, 107, 47, 0.3);
+        }
+        
+        .submit-button:active {
+            transform: translateY(0);
+        }
+        
+        .submit-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            margin-top: 3px;
+            accent-color: var(--success);
+        }
+        
+        .checkbox-label {
+            font-size: 0.9em;
+            color: var(--light);
+            line-height: 1.4;
+        }
+        
+        .checkbox-label a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        .checkbox-label a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Mensagens de status do formulário */
+        .form-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .form-message.success {
+            background: rgba(85, 107, 47, 0.3);
+            border: 1px solid var(--success);
+            color: var(--light);
+            display: block;
+        }
+        
+        .form-message.error {
+            background: rgba(139, 0, 0, 0.3);
+            border: 1px solid var(--danger);
+            color: var(--light);
+            display: block;
+        }
+        
+        .form-message.loading {
+            background: rgba(184, 134, 11, 0.3);
+            border: 1px solid var(--warning);
+            color: var(--light);
+            display: block;
+        }
+        
+        /* Mobile menu toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1100;
+            background: rgba(47, 27, 10, 0.9);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            width: 50px;
+            height: 50px;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-toggle:hover {
+            background: rgba(160, 82, 45, 0.7);
+            transform: scale(1.05);
+        }
+        
+        /* Responsividade */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 60px;
+            }
+            
+            .sidebar:hover {
+                width: 250px;
+            }
+            
+            .main-content {
+                padding: 15px;
+                margin-left: 60px; /* Ajusta a margem para a largura menor da sidebar */
+                width: calc(100% - 60px);
+            }
+            
+            .coordenacao-container, .equipes-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .parceiros-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                width: 280px;
+                height: 100%;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.mobile-open {
+                left: 0;
+            }
+            
+            .sidebar:hover {
+                width: 280px;
+            }
+            
+            .nav-text {
+                opacity: 1;
+            }
+            
+            .mobile-menu-toggle {
+                display: flex;
+            }
+            
+            .main-content {
+                padding: 10px;
+                margin-left: 0; /* Remove a margem quando a sidebar está oculta */
+                width: 100%;
+            }
+            
+            .page-title {
+                font-size: 1.8em;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .observadores-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .process-step {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .step-number {
+                align-self: flex-start;
+            }
+            
+            .institution-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .parceiros-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .page-title {
+                font-size: 1.5em;
+            }
+            
+            .page-description {
+                font-size: 0.9em;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+            
+            .section-title {
+                font-size: 1.2em;
+            }
+            
+            .parceiros-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .participacao-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Menu mobile toggle -->
+        <div class="mobile-menu-toggle" id="mobileMenuToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        
+        <div class="sidebar" id="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="logo-text">Sobre o Sistema</div>
+            </div>
+            
+            <div class="nav-items">
+                <a href="../Monitor_Seca.html" class="nav-item">
+                    <i class="fas fa-map"></i>
+                    <span class="nav-text">Mapa Interativo</span>
+                </a>
+                <a href="analises.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="nav-text">Análises</span>
+                </a>
+                <a href="observadores.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span class="nav-text">Rede de Observadores</span>
+                </a>
+                <a href="sobre.html" class="nav-item active">
+                    <i class="fas fa-info-circle"></i>
+                    <span class="nav-text">Sobre</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Sobre o Monitor de Secas</h1>
+            </div>
+            
+            <p class="page-description">
+                Conheça mais sobre o programa de acompanhamento contínuo da situação da seca no Brasil 
+                e sua implementação no estado do Maranhão.
+            </p>
+            
+            <div class="content-container">
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-sun"></i>
+                        O que é o Monitor de Secas
+                    </h2>
+                    <div class="section-content">
+                        <p>O Monitor de Secas é um programa de acompanhamento contínuo e sistemático da situação da seca no Brasil, coordenado pela Agência Nacional de Águas e Saneamento Básico (ANA), com apoio técnico da Fundação Cearense de Meteorologia e Recursos Hídricos (FUNCEME).</p>
+                        <p>Mensalmente, é elaborado o Mapa do Monitor de Secas, que mostra a evolução e a intensidade do fenômeno em todo o território nacional. O mapa apresenta as áreas afetadas e o grau de severidade da seca, classificado em cinco níveis: fraca, moderada, grave, extrema e excepcional.</p>
+                        <p>Linhas em negrito delimitam as tipologias de seca — curto prazo, longo prazo e curto & longo prazo — conforme os indicadores utilizados em diferentes escalas temporais, que variam de 1 a 24 meses.</p>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-map-marker-alt"></i>
+                        O Monitor de Secas no Maranhão
+                    </h2>
+                    <div class="section-content">
+                        <p>No Maranhão, a validação do Monitor é conduzida pela Secretaria de Estado do Meio Ambiente e Recursos Naturais (SEMA), por meio do Centro de Previsão de Desastres Ambientais do Maranhão (CPDAm), e pela Universidade Estadual do Maranhão (UEMA), através do Núcleo Geoambiental (NuGeo).</p>
+                        <p>Essas instituições atuam como validadores oficiais, garantindo maior precisão ao mapa mensal. Além delas, outras entidades participam como observadoras, enviando informações locais sobre as condições de seca, como a AGERP, o SENAR, o Corpo de Bombeiros Militar do Maranhão (CBMMA) e as Defesas Civis Estadual e Municipais.</p>
+                        
+                        <div class="organograma">
+                            <!-- Coordenação - lado a lado -->
+                            <div class="coordenacao-container">
+                                <div class="institution-card coordenacao">
+                                    <div class="institution-header">
+                                        <img src="../assets/images/logo/CPDAm/android-chrome-512x512.png" alt="SEMA/CPDAm" class="institution-logo" style="width: 70px; height: 70px;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iOCIgZmlsbD0iI0QyNjkxRSIvPgo8dGV4dCB4PSIyNSIgeT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlNFTUE8L3RleHQ+Cjwvc3ZnPgo='">
+                                        <div class="institution-info">
+                                            <div class="institution-name">SEMA/CPDAm</div>
+                                            <div class="institution-role">Validador Estadual</div>
+                                        </div>
+                                    </div>
+                                    <div class="institution-description">Secretaria de Estado do Meio Ambiente e Recursos Naturais / Centro de Previsão de Desastres Ambientais do Maranhão</div>
+                                </div>
+                                
+                                <div class="institution-card coordenacao">
+                                    <div class="institution-header">
+                                        <img src="../assets/images/logo/NUGEO.png" alt="UEMA/NuGeo" class="institution-logo" style="width: 70px; height: 70px;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iOCIgZmlsbD0iIzJGMThCMCIvPgo8dGV4dCB4PSIyNSIgeT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlVFTUE8L3RleHQ+Cjwvc3ZnPgo='">
+                                        <div class="institution-info">
+                                            <div class="institution-name">UEMA/NuGeo</div>
+                                            <div class="institution-role">Validador Estadual</div>
+                                        </div>
+                                    </div>
+                                    <div class="institution-description">Universidade Estadual do Maranhão / Núcleo Geoambiental</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Rede de Observadores -->
+                            <div class="rede-observadores">
+                                <h3 class="rede-title">
+                                    <i class="fas fa-network-wired"></i>
+                                    Instituições Observadoras
+                                </h3>
+                                <div class="observadores-grid">
+                                    <div class="institution-card">
+                                        <div class="institution-header">
+                                            <img src="../assets/images/logo/AGERP.jpeg" alt="AGERP" class="institution-logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iOCIgZmlsbD0iIzU1NkIzRiIvPgo8dGV4dCB4PSIyNSIgeT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QUdFUlA8L3RleHQ+Cjwvc3ZnPgo='">
+                                            <div class="institution-info">
+                                                <div class="institution-name">AGERP</div>
+                                                
+                                            </div>
+                                        </div>
+                                        <div class="institution-description">Agência Estadual de Pesquisa Agropecuária e Extensão Rural do Maranhão</div>
+                                    </div>
+                                    
+                                    <div class="institution-card">
+                                        <div class="institution-header">
+                                            <img src="../assets/images/logo/SENAR.jpg" alt="SENAR" class="institution-logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iOCIgZmlsbD0iI0I4ODZCMCIvPgo8dGV4dCB4PSIyNSIgeT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U0VOQVI8L3RleHQ+Cjwvc3ZnPgo='">
+                                            <div class="institution-info">
+                                                <div class="institution-name">SENAR</div>
+                                                
+                                            </div>
+                                        </div>
+                                        <div class="institution-description">Serviço Nacional de Aprendizagem Rural</div>
+                                    </div>
+                                    
+                                    <div class="institution-card">
+                                        <div class="institution-header">
+                                            <img src="../assets/images/logo/CBMMA.png" alt="CBMMA" class="institution-logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iOCIgZmlsbD0iIzhCMDAwMCIvPgo8dGV4dCB4PSIyNSIgeT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4IiBmaWxsPSJ3aGl0ZSIgdGVleHQtYW5jaG9yPSJtaWRkbGUiPkNCTU1BPC90ZXh0Pgo8L3N2Zz4K'">
+                                            <div class="institution-info">
+                                                <div class="institution-name">CBMMA</div>
+                                                
+                                            </div>
+                                        </div>
+                                        <div class="institution-description">Corpo de Bombeiros Militar do Maranhão</div>
+                                    </div>
+                                    
+                                    <div class="institution-card">
+                                        <div class="institution-header">
+                                            <img src="../assets/images/logo/DEFESA_CIVIL.png" alt="Defesas Civis" class="institution-logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iOCIgZmlsbD0iIzU1NkIzRiIvPgo8dGV4dCB4PSIyNSIgeT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI2IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RGVmZXNhIENpdmlsPC90ZXh0Pgo8L3N2Zz4K'">
+                                            <div class="institution-info">
+                                                <div class="institution-name">Defesas Civis</div>
+                                                
+                                            </div>
+                                        </div>
+                                        <div class="institution-description">Defesas Civis Estadual e Municipais</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção de parceiros nacionais -->
+                <div class="section parceiros-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-handshake"></i>
+                        Parceiros Nacionais
+                    </h2>
+                    <div class="section-content">
+                        <p>O Monitor de Secas conta com a colaboração de importantes instituições nacionais que contribuem para o sucesso do programa em todo o território brasileiro.</p>
+                        
+                        <div class="parceiros-grid">
+                            <div class="parceiro-card">
+                                <img src="../assets/images/logo/ANA_2.png" alt="ANA" class="parceiro-logo" onerror="this.src='../assets/images/logo/error/erro_ong.png'">
+                                <div class="parceiro-nome">ANA</div>
+                            </div>
+                            
+                            <div class="parceiro-card">
+                                <img src="../assets/images/logo/FUNCEME.png" alt="FUNCEME" class="parceiro-logo" onerror="this.src='../assets/images/logo/error/erro_ong.png'">
+                                <div class="parceiro-nome">FUNCEME</div>
+                            </div>
+                            
+                            <div class="parceiro-card">
+                                <img src="../assets/images/logo/MCTI.png" alt="MCTI" class="parceiro-logo" onerror="this.src='../assets/images/logo/error/erro_ong.png'">
+                                <div class="parceiro-nome">MCTI</div>
+                            </div>
+                            
+                            <div class="parceiro-card">
+                                <img src="../assets/images/logo/MMA.png" alt="MMA" class="parceiro-logo" onerror="this.src='../assets/images/logo/error/erro_ong.png'">
+                                <div class="parceiro-nome">MMA</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-bullseye"></i>
+                        Objetivos do Monitor
+                    </h2>
+                    <div class="section-content">
+                        <ul>
+                            <li>Integrar o conhecimento técnico e científico de instituições estaduais e federais, promovendo um entendimento comum sobre a severidade, evolução e impactos da seca.</li>
+                            <li>Traduzir dados dispersos em informações úteis para a tomada de decisão, fortalecendo os mecanismos de monitoramento, previsão e alerta precoce de secas no país.</li>
+                            <li>Fornecer subsídios para a implementação de políticas públicas de convivência com a seca e gestão de recursos hídricos.</li>
+                            <li>Ampliar a capacidade de monitoramento e previsão de secas em todas as regiões do Brasil.</li>
+                            <li>Promover a padronização de metodologias e indicadores de monitoramento de secas em nível nacional.</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-cogs"></i>
+                        Como o monitoramento é feito
+                    </h2>
+                    <div class="section-content">
+                        <p>O processo de elaboração do mapa é colaborativo e envolve diferentes papéis em uma metodologia padronizada:</p>
+                        
+                        <div class="process-steps">
+                            <div class="process-step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <div class="step-title">Coleta de Dados</div>
+                                    <div class="step-description">Os provedores compartilham dados de suas redes de monitoramento, incluindo informações meteorológicas, hidrológicas e agrícolas.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="process-step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <div class="step-title">Análise Técnica</div>
+                                    <div class="step-description">Os autores elaboram o mapa inicial utilizando ferramentas como QGIS e indicadores de seca padronizados, considerando diferentes escalas temporais.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="process-step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <div class="step-title">Validação Local</div>
+                                    <div class="step-description">Os validadores revisam e ajustam o mapa com base em evidências locais, conhecimento regional e informações complementares.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="process-step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <div class="step-title">Contribuição dos Observadores</div>
+                                    <div class="step-description">As instituições observadoras informam os impactos reais da seca nas comunidades, agregando informações qualitativas ao processo.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="process-step">
+                                <div class="step-number">5</div>
+                                <div class="step-content">
+                                    <div class="step-title">Consolidação e Publicação</div>
+                                    <div class="step-description">A instituição central (ANA) coordena, supervisiona e publica o mapa mensal consolidado, garantindo a padronização nacional.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin-top: 25px; color: var(--accent); font-size: 1.1em;">Indicadores Utilizados</h3>
+                        <ul>
+                            <li><strong>SPI (Índice Padronizado de Precipitação):</strong> Avalia o déficit de precipitação em diferentes escalas temporais</li>
+                            <li><strong>VHI (Índice de Saúde da Vegetação):</strong> Monitora o estresse vegetativo a partir de imagens de satélite</li>
+                            <li><strong>VSWI (Índice de Umidade do Solo pela Vegetação):</strong> Combina informações de temperatura e vegetação</li>
+                            <li><strong>SSI (Índice de Seca do Solo):</strong> Avalia a umidade do solo em diferentes profundidades</li>
+                            <li><strong>Indicadores Hidrológicos:</strong> Níveis de reservatórios, vazões de rios e aquíferos</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-map-signs"></i>
+                        Interpretação do Mapa
+                    </h2>
+                    <div class="section-content">
+                        <p>Para interpretar corretamente o mapa do Monitor de Secas, é importante compreender os seguintes elementos visuais e simbologia:</p>
+                        
+                        <div class="legend-grid">
+                            <!--<div class="legend-item">
+                                <div class="legend-color" style="background: #ffffff; border: 1px solid #cccccc;"></div>
+                                <div class="legend-label">Áreas Brancas: regiões sem ocorrência de seca relativa</div>
+                            </div>-->
+                            
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: var(--seca-fraca);"></div>
+                                <div class="legend-label">Seca Fraca (S0)</div>
+                            </div>
+                            
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: var(--seca-moderada);"></div>
+                                <div class="legend-label">Seca Moderada (S1)</div>
+                            </div>
+                            
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: var(--seca-grave);"></div>
+                                <div class="legend-label">Seca Grave (S2)</div>
+                            </div>
+                            
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: var(--seca-extrema);"></div>
+                                <div class="legend-label">Seca Extrema (S3)</div>
+                            </div>
+                            
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: var(--seca-excepcional);"></div>
+                                <div class="legend-label">Seca Excepcional (S4)</div>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin-top: 25px; color: var(--accent); font-size: 1.1em;">Elementos de Simbologia</h3>
+                        <p><strong>Letras "C" e "L":</strong> Representam os tipos de impacto — Curto Prazo (C) afeta agricultura e pastagens; Longo Prazo (L) afeta recursos hídricos; ambos (CL) indicam impactos combinados.</p>
+                        <p><strong>Linhas em negrito:</strong> Separam as tipologias de seca, mostrando intensificação, persistência ou regressão do fenômeno.</p>
+                        <p><strong>Setas:</strong> Indicam a tendência de evolução da seca na região (intensificação ou melhoria).</p>
+                        
+                        <h3 style="margin-top: 25px; color: var(--accent); font-size: 1.1em;">Escalas Temporales</h3>
+                        <ul>
+                            <li><strong>Curto Prazo (C):</strong> Indicadores de 1 a 6 meses - impactos na agricultura e pastagens</li>
+                            <li><strong>Longo Prazo (L):</strong> Indicadores de 7 a 24 meses - impactos em recursos hídricos</li>
+                            <li><strong>Misto (CL):</strong> Combinação de impactos de curto e longo prazo</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-star"></i>
+                        Importância para o Maranhão
+                    </h2>
+                    <div class="section-content">
+                        <p>O Monitor de Secas é uma ferramenta estratégica de gestão ambiental e hídrica para o Maranhão, estado que apresenta grande diversidade climática e vulnerabilidade aos fenômenos de seca.</p>
+                        
+                        <h3 style="margin-top: 20px; color: var(--accent); font-size: 1.1em;">Benefícios para o Estado</h3>
+                        <ul>
+                            <li><strong>Gestão de Recursos Hídricos:</strong> Subsidia a tomada de decisão para outorgas, racionamento e planejamento hídrico</li>
+                            <li><strong>Agricultura e Pecuária:</strong> Orienta programas de seguro agrícola e medidas de convivência com a seca</li>
+                            <li><strong>Defesa Civil:</strong> Suporta a declaração de situação de emergência e ações de resposta a desastres</li>
+                            <li><strong>Planejamento Público:</strong> Auxilia na elaboração de políticas públicas para regiões vulneráveis</li>
+                            <li><strong>Alertas Precoces:</strong> Permite ações preventivas antes do agravamento da situação de seca</li>
+                        </ul>
+                        
+                        <h3 style="margin-top: 20px; color: var(--accent); font-size: 1.1em;">Contexto Regional</h3>
+                        <p>O Maranhão, por sua localização geográfica estratégica entre a Amazônia, o Cerrado e a Caatinga, apresenta características climáticas únicas que exigem monitoramento especializado. A atuação conjunta da CPDAm/SEMA-MA, da UEMA/NuGeo e das instituições observadoras fortalece o papel do estado no monitoramento de secas, contribuindo não apenas para o Nordeste, mas para todo o Brasil.</p>
+                        
+                        <p>O trabalho desenvolvido no âmbito do Monitor de Secas no Maranhão tem sido reconhecido nacionalmente como exemplo de integração entre instituições estaduais e federais, demonstrando a importância do trabalho colaborativo para o enfrentamento dos desafios climáticos.</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-history"></i>
+                        Histórico e Evolução
+                    </h2>
+                    <div class="section-content">
+                        <p>O Monitor de Secas foi implementado no Brasil em 2014, inicialmente abrangendo os nove estados do Nordeste. O programa expandiu-se gradualmente até alcançar cobertura nacional em 2019.</p>
+                        
+                        <p>No Maranhão, a adesão ao programa ocorreu em 2018, com a UEMA/NuGeo assumindo o papel de validador oficial. Em 2021, a SEMA/CPDAm passou a atuar como co-validador, fortalecendo a base técnica e científica do monitoramento no estado.</p>
+                        
+                        <p>Ao longo dos anos, o programa tem evoluído com a incorporação de novas tecnologias, refinamento de metodologias e ampliação da rede de colaboradores, tornando-se referência no monitoramento de secas na América Latina.</p>
+                    </div>
+                </div>
+                
+                <!-- Seção para participação na rede de observadores -->
+                <div class="participacao-section">
+                    <h2 class="participacao-title">
+                        <i class="fas fa-users"></i>
+                        Faça parte da nossa rede de observadores
+                    </h2>
+                    <div class="participacao-description">
+                        <p>O Monitor de Secas do Maranhão está sempre em busca de novas parcerias para ampliar sua rede de observadores. Se você representa uma instituição, organização ou comunidade que pode contribuir com informações sobre as condições de seca no estado, convidamos você a fazer parte desta importante iniciativa.</p>
+                        <p>Como observador, você terá a oportunidade de contribuir com dados locais que ajudam a validar e aprimorar o mapa mensal de secas, além de receber informações atualizadas sobre a situação hídrica e climática do Maranhão.</p>
+                    </div>
+                    
+                    <form id="form-participacao" class="participacao-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="nome" class="form-label">
+                                    <i class="fas fa-user"></i>
+                                    Nome Completo
+                                </label>
+                                <input type="text" id="nome" name="nome" class="form-input" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope"></i>
+                                    E-mail
+                                </label>
+                                <input type="email" id="email" name="email" class="form-input" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="telefone" class="form-label">
+                                    <i class="fas fa-phone"></i>
+                                    Telefone
+                                </label>
+                                <input type="tel" id="telefone" name="telefone" class="form-input" required placeholder="(98) 99999-9999">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="instituicao" class="form-label">
+                                    <i class="fas fa-building"></i>
+                                    Instituição/Organização
+                                </label>
+                                <input type="text" id="instituicao" name="instituicao" class="form-input" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cargo" class="form-label">
+                                    <i class="fas fa-briefcase"></i>
+                                    Cargo/Função
+                                </label>
+                                <input type="text" id="cargo" name="cargo" class="form-input" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="municipio" class="form-label">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    Município de Atuação
+                                </label>
+                                <input type="text" id="municipio" name="municipio" class="form-input" required>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label for="area-atuacao" class="form-label">
+                                    <i class="fas fa-tasks"></i>
+                                    Área de Atuação
+                                </label>
+                                <select id="area-atuacao" name="area-atuacao" class="form-select" required>
+                                    <option value="">Selecione uma área</option>
+                                    <option value="agricultura">Agricultura</option>
+                                    <option value="meio-ambiente">Meio Ambiente</option>
+                                    <option value="pecuaria">Pecuária</option>
+                                    <option value="pesquisa">Pesquisa/Ensino</option>
+                                    <option value="recursos-hidricos">Recursos Hídricos</option>
+                                    <option value="AGERP">AGERP</option>
+                                    <option value="defesa-civil">Defesa Civil</option>
+                                    <option value="CBBMA">Corpo de Bombeiro</option>
+                                    <option value="SEMAM">SEMAM</option>
+                                    <option value="SENAR">SENAR</option>
+                                    <option value="outra">Outra</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label for="experiencia" class="form-label">
+                                    <i class="fas fa-chart-line"></i>
+                                    Experiência/Contribuição
+                                </label>
+                                <textarea id="experiencia" name="experiencia" class="form-textarea" placeholder="Descreva brevemente sua experiência ou como sua instituição pode contribuir para o Monitor de Secas..."></textarea>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label for="expectativas" class="form-label">
+                                    <i class="fas fa-bullseye"></i>
+                                    Expectativas
+                                </label>
+                                <textarea id="expectativas" name="expectativas" class="form-textarea" placeholder="Quais são suas expectativas em relação à participação na rede de observadores?"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="termos" name="termos" required>
+                            <label for="termos" class="checkbox-label">
+                                Concordo em compartilhar informações sobre as condições de seca na minha região e autorizo o uso desses dados para fins de monitoramento e pesquisa, de acordo com a <a href="#" onclick="alert('Política de privacidade em desenvolvimento'); return false;">Política de Privacidade</a> do Monitor de Secas.
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="submit-button" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            <span id="btnText">Enviar Solicitação de Participação</span>
+                            <span id="btnLoading" style="display: none;">Enviando...</span>
+                        </button>
+                        
+                        <div id="form-message" class="form-message"></div>
+                    </form>
+                </div>
+                
+                <a href="../Monitor_Seca.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Voltar para o Mapa Interativo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Event listeners para menu mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            // Event listener para o menu mobile
+            document.getElementById('mobileMenuToggle').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('mobile-open');
+            });
+            
+            // Fechar menu ao clicar em um link (mobile)
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.getElementById('sidebar').classList.remove('mobile-open');
+                });
+            });
+            
+            // Máscara para telefone
+            document.getElementById('telefone').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 11) {
+                    value = value.replace(/(\d{2})(\d)/, '($1) $2');
+                    value = value.replace(/(\d{5})(\d)/, '$1-$2');
+                    e.target.value = value;
+                }
+            });
+            
+            // Event listener para o formulário de participação
+            document.getElementById('form-participacao').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Validação básica
+                const nome = document.getElementById('nome').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const telefone = document.getElementById('telefone').value.trim();
+                const instituicao = document.getElementById('instituicao').value.trim();
+                const cargo = document.getElementById('cargo').value.trim();
+                const municipio = document.getElementById('municipio').value.trim();
+                const areaAtuacao = document.getElementById('area-atuacao').value;
+                const termos = document.getElementById('termos').checked;
+                
+                // Validações específicas
+                if (!nome) {
+                    showMessage('Por favor, informe seu nome completo.', 'error');
+                    return;
+                }
+                
+                if (!validateEmail(email)) {
+                    showMessage('Por favor, informe um e-mail válido.', 'error');
+                    return;
+                }
+                
+                if (telefone.replace(/\D/g, '').length < 10) {
+                    showMessage('Por favor, informe um telefone válido.', 'error');
+                    return;
+                }
+                
+                if (!instituicao) {
+                    showMessage('Por favor, informe sua instituição/organização.', 'error');
+                    return;
+                }
+                
+                if (!areaAtuacao) {
+                    showMessage('Por favor, selecione uma área de atuação.', 'error');
+                    return;
+                }
+                
+                if (!termos) {
+                    showMessage('É necessário aceitar os termos para prosseguir.', 'error');
+                    return;
+                }
+                
+                // Mostrar loading
+                setLoading(true);
+                showMessage('Enviando sua solicitação...', 'loading');
+                
+                // Coletar todos os dados do formulário
+                const data = {
+                    nome: nome,
+                    email: email,
+                    telefone: telefone.replace(/\D/g, ''),
+                    instituicao: instituicao,
+                    cargo: cargo,
+                    municipio: municipio,
+                    areaAtuacao: areaAtuacao,
+                    experiencia: document.getElementById('experiencia').value.trim(),
+                    expectativas: document.getElementById('expectativas').value.trim(),
+                    termos: 'Sim',
+                    dataEnvio: new Date().toLocaleString('pt-BR')
+                };
+                
+                // URL do Google Apps Script
+                const scriptURL = 'https://script.google.com/macros/s/AKfycbxK6qeYu5GTJdODWvPAERIPf97b00jP5F-K0nht9nJmYk3FN1zfTu492ntoN8LcrC6Izg/exec';
+                
+                try {
+                    // Usar estratégia No-CORS (que sabemos que funciona)
+                    await fetch(scriptURL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    // Sucesso - com No-CORS não temos resposta, então assumimos sucesso
+                    showMessage('✅ Solicitação enviada com sucesso! Entraremos em contato em breve.', 'success');
+                    document.getElementById('form-participacao').reset();
+                    
+                } catch (error) {
+                    console.error('Erro:', error);
+                    showMessage('❌ Erro ao enviar solicitação. Tente novamente mais tarde.', 'error');
+                } finally {
+                    setLoading(false);
+                }
+            });
+            
+            // Função para validar email
+            function validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+            
+            // Função para mostrar mensagens de status
+            function showMessage(message, type) {
+                const messageElement = document.getElementById('form-message');
+                messageElement.textContent = message;
+                messageElement.className = 'form-message ' + type;
+                messageElement.style.display = 'block';
+                
+                // Remover mensagem após 8 segundos (exceto para mensagens de sucesso)
+                if (type !== 'success') {
+                    setTimeout(() => {
+                        messageElement.style.display = 'none';
+                    }, 12000);
+                }
+            }
+            
+            // Função para controlar estado de loading
+            function setLoading(loading) {
+                const submitBtn = document.getElementById('submitBtn');
+                const btnText = document.getElementById('btnText');
+                const btnLoading = document.getElementById('btnLoading');
+                
+                if (loading) {
+                    submitBtn.disabled = true;
+                    btnText.style.display = 'none';
+                    btnLoading.style.display = 'inline';
+                } else {
+                    submitBtn.disabled = false;
+                    btnText.style.display = 'inline';
+                    btnLoading.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

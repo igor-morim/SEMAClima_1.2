@@ -1,0 +1,3008 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão: Tecnologia para preservação ambiental com monitoramento inteligente dos recursos naturais.">
+    <meta name="keywords" content="monitoramento ambiental, Maranhão, SIMA, meio ambiente, hidrologia, meteorologia, SEMA">
+    <meta name="author" content="Igor Carlos Cunha Morim">
+    <title>Monitoramento de Emergências Ambientais - MA</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Favicon SIMA - Caminhos Corrigidos -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo/CPDAm/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/CPDAm/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo/CPDAm/favicon-16x16.png">
+    <link rel="icon" href="assets/images/logo/CPDAm/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/images/logo/CPDAm/favicon.ico">
+
+    <!-- Para Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/logo/CPDAm/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/logo/CPDAm/android-chrome-512x512.png">
+
+    <!-- Meta tags para tema -->
+    <meta name="theme-color" content="#1a5d1a">
+    <meta name="msapplication-TileColor" content="#1a5d1a">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --primary-light: #2c5282;
+            --secondary-color: #3182ce;
+            --accent-color: #e53e3e;
+            --success-color: #38a169;
+            --warning-color: #dd6b20;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --radius: 10px;
+            --transition: all 0.3s ease;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        /* Header Estilizado */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            z-index: 1000;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo-icon {
+            background: var(--secondary-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 8px rgb(0, 0, 0);
+        }
+        
+        .logo-text h1 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        
+        .logo-text small {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+        
+        .header-btn {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        /* Layout Principal */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 68px);
+        }
+        
+        /* Sidebar Principal (Estatísticas) */
+        .sidebar-main {
+            width: 300px;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-md);
+            z-index: 900;
+        }
+        
+        /* Sidebar de Filtros */
+        .sidebar-filters {
+            width: 320px;
+            background: var(--card-bg);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-md);
+            z-index: 900;
+            position: absolute;
+            right: -320px;
+            top: 68px;
+            bottom: 0;
+            transition: right 0.3s ease;
+        }
+        
+        .sidebar-filters.active {
+            right: 0;
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        
+        .sidebar-header h2 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .sidebar-header h2 i {
+            color: var(--secondary-color);
+        }
+        
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        /* POPUP MUNICIPAL COMPACTO */
+        .popup-municipal {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            min-width: 100px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .popup-municipal-header {
+            background: linear-gradient(135deg, var(--success-color) 0%, #2f855a 100%);
+            padding: 0.6rem 0.2rem;
+            color: white;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .popup-municipal-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .popup-municipal-content {
+            padding: 0.4rem;
+        }
+
+        .municipio-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.6rem;
+        }
+
+        .municipio-info-item {
+            background: #f8fafc;
+            padding: 0.6rem;
+            border-radius: 6px;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid #e2e8f0;
+        }
+
+        .municipio-info-item:hover {
+            background: #edf2f7;
+            transform: translateY(-1px);
+        }
+
+        .municipio-info-value {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1;
+            margin-bottom: 0.2rem;
+        }
+
+        .municipio-info-label {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .popup-municipal-footer {
+            background: #f8fafc;
+            padding: 0.6rem 1rem;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .popup-municipal-zoom {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            color: var(--secondary-color);
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            background: rgba(49, 130, 206, 0.1);
+        }
+
+        .popup-municipal-zoom:hover {
+            color: var(--primary-color);
+            background: rgba(49, 130, 206, 0.2);
+        }
+        
+        /* Card de Total de Acidentes */
+        .total-card {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 3px solid var(--border-color);
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .total-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(30deg);
+        }
+        
+        .total-card h3 {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+        
+        .total-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .total-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .total-icon {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 2.5rem;
+            opacity: 0.2;
+        }
+        
+        /* Estatísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            border: 2px solid var(--border-color);
+            border-bottom: 3px solid var(--secondary-color);
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1;
+            margin-bottom: 0.3rem;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Legenda */
+        .legend {
+            margin-top: 1.5rem;
+        }
+        
+        .legend-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .legend-header:hover h4 {
+            color: var(--secondary-color);
+        }
+        
+        .legend-header h4 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+            transition: var(--transition);
+        }
+        
+        .legend-header h4 i {
+            color: var(--secondary-color);
+        }
+        
+        .legend-count {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: var(--bg-color);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .legend-count:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .legend-items {
+            max-height: 25rem;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .legend-items::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .legend-items::-webkit-scrollbar-track {
+            background: var(--bg-color);
+            border-radius: 2px;
+        }
+        
+        .legend-items::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem;
+            border-radius: 6px;
+            margin-bottom: 0.4rem;
+            transition: var(--transition);
+            cursor: pointer;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+        
+        .legend-item:hover {
+            background: var(--bg-color);
+            border-color: var(--secondary-color);
+            transform: translateX(3px);
+        }
+        
+        .legend-item.active {
+            background: var(--bg-color);
+            border-color: var(--secondary-color);
+            box-shadow: 0 2px 8px rgba(49, 130, 206, 0.2);
+        }
+        
+        
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            margin-right: 0.8rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        
+        .legend-label {
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .legend-quantity {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: var(--bg-color);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        /* Filtros - CORREÇÃO APLICADA AQUI */
+        .filters-container {
+            padding: 0;
+        }
+        
+        .filter-section {
+            margin-bottom: 1.0rem;
+            padding: 0.5rem 1.0rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-bg);
+        }
+        
+        .filter-section:first-child {
+            margin-top: 0;
+        }
+        
+        .filter-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 1.2rem;
+        }
+        
+        .filter-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0 0.3rem;
+        }
+        
+        .filter-header i {
+            color: var(--secondary-color);
+            font-size: 1rem;
+            width: 20px;
+        }
+        
+        .filter-header h4 {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .filter-group {
+            margin-bottom: 1.2rem;
+            padding: 0 0.3rem;
+        }
+        
+        .filter-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .filter-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding-left: 0.2rem;
+        }
+        
+        .filter-select {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+        
+        .filter-date-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+        }
+        
+        .filter-date {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+        
+        .filter-date:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-color);
+            border-radius: var(--radius);
+            margin: 2rem 1.5rem 1.5rem;
+        }
+        
+        .filter-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .filter-btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .filter-btn-primary:hover {
+            background: #2b6cb0;
+            transform: translateY(-2px);
+        }
+        
+        .filter-btn-secondary {
+            background: var(--bg-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .filter-btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        /* Contadores de Filtros */
+        .filter-counter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+            padding: 0 0.4rem;
+        }
+        
+        /* Mapa */
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Controles do Mapa */
+        .map-controls {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 800;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .control-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 0.8rem;
+            box-shadow: var(--shadow-lg);
+            min-width: 160px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .control-card h4 {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            padding: 0 0.3rem;
+        }
+        
+        .control-item {
+            display: flex;
+            align-items: center;
+            padding: 0.4rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            transition: var(--transition);
+            border-radius: 4px;
+        }
+        
+        .control-item:hover {
+            background: var(--bg-color);
+            color: var(--secondary-color);
+            transform: translateX(2px);
+        }
+        
+        .control-item i {
+            margin-right: 0.5rem;
+            width: 16px;
+            text-align: center;
+        }
+        
+        /* POPUP MELHORADO - Design Sofisticado */
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px !important;
+            border: none !important;
+            overflow: hidden;
+            padding: 0 !important;
+        }
+        
+        .leaflet-popup-content {
+            margin: 0 !important;
+            width: 320px !important;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        .popup-container {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            background: white;
+        }
+        
+        .popup-header {
+            background: linear-gradient(35deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            padding: 1rem 1.0rem;
+            position: relative;
+            overflow: hidden;
+            padding-right: 50px; /* Espaço para o botão de fechar */
+            min-height: 40px;
+        }
+        
+        .popup-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.1) 50%, transparent 60%);
+            animation: shine 3s infinite linear;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Botão de fechar do popup - NOVO E MELHORADO */
+        .popup-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .popup-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.2);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .popup-close-btn:active {
+            transform: scale(1.2);
+        }
+        
+        .popup-id-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.8rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .popup-title {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.3;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .popup-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+            font-weight: 500;
+        }
+        
+        .popup-sei {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .popup-content {
+            padding: 0.5rem 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .popup-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .popup-content::-webkit-scrollbar-track {
+            background: var(--bg-color);
+            border-radius: 3px;
+        }
+        
+        .popup-content::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+        
+        /* INFO ITEMS - UM POR LINHA - CORRIGIDO */
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+            min-height: 28px;
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .info-label {
+            width: 80px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding-top: 2px;
+        }
+        
+        .info-label i {
+            font-size: 0.85rem;
+            width: 16px;
+            text-align: center;
+        }
+        
+        .info-value {
+            flex: 1;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            line-height: 1.4;
+            word-break: break-word;
+            padding-left: 0.5rem;
+        }
+        
+        /* Status sem badge (para status não informado) */
+        .info-value .status-normal {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        /* Status badge - somente para status finalizados */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.finalizado {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-badge.analise {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        /* Melhorar o preview da descrição */
+        .descricao-container {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .descricao-container .info-label {
+            margin-bottom: 0.5rem;
+            border: none;
+            padding: 0;
+        }
+        
+        .descricao-preview {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 0.4rem;
+            max-height: 60px;
+            overflow: hidden;
+            position: relative;
+            background: var(--bg-color);
+            padding: 0.8rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        /*.descricao-preview:hover {
+            box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.8);
+        }*/
+        
+        .descricao-preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(to bottom, transparent, var(--bg-color));
+        }
+        
+        .ver-descricao-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.7rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 0.5rem;
+        }
+        
+        .ver-descricao-btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+        }
+        
+        .ver-descricao-btn i {
+            font-size: 0.9rem;
+        }
+        
+        .popup-footer {
+            background: var(--bg-color);
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .popup-date {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        
+        .popup-source {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            opacity: 0.8;
+        }
+        
+        /* Loading Indicator */
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1.5rem 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            min-width: 200px;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Sistema de Notificações */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 350px;
+        }
+        
+        .notification {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1rem;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--warning-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transform: translateY(-400px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            pointer-events: auto;
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .notification.hide {
+            transform: translateY(-400px);
+            opacity: 0;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        .notification.warning .notification-icon {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .notification.info .notification-icon {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .notification.success .notification-icon {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: var(--text-primary);
+        }
+        
+        .notification-message {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.3rem;
+            border-radius: 4px;
+            transition: var(--transition);
+            align-self: flex-start;
+        }
+        
+        .notification-close:hover {
+            background: var(--bg-color);
+            color: var(--accent-color);
+        }
+        
+        /* Modal de Descrição Completa */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .modal-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            z-index: 10001;
+            display: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .modal-container.active {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .modal-title i {
+            font-size: 1.2rem;
+        }
+        
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        /* Esconder o botão de fechar padrão do Leaflet */
+        .leaflet-popup-close-button {
+            display: none !important;
+        }
+        
+        .modal-close:hover {
+            background: rgb(255, 0, 0);
+            transform: scale(1.1);
+        }
+        
+        .modal-content {
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: calc(80vh - 70px);
+        }
+        
+        .descricao-completa {
+            line-height: 1.6;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            white-space: pre-line;
+        }
+        
+        .descricao-completa p {
+            margin-bottom: 1rem;
+        }
+        
+        .descricao-completa p:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Responsividade do popup */
+        @media (max-width: 480px) {
+            .leaflet-popup-content {
+                width: 280px !important;
+            }
+            
+            .info-label {
+                width: 70px;
+                font-size: 0.7rem;
+            }
+            
+            .info-value {
+                font-size: 0.85rem;
+            }
+            
+            .popup-close-btn {
+                top: 10px;
+                right: 10px;
+                width: 26px;
+                height: 26px;
+            }
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .sidebar-main {
+                width: 100%;
+                height: 40vh;
+            }
+            
+            .sidebar-filters {
+                width: 100%;
+                height: 60vh;
+                right: -100%;
+                top: auto;
+                bottom: 0;
+            }
+            
+            .sidebar-filters.active {
+                right: 0;
+            }
+            
+            .map-container {
+                height: 60vh;
+            }
+            
+            .filter-section {
+                padding: 1rem;
+            }
+            
+            .filter-actions {
+                margin: 1.5rem 1rem 1rem;
+                padding: 1rem;
+            }
+            
+            .notification-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+            
+            .leaflet-popup-content {
+                width: 280px !important;
+            }
+            
+            .info-label {
+                width: 65px;
+            }
+            
+            .modal-container {
+                width: 95%;
+                max-height: 85vh;
+            }
+            
+            .modal-content {
+                max-height: calc(85vh - 70px);
+            }
+            
+            .popup-close-btn {
+                top: 8px;
+                right: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="logo-text">
+                <h1>Monitoramento de Emergências Ambientais</h1>
+                <small>Estado do Maranhão</small>
+            </div>
+        </div>
+        
+        <div class="header-controls">
+            <button class="header-btn" id="toggleFilters">
+                <i class="fas fa-filter"></i>
+                <span>Filtros</span>
+                <span class="filter-counter" id="activeFiltersCount">0</span>
+            </button>
+            <button class="header-btn" onclick="exportarDados()">
+                <i class="fas fa-download"></i>
+                <span>Exportar</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Layout Principal -->
+    <div class="main-container">
+        <!-- Sidebar Principal (Estatísticas) -->
+        <div class="sidebar-main">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-chart-pie"></i> Painel de Controle</h2>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- Card de Total de Acidentes -->
+                <div class="total-card">
+                    <h3>TOTAL DE EMERGÊNCIAS</h3>
+                    <div class="total-value" id="totalAcidentes">0</div>
+                    <div class="total-label">Registros na base de dados</div>
+                    <div class="total-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+
+                <!-- Estatísticas -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="acidentesAtivos">0</div>
+                        <div class="stat-label">Em Análise</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="empresasEnvolvidas">0</div>
+                        <div class="stat-label">Empresas</div>
+                    </div>
+                </div>
+
+                <!-- Legenda -->
+                <div class="legend">
+                    <div class="legend-header" id="legendHeader">
+                        <h4><i class="fas fa-palette"></i> Tipos de Emergências</h4>
+                        <div class="legend-count" id="tiposCount">0 tipos</div>
+                    </div>
+                    <div class="legend-items" id="legendContainer">
+                        <!-- Gerado dinamicamente em ordem alfabética -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa -->
+        <div class="map-container">
+            <div id="map"></div>
+            
+            <!-- Controles do Mapa -->
+            <div class="map-controls">
+                <div class="control-card">
+                    <h4>Mapa Base</h4>
+                    <div class="control-item" onclick="mudarMapaBase('osm')">
+                        <i class="fas fa-map"></i>
+                        <span>OpenStreetMap</span>
+                    </div>
+                    <div class="control-item" onclick="mudarMapaBase('satellite')">
+                        <i class="fas fa-satellite"></i>
+                        <span>Satélite</span>
+                    </div>
+                </div>
+                <!-- Novo controle para camadas do Maranhão -->
+                <div class="control-card">
+                    <h4>Camadas do MA</h4>
+                    <div class="control-item" onclick="toggleCamada('municipios-border')">
+                        <i class="fas fa-draw-polygon"></i>
+                        <span>Municípios (limites)</span>
+                    </div>
+                    <div class="control-item" onclick="toggleCamada('limite-estado')">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Limite do Estado</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div class="loading-indicator" id="loadingIndicator">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Carregando dados...</div>
+            </div>
+        </div>
+
+        <!-- Sidebar de Filtros -->
+        <div class="sidebar-filters" id="sidebarFilters">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-sliders-h"></i> Filtros Avançados</h2>
+            </div>
+            
+            <div class="sidebar-content filters-container">
+                <!-- Filtro por Empresa -->
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <i class="fas fa-building"></i>
+                        <h4>Empresa</h4>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Selecionar Empresa</label>
+                        <select class="filter-select" id="filterEmpresa">
+                            <option value="">Todas as empresas</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Filtro por Período -->
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <i class="fas fa-calendar-alt"></i>
+                        <h4>Período</h4>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Data Inicial</label>
+                        <input type="date" class="filter-date" id="filterDataInicio">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Data Final</label>
+                        <input type="date" class="filter-date" id="filterDataFim">
+                    </div>
+                </div>
+                
+                <!-- Filtro por Status -->
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <i class="fas fa-tasks"></i>
+                        <h4>Status do Processo</h4>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Selecionar Status</label>
+                        <select class="filter-select" id="filterStatus">
+                            <option value="">Todos os status</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Filtro por Tipo -->
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <i class="fas fa-bolt"></i>
+                        <h4>Tipo de Emergência</h4>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Selecionar Tipo</label>
+                        <select class="filter-select" id="filterTipo">
+                            <option value="">Todos os tipos</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Ações dos Filtros -->
+                <div class="filter-actions">
+                    <button class="filter-btn filter-btn-secondary" onclick="limparFiltros()">
+                        <i class="fas fa-undo"></i>
+                        Limpar
+                    </button>
+                    <button class="filter-btn filter-btn-primary" onclick="aplicarFiltros()">
+                        <i class="fas fa-check"></i>
+                        Aplicar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema de Notificações -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <!-- Modal de Descrição Completa -->
+    <div class="modal-overlay" id="modalOverlay" onclick="fecharModalDescricao()"></div>
+    <div class="modal-container" id="modalDescricao">
+        <div class="modal-header">
+            <div class="modal-title">
+                <i class="fas fa-align-left"></i>
+                <span id="modalTitulo">Descrição do Acidente</span>
+            </div>
+            <button class="modal-close" onclick="fecharModalDescricao()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <div class="descricao-completa" id="modalConteudo"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS e XLSX -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <script>
+        // Configuração
+        const CAMINHO_PLANILHA = 'docs/Monitoramento_Emergencias_Ambientais_2025.xlsx';
+        const CAMINHO_MUNICIPIOS = 'docs/Shapefile/MA_Municipios_2022/MA_Municipios_2022.geojson';
+        const CAMINHO_LIMITE_MA = 'docs/Shapefile/MA_Municipios_2022_limite/Limite_MA_2022.geojson';
+        
+        // Variáveis globais
+        let map;
+        let acidentesData = [];
+        let filteredData = [];
+        let baseLayers = {};
+        let currentBaseLayer = 'osm';
+        let activeFilters = 0;
+        let municipiosFillLayer = null;
+        let municipiosBorderLayer = null;
+        let limiteEstadoLayer = null;
+        let markersLayer = L.layerGroup(); // Camada para agrupar marcadores
+        let openPopup = null; // Referência ao popup aberto
+        
+        // Variáveis para gerenciamento de notificações
+        let notificationTimeout = null;
+        let currentNotificationId = null;
+        
+        // Estilos para camadas com mapa base normal
+        const stylesNormal = {
+            municipiosBorder: {
+                fillColor: 'transparent',
+                color: '#4a5568',
+                weight: 1,
+                opacity: 0.6,
+            },
+            limiteEstado: {
+                fillColor: 'transparent',
+                color: '#1a365d',
+                weight: 2,
+                opacity: 0.8
+            }
+        };
+        
+        // Estilos para camadas com mapa base satélite (cores mais claras)
+        const stylesSatellite = {
+            municipiosBorder: {
+                fillColor: 'transparent',
+                color: '#ffffff',
+                weight: 1.5,
+                opacity: 0.8,
+            },
+            limiteEstado: {
+                fillColor: 'transparent',
+                color: '#e2e8f0',
+                weight: 3,
+                opacity: 0.9
+            }
+        };
+        
+        // Limites do Maranhão (coordenadas extremas com buffer)
+        const LIMITES_MA = {
+            minLat: -10.0,  // Sul do estado
+            maxLat: -1.0,   // Norte do estado
+            minLng: -50.0,  // Oeste do estado
+            maxLng: -40.0   // Leste do estado
+        };
+        
+        // Aplicar buffer de 10%
+        const BUFFER_FACTOR = 0.7;
+        const MA_BOUNDS = L.latLngBounds([
+            [LIMITES_MA.minLat - (LIMITES_MA.maxLat - LIMITES_MA.minLat) * BUFFER_FACTOR, 
+             LIMITES_MA.minLng - (LIMITES_MA.maxLng - LIMITES_MA.minLng) * BUFFER_FACTOR],
+            [LIMITES_MA.maxLat + (LIMITES_MA.maxLat - LIMITES_MA.minLat) * BUFFER_FACTOR, 
+             LIMITES_MA.maxLng + (LIMITES_MA.maxLng - LIMITES_MA.minLng) * BUFFER_FACTOR]
+        ]);
+        
+        // Elementos DOM
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const sidebarFilters = document.getElementById('sidebarFilters');
+        const toggleFiltersBtn = document.getElementById('toggleFilters');
+        const activeFiltersCount = document.getElementById('activeFiltersCount');
+        const notificationContainer = document.getElementById('notificationContainer');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalDescricao = document.getElementById('modalDescricao');
+        const modalTitulo = document.getElementById('modalTitulo');
+        const modalConteudo = document.getElementById('modalConteudo');
+        const legendHeader = document.getElementById('legendHeader');
+        
+        // Elementos de filtro
+        const filterEmpresa = document.getElementById('filterEmpresa');
+        const filterStatus = document.getElementById('filterStatus');
+        const filterTipo = document.getElementById('filterTipo');
+        const filterDataInicio = document.getElementById('filterDataInicio');
+        const filterDataFim = document.getElementById('filterDataFim');
+        
+        // Inicializar aplicação
+        window.addEventListener('load', function() {
+            console.log('🚀 Iniciando aplicação...');
+            inicializarMapa();
+            configurarEventos();
+            carregarDadosAutomaticamente();
+            // Carregar camadas do Maranhão
+            carregarCamadasMaranhao();
+        });
+        
+        // Configurar eventos
+        function configurarEventos() {
+            toggleFiltersBtn.addEventListener('click', toggleSidebarFiltros);
+            
+            // Eventos para contar filtros ativos
+            const filtros = [filterEmpresa, filterStatus, filterTipo, filterDataInicio, filterDataFim];
+            filtros.forEach(filtro => {
+                filtro.addEventListener('change', atualizarContadorFiltros);
+            });
+            
+            // Fechar modal com ESC
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    fecharModalDescricao();
+                }
+            });
+            
+            // Configurar clique no cabeçalho da legenda
+            if (legendHeader) {
+                legendHeader.addEventListener('click', function() {
+                    limparFiltroTipo();
+                });
+            }
+            
+            // Fechar popup ao clicar fora (opcional)
+            document.addEventListener('click', function(event) {
+                // Verificar se o clique não foi em um popup
+                const isPopup = event.target.closest('.leaflet-popup') || 
+                               event.target.closest('.popup-container') ||
+                               event.target.closest('.popup-close-btn');
+                
+                if (!isPopup && openPopup) {
+                    openPopup.closePopup();
+                    openPopup = null;
+                }
+            });
+        }
+        
+        // Função para limpar apenas o filtro de tipo
+        function limparFiltroTipo() {
+            if (filterTipo.value) {
+                filterTipo.value = '';
+                aplicarFiltros();
+                
+                mostrarNotificacao(
+                    'Filtro de tipo limpo',
+                    'O filtro por tipo de acidente foi removido. Mostrando todos os tipos.',
+                    'info'
+                );
+            }
+        }
+        
+        // Função para mostrar modal de descrição
+        function mostrarModalDescricao(titulo, descricao) {
+            modalTitulo.textContent = titulo;
+            modalConteudo.textContent = descricao || 'Nenhuma descrição disponível.';
+            
+            modalOverlay.classList.add('active');
+            modalDescricao.classList.add('active');
+            
+            // Prevenir scroll do body
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Função para fechar modal de descrição
+        function fecharModalDescricao() {
+            modalOverlay.classList.remove('active');
+            modalDescricao.classList.remove('active');
+            
+            // Restaurar scroll do body
+            document.body.style.overflow = '';
+        }
+        
+        // Função para fechar popup
+        function fecharPopup() {
+            if (openPopup) {
+                openPopup.closePopup();
+                openPopup = null;
+            }
+        }
+        
+        // Função para mostrar notificação - ATUALIZADA
+        function mostrarNotificacao(titulo, mensagem, tipo = 'warning') {
+            // Fechar notificação atual imediatamente se existir
+            fecharNotificacaoAtual(true);
+            
+            const notificationId = 'notification-' + Date.now();
+            currentNotificationId = notificationId;
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${tipo}`;
+            notification.id = notificationId;
+            notification.innerHTML = `
+                <div class="notification-icon">
+                    <i class="fas fa-${tipo === 'warning' ? 'exclamation-triangle' : tipo === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">${titulo}</div>
+                    <div class="notification-message">${mensagem}</div>
+                </div>
+                <button class="notification-close" onclick="fecharNotificacaoAtual()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Limpar container de notificações antes de adicionar a nova
+            notificationContainer.innerHTML = '';
+            notificationContainer.appendChild(notification);
+            
+            // Mostrar notificação
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Remover automaticamente após 5 segundos
+            notificationTimeout = setTimeout(() => {
+                fecharNotificacaoAtual();
+            }, 5000);
+            
+            return notificationId;
+        }
+        
+        // Função para fechar notificação atual
+        function fecharNotificacaoAtual(imediato = false) {
+            const notification = document.getElementById(currentNotificationId);
+            
+            if (notification) {
+                if (imediato) {
+                    // Remover imediatamente sem animação
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                } else {
+                    // Fechar com animação
+                    notification.classList.remove('show');
+                    notification.classList.add('hide');
+                    
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }
+            }
+            
+            // Limpar timeout se existir
+            if (notificationTimeout) {
+                clearTimeout(notificationTimeout);
+                notificationTimeout = null;
+            }
+            
+            // Resetar ID
+            currentNotificationId = null;
+        }
+        
+        // Função para fechar notificação específica (mantida para compatibilidade)
+        function fecharNotificacao(id) {
+            if (id === currentNotificationId) {
+                fecharNotificacaoAtual();
+            }
+        }
+        
+        // Inicializar mapa com limites do Maranhão
+        function inicializarMapa() {
+            console.log('🗺️ Inicializando mapa com limites do Maranhão...');
+            
+            // Criar mapa centralizado no Maranhão
+            map = L.map('map', {
+                center: [-5.5, -45.0],
+                zoom: 9,
+                minZoom: 7, // Zoom mínimo para não afastar muito
+                maxBounds: MA_BOUNDS, // Limitar movimento aos limites
+                worldCopyJump: false // Não permitir "saltar" para outro lado do mundo
+            });
+            
+            // Configurar camadas base
+            baseLayers = {
+                osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap',
+                    maxZoom: 19,
+                    noWrap: true // Não repetir o mapa fora dos limites
+                }),
+                satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '© Esri',
+                    maxZoom: 19,
+                    noWrap: true
+                })
+            };
+            
+            baseLayers.osm.addTo(map);
+            
+            // Adicionar camada de marcadores
+            markersLayer.addTo(map);
+            
+            // Definir limite inicial para o zoom do usuário
+            map.setMaxBounds(MA_BOUNDS);
+            
+            // Prevenir zoom excessivo para fora
+            map.on('zoomend', function() {
+                if (map.getZoom() < 6) {
+                    map.setZoom(6);
+                }
+                
+                // Verificar se o centro do mapa está dentro dos limites
+                const center = map.getCenter();
+                if (!MA_BOUNDS.contains(center)) {
+                    const boundedCenter = MA_BOUNDS.getCenter();
+                    map.setView(boundedCenter, map.getZoom());
+                }
+            });
+            
+            // Prevenir arrastar para fora dos limites
+            map.on('drag', function() {
+                const center = map.getCenter();
+                if (!MA_BOUNDS.contains(center)) {
+                    map.panInsideBounds(MA_BOUNDS);
+                }
+            });
+            
+            console.log('✅ Mapa inicializado com limites do Maranhão');
+        }
+        
+        // Função para carregar as camadas do Maranhão
+        async function carregarCamadasMaranhao() {
+            try {
+                console.log('📁 Carregando camadas do Maranhão...');
+                
+                // Carregar camada de municípios (preenchimento)
+                const responseMunicipios = await fetch(CAMINHO_MUNICIPIOS);
+                if (!responseMunicipios.ok) {
+                    throw new Error(`Erro ao carregar municípios: ${responseMunicipios.status}`);
+                }
+                const dataMunicipios = await responseMunicipios.json();
+                
+                // Carregar camada de limite do estado
+                const responseLimite = await fetch(CAMINHO_LIMITE_MA);
+                if (!responseLimite.ok) {
+                    throw new Error(`Erro ao carregar limite do estado: ${responseLimite.status}`);
+                }
+                const dataLimite = await responseLimite.json();
+
+                // Função para criar popup municipal compacto
+                function createMunicipioPopup(nome, codigo, area) {
+                    const areaFormatada = area ? area.toLocaleString('pt-BR') + ' km²' : 'N/I';
+                    
+                    return `
+                        <div class="popup-municipal">
+                            <div class="popup-municipal-header">
+                                <h3>${nome}</h3>
+                            </div>
+                            <div class="popup-municipal-content">
+                                <div class="municipio-info-grid">
+                                    <div class="municipio-info-item">
+                                        <div class="municipio-info-value">${codigo || 'N/I'}</div>
+                                        <div class="municipio-info-label">Código</div>
+                                    </div>
+                                    <div class="municipio-info-item">
+                                        <div class="municipio-info-value">${areaFormatada}</div>
+                                        <div class="municipio-info-label">Área</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Criar camada de municípios (apenas limites) com estilo inicial
+                municipiosBorderLayer = L.geoJSON(dataMunicipios, {
+                    style: stylesNormal.municipiosBorder,
+                    onEachFeature: function(feature, layer) {
+                        if (feature.properties) {
+                            const nomeMunicipio = feature.properties.NM_MUN || feature.properties.nome || 'Município';
+                            const codigo = feature.properties.CD_MUN || feature.properties.codigo || '';
+                            const area = feature.properties.AREA_KM2 || feature.properties.area || 0;
+                            
+                            layer.bindPopup(createMunicipioPopup(nomeMunicipio, codigo, area), { 
+                                maxWidth: 250,
+                                className: 'popup-municipal'
+                            });
+                        }
+                    }
+                });
+                
+                // Criar camada de limite do estado com estilo inicial
+                limiteEstadoLayer = L.geoJSON(dataLimite, {
+                    style: stylesNormal.limiteEstado,
+                    onEachFeature: function(feature, layer) {
+                        layer.bindPopup('<b>Limite do Estado do Maranhão</b>');
+                    }
+                });
+                
+                console.log('✅ Camadas do Maranhão carregadas com sucesso!');
+                
+            } catch (erro) {
+                console.error('❌ Erro ao carregar camadas do Maranhão:', erro);
+                mostrarNotificacao('Erro ao carregar camadas', `Não foi possível carregar as camadas do Maranhão: ${erro.message}`, 'warning');
+            }
+        }
+        
+        // Função para alternar camadas
+        function toggleCamada(camada) {
+            switch(camada) {
+                case 'municipios-border':
+                    if (map.hasLayer(municipiosBorderLayer)) {
+                        map.removeLayer(municipiosBorderLayer);
+                    } else {
+                        municipiosBorderLayer.addTo(map);
+                    }
+                    break;
+                    
+                case 'limite-estado':
+                    if (map.hasLayer(limiteEstadoLayer)) {
+                        map.removeLayer(limiteEstadoLayer);
+                    } else {
+                        limiteEstadoLayer.addTo(map);
+                    }
+                    break;
+            }
+        }
+        
+        // Função para mudar o mapa base e ajustar cores das camadas
+        function mudarMapaBase(tipo) {
+            if (baseLayers[currentBaseLayer]) {
+                map.removeLayer(baseLayers[currentBaseLayer]);
+            }
+            
+            if (baseLayers[tipo]) {
+                baseLayers[tipo].addTo(map);
+                currentBaseLayer = tipo;
+                
+                // Atualizar estilos das camadas baseado no mapa base selecionado
+                atualizarEstilosCamadas(tipo);
+            }
+        }
+        
+        // Função para atualizar estilos das camadas baseado no mapa base
+        function atualizarEstilosCamadas(tipoMapaBase) {
+            let novosEstilos;
+            
+            if (tipoMapaBase === 'satellite') {
+                // Usar estilos mais claros para mapa satélite
+                novosEstilos = stylesSatellite;
+                console.log('🛰️ Mudando para estilos claros para mapa satélite');
+            } else {
+                // Usar estilos padrão para outros mapas
+                novosEstilos = stylesNormal;
+                console.log('🗺️ Mudando para estilos padrão');
+            }
+            
+            // Aplicar novos estilos às camadas se elas existirem
+            if (municipiosBorderLayer && map.hasLayer(municipiosBorderLayer)) {
+                municipiosBorderLayer.setStyle(novosEstilos.municipiosBorder);
+            }
+            
+            if (limiteEstadoLayer && map.hasLayer(limiteEstadoLayer)) {
+                limiteEstadoLayer.setStyle(novosEstilos.limiteEstado);
+            }
+        }
+        
+        // Mostrar/ocultar loading
+        function mostrarLoading(mostrar) {
+            loadingIndicator.style.display = mostrar ? 'flex' : 'none';
+        }
+        
+        // Alternar sidebar de filtros
+        function toggleSidebarFiltros() {
+            sidebarFilters.classList.toggle('active');
+            const icon = toggleFiltersBtn.querySelector('i');
+            if (sidebarFilters.classList.contains('active')) {
+                icon.className = 'fas fa-times';
+                toggleFiltersBtn.querySelector('span').textContent = 'Fechar';
+            } else {
+                icon.className = 'fas fa-filter';
+                toggleFiltersBtn.querySelector('span').textContent = 'Filtros';
+            }
+        }
+        
+        // Atualizar contador de filtros ativos
+        function atualizarContadorFiltros() {
+            activeFilters = 0;
+            
+            // Verificar filtros preenchidos
+            if (filterEmpresa.value) activeFilters++;
+            if (filterStatus.value) activeFilters++;
+            if (filterTipo.value) activeFilters++;
+            if (filterDataInicio.value) activeFilters++;
+            if (filterDataFim.value) activeFilters++;
+            
+            activeFiltersCount.textContent = activeFilters;
+        }
+        
+        // Função para converter número de data do Excel para JavaScript
+        function converterDataExcelParaJS(excelDate) {
+            // Excel usa 1 = 1 de janeiro de 1900
+            // JavaScript usa milissegundos desde 1 de janeiro de 1970
+            const MS_POR_DIA = 24 * 60 * 60 * 1000;
+            const OFFSET_EXCEL = 25569; // Dias entre 1/1/1900 e 1/1/1970
+            
+            // Se for um número (data do Excel)
+            if (typeof excelDate === 'number') {
+                // Verificar se é um número de data do Excel (geralmente > 10000)
+                if (excelDate > 10000) {
+                    const diasDesde1900 = excelDate;
+                    const msDesde1970 = (diasDesde1900 - OFFSET_EXCEL) * MS_POR_DIA;
+                    const data = new Date(msDesde1970);
+                    
+                    // Verificar se a conversão foi bem-sucedida
+                    if (!isNaN(data.getTime())) {
+                        return data;
+                    }
+                }
+            }
+            
+            return null;
+        }
+        
+        // Função para carregar dados automaticamente
+        async function carregarDadosAutomaticamente() {
+            try {
+                mostrarLoading(true);
+                console.log('📁 Tentando carregar:', CAMINHO_PLANILHA);
+                
+                const response = await fetch(CAMINHO_PLANILHA);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status} ${response.statusText}`);
+                }
+                
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                
+                // Processar dados
+                processarPlanilha(workbook);
+                
+            } catch (erro) {
+                console.error('❌ Erro ao carregar:', erro);
+                mostrarLoading(false);
+                mostrarNotificacao('Erro ao carregar dados', `Não foi possível carregar a planilha: ${erro.message}`, 'warning');
+            }
+        }
+        
+        // Função para processar a planilha
+        function processarPlanilha(workbook) {
+            try {
+                // Pegar primeira aba
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const dados = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                console.log(`📊 Total de linhas: ${dados.length}`);
+                
+                if (dados.length < 2) {
+                    throw new Error('Planilha vazia ou sem dados!');
+                }
+                
+                // Pegar cabeçalhos
+                const headers = dados[0];
+                console.log('📋 Cabeçalhos:', headers);
+                
+                // Encontrar índices das colunas importantes
+                const encontrarIndice = (termos) => {
+                    for (const termo of termos) {
+                        const indice = headers.findIndex(h => 
+                            h && h.toString().toLowerCase().includes(termo.toLowerCase())
+                        );
+                        if (indice !== -1) {
+                            console.log(`✅ Encontrado "${termo}" no índice ${indice}`);
+                            return indice;
+                        }
+                    }
+                    console.log(`❌ Não encontrado: ${termos}`);
+                    return -1;
+                };
+                
+                const indices = {
+                    numero: encontrarIndice(['nº', 'numero', 'número']),
+                    empresa: encontrarIndice(['empresa', 'nome da empresa']),
+                    tipo: encontrarIndice(['tipo', 'tipo de sinistro']),
+                    data: encontrarIndice(['data', 'data do acidente']),
+                    localizacao: encontrarIndice(['localização', 'localizacao']),
+                    latitude: encontrarIndice(['latitude']),
+                    longitude: encontrarIndice(['longitude']),
+                    status: encontrarIndice(['status', 'status do processo']),
+                    fonte: encontrarIndice(['fonte']),
+                    descricao: encontrarIndice(['descrição', 'descricao', 'impacto']),
+                    orgaos: encontrarIndice(['órgãos', 'orgaos', 'orgão competente']),
+                    sei: encontrarIndice(['sei', 'nº do sei', 'numero sei', 'sigepe', 'siegpe']) // NOVO: índice do SEI
+                };
+                
+                console.log('📍 Índices encontrados:', indices);
+                
+                // Processar dados usando a nova função
+                processarDadosPlanilha(dados, indices);
+                
+                console.log(`✅ ${acidentesData.length} acidentes carregados com sucesso!`);
+                
+                mostrarLoading(false);
+                
+            } catch (erro) {
+                console.error('❌ Erro ao processar:', erro);
+                mostrarLoading(false);
+                mostrarNotificacao('Erro ao processar dados', `Não foi possível processar os dados da planilha: ${erro.message}`, 'warning');
+            }
+        }
+        
+        // Função para processar dados da planilha - ATUALIZADA com SEI
+        function processarDadosPlanilha(dados, indices) {
+            // Limpar dados anteriores
+            acidentesData = [];
+            filteredData = [];
+            markersLayer.clearLayers(); // Limpar marcadores anteriores
+            
+            const bounds = [];
+            const tiposContagem = {};
+            const empresasSet = new Set();
+            const statusSet = new Set();
+            const tiposSet = new Set();
+            
+            let totalLinhas = 0;
+            let linhasComCoordenadas = 0;
+            
+            for (let i = 1; i < dados.length; i++) {
+                totalLinhas++;
+                const linha = dados[i];
+                if (!linha || linha.length === 0) continue;
+                
+                // Processar latitude e longitude
+                let lat = linha[indices.latitude];
+                let lon = linha[indices.longitude];
+                
+                if (lat !== undefined && lon !== undefined) {
+                    // Converter para número
+                    if (typeof lat === 'string') {
+                        lat = parseFloat(lat.toString().replace(',', '.').trim());
+                    }
+                    if (typeof lon === 'string') {
+                        lon = parseFloat(lon.toString().replace(',', '.').trim());
+                    }
+                    
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        linhasComCoordenadas++;
+                        
+                        // Processar data (especial para Excel)
+                        let dataRaw = linha[indices.data];
+                        let dataFormatada = 'Não informado';
+                        
+                        if (dataRaw !== undefined && dataRaw !== null && dataRaw !== '') {
+                            // Tentar converter data do Excel
+                            const dataExcel = converterDataExcelParaJS(dataRaw);
+                            if (dataExcel) {
+                                dataFormatada = formatarDataParaExibicao(dataExcel);
+                            } else if (typeof dataRaw === 'string') {
+                                // Tentar formatar como string
+                                dataFormatada = dataRaw.toString().trim();
+                            } else if (typeof dataRaw === 'number') {
+                                // Outro número que não é data do Excel
+                                dataFormatada = dataRaw.toString();
+                            }
+                        }
+                        
+                        // Processar SEI
+                        let sei = linha[indices.sei];
+                        let seiFormatado = 'SEI não informado';
+                        
+                        if (sei !== undefined && sei !== null && sei !== '') {
+                            if (typeof sei === 'string' && sei.trim() !== '') {
+                                seiFormatado = `SEI: ${sei.toString().trim()}`;
+                            } else if (typeof sei === 'number') {
+                                seiFormatado = `SEI: ${sei.toString()}`;
+                            }
+                        }
+                        
+                        // Criar objeto de dados
+                        const acidente = {
+                            id: linha[indices.numero] || i,
+                            empresa: (linha[indices.empresa] || 'Não informado').toString().trim(),
+                            tipo: (linha[indices.tipo] || 'Não informado').toString().trim(),
+                            data: dataFormatada, // Usar data já processada
+                            dataRaw: linha[indices.data], // Manter original para referência
+                            localizacao: (linha[indices.localizacao] || 'Não informado').toString().trim(),
+                            status: (linha[indices.status] || 'Não informado').toString().trim(),
+                            fonte: (linha[indices.fonte] || 'Não informado').toString().trim(),
+                            descricao: (linha[indices.descricao] || '').toString().trim(),
+                            orgaos: (linha[indices.orgaos] || 'Não informado').toString().trim(),
+                            sei: seiFormatado, // Adicionar SEI formatado
+                            latitude: lat,
+                            longitude: lon
+                        };
+                        
+                        acidentesData.push(acidente);
+                        
+                        // Coletar dados para filtros
+                        if (acidente.empresa !== 'Não informado') empresasSet.add(acidente.empresa);
+                        if (acidente.status !== 'Não informado') statusSet.add(acidente.status);
+                        if (acidente.tipo !== 'Não informado') tiposSet.add(acidente.tipo);
+                        
+                        // Contar tipos para legenda
+                        const tipoKey = acidente.tipo;
+                        tiposContagem[tipoKey] = (tiposContagem[tipoKey] || 0) + 1;
+                        
+                        bounds.push([lat, lon]);
+                    }
+                }
+            }
+            
+            console.log(`📈 Estatísticas: ${totalLinhas} linhas, ${linhasComCoordenadas} com coordenadas, ${acidentesData.length} acidentes processados`);
+            
+            // Popular filtros
+            popularFiltros(Array.from(empresasSet), Array.from(statusSet), Array.from(tiposSet));
+            
+            // Inicializar dados filtrados com todos os dados
+            filteredData = [...acidentesData];
+            
+            // Atualizar estatísticas
+            atualizarEstatisticas();
+            
+            // Criar legenda em ordem alfabética
+            criarLegendaOrdenada(tiposContagem);
+            
+            // Plotar marcadores
+            plotarMarcadores();
+            
+            // Ajustar zoom para mostrar todos os marcadores, mas respeitando os limites
+            if (bounds.length > 0) {
+                const latLngBounds = L.latLngBounds(bounds);
+                const boundedBounds = latLngBounds.pad(0.1);
+                
+                // Garantir que o ajuste de zoom não ultrapasse os limites do MA
+                const finalBounds = L.latLngBounds(
+                    [
+                        Math.max(boundedBounds.getSouth(), MA_BOUNDS.getSouth()),
+                        Math.max(boundedBounds.getWest(), MA_BOUNDS.getWest())
+                    ],
+                    [
+                        Math.min(boundedBounds.getNorth(), MA_BOUNDS.getNorth()),
+                        Math.min(boundedBounds.getEast(), MA_BOUNDS.getEast())
+                    ]
+                );
+                
+                map.fitBounds(finalBounds);
+            }
+        }
+        
+        // Função para formatar data para exibicação - ATUALIZADA
+        function formatarDataParaExibicao(dataInput) {
+            // Se for um objeto Date
+            if (dataInput instanceof Date) {
+                const dia = String(dataInput.getDate()).padStart(2, '0');
+                const mes = String(dataInput.getMonth() + 1).padStart(2, '0');
+                const ano = dataInput.getFullYear();
+                return `${dia}/${mes}/${ano}`;
+            }
+            
+            // Se for string
+            if (typeof dataInput === 'string') {
+                const dataLimpa = dataInput.trim();
+                if (dataLimpa === '' || dataLimpa === 'Não informado') {
+                    return 'Data não informada';
+                }
+                
+                // Tentar parsear a data
+                const data = parseDataBrasileira(dataLimpa);
+                if (data) {
+                    const dia = String(data.getDate()).padStart(2, '0');
+                    const mes = String(data.getMonth() + 1).padStart(2, '0');
+                    const ano = data.getFullYear();
+                    return `${dia}/${mes}/${ano}`;
+                }
+                
+                // Se não conseguir parsear, retorna o original
+                return dataLimpa;
+            }
+            
+            // Se for número (pode ser data do Excel)
+            if (typeof dataInput === 'number') {
+                // Tentar converter data do Excel
+                const dataExcel = converterDataExcelParaJS(dataInput);
+                if (dataExcel) {
+                    const dia = String(dataExcel.getDate()).padStart(2, '0');
+                    const mes = String(dataExcel.getMonth() + 1).padStart(2, '0');
+                    const ano = dataExcel.getFullYear();
+                    return `${dia}/${mes}/${ano}`;
+                }
+                
+                // Se não for data do Excel, retorna como string
+                return dataInput.toString();
+            }
+            
+            return 'Data não informada';
+        }
+        
+        // Parse data brasileira - VERSÃO CORRIGIDA
+        function parseDataBrasileira(dataStr) {
+            if (!dataStr || dataStr.trim() === '' || dataStr === 'Não informado') return null;
+            
+            let data = null;
+            
+            // Limpar espaços e caracteres indesejados
+            const dataLimpa = dataStr.toString().trim();
+            
+            // Tentar formato DD/MM/YYYY (formato brasileiro)
+            const matchBR = dataLimpa.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (matchBR) {
+                const dia = parseInt(matchBR[1], 10);
+                const mes = parseInt(matchBR[2], 10) - 1; // Mês começa em 0
+                const ano = parseInt(matchBR[3], 10);
+                data = new Date(ano, mes, dia);
+                
+                // Verificar se a data é válida
+                if (data.getDate() === dia && data.getMonth() === mes && data.getFullYear() === ano) {
+                    return data;
+                }
+            }
+            
+            // Tentar formato DD/MM/YY (ano com 2 dígitos)
+            const matchBRShort = dataLimpa.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+            if (matchBRShort) {
+                const dia = parseInt(matchBRShort[1], 10);
+                const mes = parseInt(matchBRShort[2], 10) - 1;
+                const ano = parseInt(matchBRShort[3], 10);
+                const anoCompleto = ano + 2000; // Assumindo século 21
+                data = new Date(anoCompleto, mes, dia);
+                
+                if (data.getDate() === dia && data.getMonth() === mes && data.getFullYear() === anoCompleto) {
+                    return data;
+                }
+            }
+            
+            // Tentar formato ISO (YYYY-MM-DD) que pode vir de input type="date"
+            const matchISO = dataLimpa.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (matchISO) {
+                const ano = parseInt(matchISO[1], 10);
+                const mes = parseInt(matchISO[2], 10) - 1;
+                const dia = parseInt(matchISO[3], 10);
+                data = new Date(ano, mes, dia);
+                
+                if (data.getFullYear() === ano && data.getMonth() === mes && data.getDate() === dia) {
+                    return data;
+                }
+            }
+            
+            // Tentar parse direto (para outros formatos)
+            data = new Date(dataLimpa);
+            
+            // Verificar se é uma data válida
+            if (!isNaN(data.getTime())) {
+                return data;
+            }
+            
+            console.warn(`❌ Data inválida: "${dataStr}"`);
+            return null;
+        }
+        
+        // Popular opções dos filtros
+        function popularFiltros(empresas, statusList, tipos) {
+            // Ordenar alfabeticamente
+            empresas.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            statusList.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            tipos.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            
+            // Popular filtro de empresas
+            filterEmpresa.innerHTML = '<option value="">Todas as empresas</option>';
+            empresas.forEach(empresa => {
+                const option = document.createElement('option');
+                option.value = empresa;
+                option.textContent = empresa.length > 30 ? empresa.substring(0, 30) + '...' : empresa;
+                option.title = empresa;
+                filterEmpresa.appendChild(option);
+            });
+            
+            // Popular filtro de status
+            filterStatus.innerHTML = '<option value="">Todos os status</option>';
+            statusList.forEach(status => {
+                const option = document.createElement('option');
+                option.value = status;
+                option.textContent = status;
+                filterStatus.appendChild(option);
+            });
+            
+            // Popular filtro de tipos
+            filterTipo.innerHTML = '<option value="">Todos os tipos</option>';
+            tipos.forEach(tipo => {
+                const option = document.createElement('option');
+                option.value = tipo;
+                option.textContent = tipo;
+                filterTipo.appendChild(option);
+            });
+        }
+        
+        // Aplicar filtros
+        function aplicarFiltros() {
+            try {
+                mostrarLoading(true);
+                
+                // Coletar valores dos filtros
+                const empresaFiltro = filterEmpresa.value;
+                const statusFiltro = filterStatus.value;
+                const tipoFiltro = filterTipo.value;
+                const dataInicioFiltro = filterDataInicio.value ? new Date(filterDataInicio.value) : null;
+                const dataFimFiltro = filterDataFim.value ? new Date(filterDataFim.value) : null;
+                
+                // Adicionar 23:59:59 para data fim
+                if (dataFimFiltro) {
+                    dataFimFiltro.setHours(23, 59, 59, 999);
+                }
+                
+                // Aplicar filtros
+                filteredData = acidentesData.filter(acidente => {
+                    // Filtro por empresa
+                    if (empresaFiltro && acidente.empresa !== empresaFiltro) {
+                        return false;
+                    }
+                    
+                    // Filtro por status
+                    if (statusFiltro && acidente.status !== statusFiltro) {
+                        return false;
+                    }
+                    
+                    // Filtro por tipo
+                    if (tipoFiltro && acidente.tipo !== tipoFiltro) {
+                        return false;
+                    }
+                    
+                    // Filtro por data (com tratamento aprimorado)
+                    if (dataInicioFiltro || dataFimFiltro) {
+                        const dataAcidente = parseDataBrasileira(acidente.data);
+                        
+                        // Se a data do acidente não puder ser parseada, considerar como não correspondente
+                        if (!dataAcidente) {
+                            return false;
+                        }
+                        
+                        // Comparar com data início
+                        if (dataInicioFiltro && dataAcidente < dataInicioFiltro) {
+                            return false;
+                        }
+                        
+                        // Comparar com data fim
+                        if (dataFimFiltro && dataAcidente > dataFimFiltro) {
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                });
+                
+                // Atualizar contador de filtros
+                atualizarContadorFiltros();
+                
+                // Atualizar estatísticas
+                atualizarEstatisticas();
+                
+                // Atualizar legenda com dados filtrados
+                const tiposContagemFiltrados = {};
+                filteredData.forEach(acidente => {
+                    const tipoKey = acidente.tipo;
+                    tiposContagemFiltrados[tipoKey] = (tiposContagemFiltrados[tipoKey] || 0) + 1;
+                });
+                criarLegendaOrdenada(tiposContagemFiltrados);
+                
+                // Plotar marcadores filtrados
+                plotarMarcadores();
+                
+                // Fechar sidebar de filtros
+                toggleSidebarFiltros();
+                
+                mostrarLoading(false);
+                
+                console.log(`✅ ${filteredData.length} acidentes após filtros`);
+                
+                // Mostrar notificação se não houver resultados
+                if (filteredData.length === 0) {
+                    mostrarNotificacao(
+                        'Nenhum resultado encontrado',
+                        'Não foram encontrados acidentes com os filtros aplicados. Tente ajustar os critérios de busca.',
+                        'warning'
+                    );
+                }
+                
+            } catch (erro) {
+                console.error('❌ Erro ao aplicar filtros:', erro);
+                mostrarLoading(false);
+                mostrarNotificacao('Erro ao aplicar filtros', `Não foi possível aplicar os filtros: ${erro.message}`, 'warning');
+            }
+        }
+        
+        // Limpar filtros
+        function limparFiltros() {
+            filterEmpresa.value = '';
+            filterStatus.value = '';
+            filterTipo.value = '';
+            filterDataInicio.value = '';
+            filterDataFim.value = '';
+            
+            // Resetar dados filtrados
+            filteredData = [...acidentesData];
+            
+            // Atualizar contador
+            atualizarContadorFiltros();
+            
+            // Atualizar estatísticas
+            atualizarEstatisticas();
+            
+            // Atualizar legenda
+            const tiposContagem = {};
+            acidentesData.forEach(acidente => {
+                const tipoKey = acidente.tipo;
+                tiposContagem[tipoKey] = (tiposContagem[tipoKey] || 0) + 1;
+            });
+            criarLegendaOrdenada(tiposContagem);
+            
+            // Plotar todos os marcadores
+            plotarMarcadores();
+            
+            console.log('✅ Filtros limpos');
+            
+            // Mostrar notificação de sucesso
+            mostrarNotificacao(
+                'Filtros limpos',
+                'Todos os filtros foram removidos. Mostrando todos os acidentes.',
+                'success'
+            );
+        }
+        
+        // Plotar marcadores no mapa
+        function plotarMarcadores() {
+            // Limpar marcadores antigos
+            markersLayer.clearLayers();
+            
+            const bounds = [];
+            
+            // Adicionar marcadores filtrados
+            filteredData.forEach(acidente => {
+                adicionarMarcador(acidente);
+                bounds.push([acidente.latitude, acidente.longitude]);
+            });
+            
+            // Ajustar zoom se houver marcadores, respeitando os limites
+            if (bounds.length > 0) {
+                const latLngBounds = L.latLngBounds(bounds);
+                const boundedBounds = latLngBounds.pad(0.1);
+                
+                // Garantir que o ajuste de zoom não ultrapasse os limites do MA
+                const finalBounds = L.latLngBounds(
+                    [
+                        Math.max(boundedBounds.getSouth(), MA_BOUNDS.getSouth()),
+                        Math.max(boundedBounds.getWest(), MA_BOUNDS.getWest())
+                    ],
+                    [
+                        Math.min(boundedBounds.getNorth(), MA_BOUNDS.getNorth()),
+                        Math.min(boundedBounds.getEast(), MA_BOUNDS.getEast())
+                    ]
+                );
+                
+                map.fitBounds(finalBounds);
+            }
+        }
+        
+        // Adicionar marcador ao mapa
+        function adicionarMarcador(acidente) {
+            const cor = getCorPorTipo(acidente.tipo);
+            const icone = L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background-color: ${cor}; width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            
+            const marker = L.marker([acidente.latitude, acidente.longitude], { icon: icone });
+            
+            // Criar popup
+            const popup = L.popup({
+                maxWidth: 400,
+                className: 'custom-popup'
+            }).setContent(criarPopupContent(acidente));
+            
+            // Configurar eventos do popup
+            marker.bindPopup(popup);
+            
+            // Salvar referência quando o popup abrir
+            marker.on('popupopen', function(e) {
+                openPopup = e.popup;
+                
+                // Configurar evento para o botão de fechar dentro do popup
+                setTimeout(() => {
+                    const closeBtn = document.querySelector('.popup-close-btn');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', function(event) {
+                            event.stopPropagation();
+                            marker.closePopup();
+                            openPopup = null;
+                        });
+                    }
+                }, 100);
+            });
+            
+            // Limpar referência quando o popup fechar
+            marker.on('popupclose', function() {
+                openPopup = null;
+            });
+            
+            // Adicionar marcador ao grupo
+            markersLayer.addLayer(marker);
+            
+            return marker;
+        }
+        
+        // Criar conteúdo do popup com botão de fechar melhorado
+        function criarPopupContent(acidente) {
+            // Função auxiliar para tratar dados ausentes
+            const formatarValor = (valor, placeholder = '-') => {
+                if (!valor || valor === '' || valor === 'Não informado' || valor === 'undefined') {
+                    return placeholder;
+                }
+                return valor.toString().trim();
+            };
+            
+            // Determinar a classe do status baseado no conteúdo
+            const determinarClasseStatus = (status) => {
+                if (!status || status === 'Não informado' || status === '-') {
+                    return 'normal';
+                }
+                
+                const statusLower = status.toLowerCase();
+                
+                // Verificar se é um status finalizado
+                if (statusLower.includes('finalizado') || 
+                    statusLower.includes('concluído') || 
+                    statusLower.includes('concluido') ||
+                    statusLower.includes('resolvido') ||
+                    statusLower.includes('encerrado')) {
+                    return 'finalizado';
+                }
+                
+                // Verificar se é um status em análise
+                if (statusLower.includes('análise') || 
+                    statusLower.includes('analise') ||
+                    statusLower.includes('andamento') ||
+                    statusLower.includes('processando') ||
+                    statusLower.includes('pendente')) {
+                    return 'analise';
+                }
+                
+                return 'normal';
+            };
+            
+            const classeStatus = determinarClasseStatus(acidente.status);
+            const dataFormatada = formatarDataParaExibicao(acidente.data);
+            const temDescricao = acidente.descricao && acidente.descricao.trim() !== '';
+            const previewDescricao = temDescricao ? 
+                (acidente.descricao.length > 80 ? 
+                    acidente.descricao.substring(0, 80) + '...' : 
+                    acidente.descricao) : 
+                'Nenhuma descrição disponível.';
+            
+            const popupHTML = `
+                <div class="popup-container">
+                    <div class="popup-header">
+                        <!-- Botão de fechar melhorado -->
+                        <button class="popup-close-btn" title="Fechar">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <h2 class="popup-title">${formatarValor(acidente.empresa, 'Empresa não informada')}</h2>
+                        <div class="popup-subtitle">${formatarValor(acidente.tipo, 'Tipo não especificado')}</div>
+                        <!-- SEI no header -->
+                        <div class="popup-sei">
+                            <i class="fas fa-file-alt"></i>
+                            ${formatarValor(acidente.sei, 'SEI não informado')}
+                        </div>
+                    </div>
+                
+                    <div class="popup-content">
+                        <!-- Data -->
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-calendar"></i>
+                                Data
+                            </div>
+                            <div class="info-value">${dataFormatada}</div>
+                        </div>
+                        
+                        <!-- Localização -->
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Local
+                            </div>
+                            <div class="info-value">${formatarValor(acidente.localizacao, 'Local não informado')}</div>
+                        </div>
+                        
+                        <!-- Status (com tratamento especial) -->
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-tasks"></i>
+                                Status
+                            </div>
+                            <div class="info-value">
+                                ${classeStatus === 'finalizado' ? `
+                                    <span class="status-badge finalizado">
+                                        <i class="fas fa-check-circle"></i>
+                                        ${formatarValor(acidente.status, 'Status não informado')}
+                                    </span>
+                                ` : classeStatus === 'analise' ? `
+                                    <span class="status-badge analise">
+                                        <i class="fas fa-hourglass-half"></i>
+                                        ${formatarValor(acidente.status, 'Status não informado')}
+                                    </span>
+                                ` : `
+                                    <span class="status-normal">${formatarValor(acidente.status, 'Status não informado')}</span>
+                                `}
+                            </div>
+                        </div>
+                        
+                        <!-- Fonte (se existir) -->
+                        ${formatarValor(acidente.fonte) !== '-' ? `
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-newspaper"></i>
+                                Fonte
+                            </div>
+                            <div class="info-value">${formatarValor(acidente.fonte)}</div>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Órgãos Envolvidos (se existir) -->
+                        ${formatarValor(acidente.orgaos) !== '-' ? `
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-building"></i>
+                                Órgãos
+                            </div>
+                            <div class="info-value">${formatarValor(acidente.orgaos)}</div>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Descrição (se existir) -->
+                        ${temDescricao ? `
+                        <div class="descricao-container">
+                            <div class="info-label">
+                                <i class="fas fa-align-left"></i>
+                                Descrição
+                            </div>
+                            <div class="descricao-preview">
+                                ${previewDescricao}
+                            </div>
+                            <button class="ver-descricao-btn" onclick="event.stopPropagation(); mostrarDescricaoCompleta(${JSON.stringify(acidente).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-expand-alt"></i>
+                                Ler descrição completa
+                            </button>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            return popupHTML;
+        }
+        
+        // Função para mostrar descrição completa
+        function mostrarDescricaoCompleta(acidente) {
+            const titulo = `${acidente.sei || 'SEI não informado'} - ${acidente.empresa || 'Empresa não informada'}`;
+            const descricao = acidente.descricao && acidente.descricao.trim() !== '' 
+                ? acidente.descricao 
+                : 'Nenhuma descrição detalhada disponível para este acidente.';
+            
+            mostrarModalDescricao(titulo, descricao);
+        }
+        
+        // Atualizar estatísticas
+        function atualizarEstatisticas() {
+            const totalAcidentes = filteredData.length;
+            const emAnalise = filteredData.filter(a => 
+                a.status && a.status.toLowerCase().includes('análise')
+            ).length;
+            
+            const empresas = [...new Set(filteredData.map(a => a.empresa).filter(e => e !== 'Não informado'))].length;
+            
+            document.getElementById('totalAcidentes').textContent = totalAcidentes;
+            document.getElementById('acidentesAtivos').textContent = emAnalise;
+            document.getElementById('empresasEnvolvidas').textContent = empresas;
+        }
+        
+        // Criar legenda em ordem alfabética COM TOGGLE
+        function criarLegendaOrdenada(tiposContagem) {
+            const container = document.getElementById('legendContainer');
+            const tiposCount = document.getElementById('tiposCount');
+            
+            // Ordenar tipos alfabeticamente
+            const tiposOrdenados = Object.entries(tiposContagem).sort(([tipoA], [tipoB]) => 
+                tipoA.localeCompare(tipoB, 'pt-BR')
+            );
+            
+            // Atualizar contador de tipos
+            tiposCount.textContent = `${tiposOrdenados.length} ${tiposOrdenados.length === 1 ? 'tipo' : 'tipos'}`;
+            
+            // Limpar container
+            container.innerHTML = '';
+            
+            // Verificar qual tipo está ativo no filtro atual
+            const tipoAtual = filterTipo.value;
+            
+            // Adicionar itens ordenados
+            tiposOrdenados.forEach(([tipo, quantidade]) => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                
+                // Destacar se este tipo está ativo no filtro
+                if (tipo === tipoAtual) {
+                    item.classList.add('active');
+                }
+                
+                item.innerHTML = `
+                    <div class="legend-color" style="background-color: ${getCorPorTipo(tipo)}"></div>
+                    <span class="legend-label">${tipo}</span>
+                    <div class="legend-quantity">${quantidade}</div>
+                `;
+                
+                // Adicionar evento de clique com toggle
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    if (tipo === tipoAtual) {
+                        // Se clicou no mesmo tipo que já está ativo, remove o filtro
+                        filterTipo.value = '';
+                        mostrarNotificacao(
+                            'Filtro removido',
+                            `Filtro por "${tipo}" foi removido. Mostrando todos os tipos.`,
+                            'info'
+                        );
+                    } else {
+                        // Se clicou em um tipo diferente, aplica o filtro
+                        filterTipo.value = tipo;
+                        mostrarNotificacao(
+                            'Filtro aplicado',
+                            `Mostrando apenas acidentes do tipo: ${tipo}`,
+                            'success'
+                        );
+                    }
+                    
+                    // Aplicar filtros
+                    aplicarFiltros();
+                });
+                
+                container.appendChild(item);
+            });
+        }
+        
+        // Função para definir cores por tipo
+        function getCorPorTipo(tipo) {
+            if (!tipo) return '#718096';
+            
+            const tipoLower = tipo.toLowerCase();
+            if (tipoLower.includes('vazamento')) return '#3182ce';
+            if (tipoLower.includes('derramamento')) return '#ed8936';
+            if (tipoLower.includes('incêndio') || tipoLower.includes('incendio')) return '#e53e3e';
+            if (tipoLower.includes('tombamento')) return '#805ad5';
+            if (tipoLower.includes('desabamento') || tipoLower.includes('deslizamento')) return '#d69e2e';
+            if (tipoLower.includes('contaminação') || tipoLower.includes('contaminacao')) return '#38a169';
+            return '#718096';
+        }
+        
+        // Exportar dados
+        function exportarDados() {
+            const data = filteredData.length > 0 ? filteredData : acidentesData;
+            
+            if (data.length === 0) {
+                mostrarNotificacao(
+                    'Exportação cancelada',
+                    'Não há dados para exportar. Aplique filtros diferentes ou verifique os dados carregados.',
+                    'warning'
+                );
+                return;
+            }
+            
+            const csv = [
+                ['ID', 'Empresa', 'Tipo', 'Data', 'Localização', 'Latitude', 'Longitude', 'Status', 'Fonte', 'SEI', 'Órgãos'],
+                ...data.map(a => [
+                    a.id,
+                    a.empresa,
+                    a.tipo,
+                    a.data,
+                    a.localizacao,
+                    a.latitude,
+                    a.longitude,
+                    a.status,
+                    a.fonte || '',
+                    a.sei || '',
+                    a.orgaos || ''
+                ])
+            ].map(row => 
+                row.map(cell => 
+                    typeof cell === 'string' ? `"${cell.replace(/"/g, '""')}"` : cell
+                ).join(',')
+            ).join('\n');
+            
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `acidentes_ambientais_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            mostrarNotificacao(
+                'Exportação concluída',
+                `${data.length} registros exportados com sucesso!`,
+                'success'
+            );
+        }
+        
+        console.log('✅ Aplicação inicializada com sistema de notificações aprimorado');
+    </script>
+</body>
+</html>

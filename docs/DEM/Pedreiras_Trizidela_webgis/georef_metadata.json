@@ -1,0 +1,36 @@
+{
+  "imagem": {
+    "arquivo": "ortofoto_Pedreiras_Trizidela.png",
+    "largura": 4175,
+    "altura": 10000,
+    "formato": "PNG",
+    "tem_transparencia": true,
+    "qualidade": "PNG com transparência"
+  },
+  "georreferenciamento": {
+    "crs": "EPSG:4326 (WGS84)",
+    "bounds": {
+      "left": -44.61115012664845,
+      "bottom": -4.574283541728669,
+      "right": -44.603061774003095,
+      "top": -4.5549119122780635
+    },
+    "centro": {
+      "lat": -4.564597727003367,
+      "lng": -44.607105950325774
+    }
+  },
+  "origem": {
+    "arquivo": "E:\\Igor Morim\\sima-ma\\docs\\DEM\\Pedreiras_Trizidela.tif",
+    "crs_original": "EPSG:31983",
+    "width_original": 17921,
+    "height_original": 42817,
+    "bounds_original": {
+      "left": 543133.8365921454,
+      "bottom": 9494381.777421415,
+      "right": 544029.8865921454,
+      "top": 9496522.627421414
+    },
+    "tem_alpha_original": true
+  }
+}

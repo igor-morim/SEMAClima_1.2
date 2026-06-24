@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Alertas Hidrológicos - Sistema de alerta para níveis de rios no Maranhão: Monitoramento em tempo real dos níveis dos rios com alertas para atenção, alerta e emergência.">
+    <meta name="keywords" content="alertas hidrológicos, Maranhão, rios, monitoramento, cheia, seca, SEMA">
+    <meta name="author" content="Igor Carlos Cunha Morim">
+    <title>Alertas Hidrológicos - SIMA</title>
+    
+    <!-- Favicon SIMA -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo/CPDAm/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/CPDAm/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo/CPDAm/favicon-16x16.png">
+    <link rel="icon" href="assets/images/logo/CPDAm/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/images/logo/CPDAm/favicon.ico">
+
+    <!-- Para Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/logo/CPDAm/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/logo/CPDAm/android-chrome-512x512.png">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Paleta Azul para Alertas Hidrológicos */
+            --primary-color: #0369a1;
+            --primary-dark: #0c4a6e;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --bg-color: #f0f9ff;
+            --bg-secondary: #e0f2fe;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #bae6fd;
+            --shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Cores específicas para Alertas Hidrológicos */
+            --accent-color: #0ea5e9;
+            --unavailable-color: #95a5a6;
+            --unavailable-bg: #ecf0f194;
+            --card-gradient: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+            
+            /* Cores de status para alertas */
+            --status-emergencia_seca: #ff0000;
+            --status-alerta_seca: #ff7f00;
+            --status-atencao_seca: #ffff00;
+            --status-normal: #33cc33;
+            --status-atencao_cheia: #00ffff;
+            --status-alerta_cheia: #7f7fff;
+            --status-emergencia_cheia: #7f00bf;
+        }
+
+        .dark-mode {
+            --primary-color: #0ea5e9;
+            --primary-dark: #0369a1;
+            --secondary-color: #94a3b8;
+            --bg-color: #0a192f;
+            --bg-secondary: #09131f;
+            --bg-card: #142d4a;
+            --text-primary: #e3f2fd;
+            --text-secondary: #b0bec5;
+            --text-muted: #607d8b;
+            --border-color: #2c4a6a;
+            --shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+            
+            /* Ajustes para dark mode nos Alertas */
+            --accent-color: #60a5fa;
+            --unavailable-color: #78909c;
+            --unavailable-bg: #37474f;
+            --card-gradient: linear-gradient(135deg, #142d4a 0%, #1a3658 100%);
+            
+            /* Cores de status para alertas no dark mode */
+            --status-emergencia_seca: #ff0000;
+            --status-alerta_seca: #ff7f00;
+            --status-atencao_seca: #ffff00;
+            --status-normal: #33cc33;
+            --status-atencao_cheia: #00ffff;
+            --status-alerta_cheia: #7f7fff;
+            --status-emergencia_cheia: #7f00bf;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        /* CSS base simplificado */
+        .water-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .dark-mode .water-background {
+            opacity: 0.6;
+        }
+
+        /* Remover as definições antigas de .wave */
+        
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header - Estilo HydroDocs */
+        .header {
+            background: rgba(var(--bg-card-rgb), 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-description {
+            color: var(--text-secondary);
+            text-align: justify;
+            font-size: 1.2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Controls */
+        .controls-section {
+            padding: 1.5rem 2rem;
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: rgba(var(--bg-card-rgb), 0.8);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            background: rgba(30, 64, 175, 0.1);
+        }
+
+        .stat-item i {
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        /* Filtros */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Cards de Alertas */
+        .alerts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 15px;
+        }
+
+        .alert-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 100%;
+            transition: var(--transition);
+        }
+
+        .alert-card.status-emergencia_seca::before {
+            background: var(--status-emergencia_seca);
+        }
+
+        .alert-card.status-alerta_seca::before {
+            background: var(--status-alerta_seca);
+        }
+
+        .alert-card.status-atencao_seca::before {
+            background: var(--status-atencao_seca);
+        }
+
+        .alert-card.status-normal::before {
+            background: var(--status-normal);
+        }
+
+        .alert-card.status-atencao_cheia::before {
+            background: var(--status-atencao_cheia);
+        }
+
+        .alert-card.status-alerta_cheia::before {
+            background: var(--status-alerta_cheia);
+        }
+
+        .alert-card.status-emergencia_cheia::before {
+            background: var(--status-emergencia_cheia);
+        }
+
+        .alert-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .alert-card:hover::before {
+            width: 12px;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .alert-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-number {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .alert-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .alert-status.emergencia_seca {
+            background: rgba(255, 0, 0, 0.15);
+            color: var(--status-emergencia_seca);
+        }
+
+        .alert-status.alerta_seca {
+            background: rgba(255, 127, 0, 0.15);
+            color: var(--status-alerta_seca);
+        }
+
+        .alert-status.atencao_seca {
+            background: rgba(255, 255, 0, 0.15);
+            color: var(--status-atencao_seca);
+        }
+
+        .alert-status.normal {
+            background: rgba(0, 191, 0, 0.15);
+            color: var(--status-normal);
+        }
+
+        .alert-status.atencao_cheia {
+            background: rgba(0, 255, 255, 0.15);
+            color: var(--status-atencao_cheia);
+        }
+
+        .alert-status.alerta_cheia {
+            background: rgba(127, 127, 255, 0.15);
+            color: var(--status-alerta_cheia);
+        }
+
+        .alert-status.emergencia_cheia {
+            background: rgba(127, 0, 191, 0.15);
+            color: var(--status-emergencia_cheia);
+        }
+
+        .alert-body {
+            flex-grow: 1;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .alert-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .alert-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .alert-meta-item i {
+            font-size: 0.8rem;
+            width: 16px;
+            text-align: center;
+        }
+
+        .alert-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .alert-timestamp {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .btn-alert-details {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            box-shadow: 0 3px 8px rgba(30, 64, 175, 0.3);
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-alert-details:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+        }
+
+        /* Indicadores de Status */
+        .status-indicators {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: var(--bg-secondary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .status-indicator.emergencia_seca {
+            border-bottom: 3px solid var(--status-emergencia_seca);
+        }
+
+        .status-indicator.alerta_seca {
+            border-bottom: 3px solid var(--status-alerta_seca);
+        }
+
+        .status-indicator.atencao_seca {
+            border-bottom: 3px solid var(--status-atencao_seca);
+        }
+
+        .status-indicator.normal {
+            border-bottom: 3px solid var(--status-normal);
+        }
+
+        .status-indicator.atencao_cheia {
+            border-bottom: 3px solid var(--status-atencao_cheia);
+        }
+
+        .status-indicator.alerta_cheia {
+            border-bottom: 3px solid var(--status-alerta_cheia);
+        }
+
+        .status-indicator.emergencia_cheia {
+            border-bottom: 3px solid var(--status-emergencia_cheia);
+        }
+
+        /* Empty and Loading States */
+        .empty-message {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-muted);
+            font-style: italic;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .empty-message i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .loading p {
+            font-size: 1.1rem;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: var(--radius);
+            color: var(--danger-color);
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--danger-color);
+        }
+
+        .error-message i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Footer - Estilo HydroDocs */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: var(--transition);
+        }
+
+        .footer-link:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-copyright {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive - AJUSTES DE FONTES PARA TELAS MENORES */
+        @media (min-width: 768px) {
+            .main-content {
+                padding: 2rem;
+            }
+            
+            .page-title {
+                font-size: 2.5rem;
+            }
+            
+            .controls-section {
+                padding: 0.5rem;
+            }
+            
+            .stats {
+                gap: 1.5rem;
+                font-size: 1rem;
+            }
+            
+            .stat-item {
+                padding: 10px 16px;
+            }
+            
+            .alerts-grid {
+                grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            }
+            
+            /* Ajustes de fonte para tablets */
+            .alert-title {
+                font-size: 1.3rem;
+            }
+            
+            .alert-status {
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
+            
+            .status-indicator {
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .alerts-grid {
+                grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            }
+            
+            .alert-title {
+                font-size: 1.4rem;
+            }
+            
+            .alert-status {
+                font-size: 0.85rem;
+                padding: 6px 12px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                margin: 1rem 0;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .controls-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filters {
+                justify-content: center;
+            }
+            
+            .alerts-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+            
+            /* Ajustes de fonte para mobile */
+            .page-title {
+                font-size: 1.8rem;
+            }
+            
+            .page-description {
+                font-size: 1rem;
+            }
+            
+            .alert-title {
+                font-size: 1.1rem;
+                line-height: 1.3;
+            }
+            
+            .alert-number {
+                font-size: 0.8rem;
+            }
+            
+            .alert-status {
+                font-size: 0.7rem;
+                padding: 5px 8px;
+                letter-spacing: 0.3px;
+            }
+            
+            .alert-description {
+                font-size: 0.85rem;
+            }
+            
+            .alert-meta-item {
+                font-size: 0.8rem;
+            }
+            
+            .status-indicator {
+                font-size: 0.75rem;
+                padding: 6px 10px;
+            }
+            
+            /* Improve touch targets */
+            .alert-card {
+                min-height: 44px; /* Minimum touch target size */
+            }
+            
+            .btn-alert-details, .stat-item {
+                min-height: 36px; /* Minimum touch target size */
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        /* Very small screens */
+        @media (max-width: 480px) {
+            .alerts-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            
+            .alert-card {
+                padding: 1.2rem;
+            }
+            
+            .alert-title {
+                font-size: 1.1rem;
+            }
+            
+            .alert-number {
+                font-size: 0.95rem;
+            }
+            
+            .alert-status {
+                font-size: 0.75rem;
+                padding: 4px 6px;
+            }
+            
+            .alert-description {
+                font-size: 0.8rem;
+            }
+            
+            .alert-meta-item {
+                font-size: 0.75rem;
+            }
+            
+            .status-indicator {
+                font-size: 0.7rem;
+                padding: 5px 8px;
+            }
+            
+            .btn-alert-details {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+            
+            .filter-select {
+                font-size: 0.85rem;
+                padding: 0.6rem 0.8rem;
+            }
+            
+            .stat-item {
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 360px) {
+            .alerts-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .alert-card {
+                padding: 1rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .page-description {
+                font-size: 0.9rem;
+            }
+            
+            .alert-title {
+                font-size: 0.95rem;
+            }
+            
+            .alert-number {
+                font-size: 0.7rem;
+            }
+            
+            .alert-status {
+                font-size: 0.6rem;
+                padding: 3px 5px;
+            }
+            
+            .alert-description {
+                font-size: 0.75rem;
+            }
+            
+            .alert-meta-item {
+                font-size: 0.7rem;
+            }
+            
+            .status-indicator {
+                font-size: 0.65rem;
+                padding: 4px 6px;
+            }
+            
+            .btn-alert-details {
+                font-size: 0.75rem;
+                padding: 5px 10px;
+            }
+            
+            .filter-select {
+                font-size: 0.8rem;
+                padding: 0.5rem 0.7rem;
+            }
+            
+            .stat-item {
+                font-size: 0.75rem;
+                padding: 5px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+        <!-- Ondas dinâmicas no background -->
+    <div class="water-background">
+        <!-- As ondas serão criadas dinamicamente pelo JavaScript -->
+    </div>
+    
+    <div class="app-container">
+        <!-- Header - Estilo HydroDocs -->
+        <header class="header">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-water"></i>
+                    <span>Alertas Hidrológicos</span>
+                </a>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="refreshAlertas()">
+                        <i class="fas fa-sync-alt"></i>
+                        Atualizar
+                    </button>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Alertas Hidrológicos</h1>
+                <p class="page-description">Sistema de alerta para monitoramento dos níveis dos rios no território estadual. São emitidos alertas sempre que um rio atinge níveis de atenção, alerta ou emergência para situações de cheia ou seca, permitindo ações preventivas e de resposta pelos órgãos competentes.</p>
+            </div>
+            
+            <!-- Indicadores de Status -->
+            <div class="status-indicators">
+                <div class="status-indicator emergencia_seca">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Emergência de Seca</span>
+                </div>
+                <div class="status-indicator alerta_seca">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Alerta de Seca</span>
+                </div>
+                <div class="status-indicator atencao_seca">
+                    <i class="fas fa-rss-square"></i>
+                    <span>Atenção de Seca</span>
+                </div>
+                <div class="status-indicator normal">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Normal</span>
+                </div>
+                <div class="status-indicator atencao_cheia">
+                    <i class="fas fa-rss-square"></i>
+                    <span>Atenção de Cheia</span>
+                </div>
+                <div class="status-indicator alerta_cheia">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Alerta de Cheia</span>
+                </div>
+                <div class="status-indicator emergencia_cheia">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Emergência de Cheia</span>
+                </div>
+            </div>
+            
+            <div class="controls-section">
+                <div class="stats">
+                    <div class="stat-item">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span id="total-alertas">0 alertas Emitidos</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-river"></i>
+                        <span id="total-rios">0 rios monitorados</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span id="last-update">Atualização: Carregando...</span>
+                    </div>
+                </div>
+                
+                <div class="filters">
+                    <select class="filter-select" id="filter-tipo" onchange="filterAlertas()" title="Filtrar por tipo de alerta" aria-label="Filtrar por tipo de alerta">
+                        <option value="all">Todos os Tipos</option>
+                        <option value="emergencia_seca">Emergência de Seca</option>
+                        <option value="alerta_seca">Alerta de Seca</option>
+                        <option value="atencao_seca">Atenção de Seca</option>
+                        <option value="atencao_cheia">Atenção de Cheia</option>
+                        <option value="alerta_cheia">Alerta de Cheia</option>
+                        <option value="emergencia_cheia">Emergência de Cheia</option>
+                    </select>
+                    
+                    <select class="filter-select" id="filter-status" onchange="filterAlertas()" title="Filtrar por status" aria-label="Filtrar por status">
+                        <option value="all">Todos os Status</option>
+                        <option value="emergencia">Emergência</option>
+                        <option value="alerta">Alerta</option>
+                        <option value="atencao">Atenção</option>
+                        <option value="normal">Normal</option>
+                    </select>
+                    
+                    <select class="filter-select" id="filter-rio" onchange="filterAlertas()" title="Filtrar por rio" aria-label="Filtrar por rio">
+                        <option value="all">Todos os Rios</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="alertas-container">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando alertas...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer - Estilo HydroDocs -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-water"></i>
+                    <span>Alertas Hidrológicos - SIMA</span>
+                </div>
+                
+                <div class="footer-copyright">
+                    &copy; 2026 Sistema de Monitoramento Ambiental - SIMA/MA
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ========== TEMA ESCURO ==========
+        function carregarPreferenciasTema() {
+            const temaSalvo = localStorage.getItem('temaEscuro');
+            if (temaSalvo === 'true') {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const botaoTema = document.querySelector('.theme-toggle');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                botaoTema.innerHTML = '<i class="fas fa-sun"></i>';
+                localStorage.setItem('temaEscuro', 'true');
+            } else {
+                botaoTema.innerHTML = '<i class="fas fa-moon"></i>';
+                localStorage.setItem('temaEscuro', 'false');
+            }
+        }
+
+        // ========== FUNÇÕES DOS ALERTAS ==========
+        
+        // Função para buscar alertas da API
+        async function fetchAlertas() {
+            try {
+                const response = await fetch('/api/alertas-hidrologicos');
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar alertas hidrológicos');
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Erro:', error);
+                throw error;
+            }
+        }
+
+        // Função para criar cards de alerta
+        function createAlertCards(alertas) {
+            let cardsHTML = '';
+            
+            alertas.forEach(alerta => {
+                // Determinar a classe de status baseada no tipo de evento e gravidade
+                const statusClass = getStatusClass(alerta.gravidade, alerta.tipo_evento);
+                const statusText = getStatusText(alerta.gravidade, alerta.tipo_evento);
+                
+                // Formatar data de publicação
+                const dataPublicacao = alerta.data_publicacao || formatTimestamp(alerta.timestamp);
+                
+                cardsHTML += `
+                    <div class="alert-card status-${statusClass}">
+                        <div class="alert-header">
+                            <div>
+                                <h3 class="alert-title">Alerta N° ${alerta.numero}/${alerta.ano}</h3>
+                                <div class="alert-number">${alerta.municipio} - ${alerta.rio}</div>
+                            </div>
+                            <span class="alert-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="alert-body">
+                            <p class="alert-description">${alerta.descricao || 'Monitoramento contínuo do nível do rio.'}</p>
+                            <div class="alert-meta">
+                                <div class="alert-meta-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span><strong>Município:</strong> ${alerta.municipio}</span>
+                                </div>
+                                <div class="alert-meta-item">
+                                    <i class="fas fa-water"></i>
+                                    <span><strong>Rio:</strong> ${alerta.rio}</span>
+                                </div>
+                                <div class="alert-meta-item">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span><strong>Status:</strong> ${statusText}</span>
+                                </div>
+                                <div class="alert-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span><strong>Publicação:</strong> ${dataPublicacao}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert-footer">
+                            <span class="alert-timestamp">Sistema de Alerta Hidrológico</span>
+                            <button class="btn-alert-details" onclick="openAlertPDF('${alerta.arquivo}')">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>Abrir PDF</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return cardsHTML;
+        }
+
+        // Nova função para obter a classe de status combinada
+        function getStatusClass(gravidade, tipoEvento) {
+            if (!gravidade || gravidade === 'normal') return 'normal';
+            
+            if (tipoEvento === 'seca') {
+                switch(gravidade) {
+                    case 'atencao': return 'atencao_seca';
+                    case 'alerta': return 'alerta_seca';
+                    case 'emergencia': return 'emergencia_seca';
+                    default: return 'normal';
+                }
+            } else {
+                // Para cheia ou não especificado
+                switch(gravidade) {
+                    case 'atencao': return 'atencao_cheia';
+                    case 'alerta': return 'alerta_cheia';
+                    case 'emergencia': return 'emergencia_cheia';
+                    default: return 'normal';
+                }
+            }
+        }
+
+        // Função para obter texto do status formatado
+        function getStatusText(gravidade, tipoEvento) {
+            if (!gravidade || gravidade === 'normal') return 'Normal';
+            
+            if (tipoEvento === 'seca') {
+                switch(gravidade) {
+                    case 'atencao': return 'Atenção de Seca';
+                    case 'alerta': return 'Alerta de Seca';
+                    case 'emergencia': return 'Emergência de Seca';
+                    default: return 'Normal';
+                }
+            } else {
+                // Para cheia ou não especificado
+                switch(gravidade) {
+                    case 'atencao': return 'Atenção de Cheia';
+                    case 'alerta': return 'Alerta de Cheia';
+                    case 'emergencia': return 'Emergência de Cheia';
+                    default: return 'Normal';
+                }
+            }
+        }
+
+        // Função para formatar timestamp
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return '--';
+            
+            const date = new Date(timestamp);
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Função para criar grid de alertas
+        function createAlertasGrid(alertas) {
+            return `<div class="alerts-grid">${createAlertCards(alertas)}</div>`;
+        }
+
+        // Função para filtrar alertas
+        function filterAlertas() {
+            const tipoFilter = document.getElementById('filter-tipo').value;
+            const statusFilter = document.getElementById('filter-status').value;
+            const rioFilter = document.getElementById('filter-rio').value;
+            
+            const filteredAlertas = window.allAlertas.filter(alerta => {
+                const tipoMatch = tipoFilter === 'all' || 
+                    (tipoFilter === 'emergencia_seca' && alerta.gravidade === 'emergencia' && alerta.tipo_evento === 'seca') ||
+                    (tipoFilter === 'alerta_seca' && alerta.gravidade === 'alerta' && alerta.tipo_evento === 'seca') ||
+                    (tipoFilter === 'atencao_seca' && alerta.gravidade === 'atencao' && alerta.tipo_evento === 'seca') ||
+                    (tipoFilter === 'atencao_cheia' && alerta.gravidade === 'atencao' && (alerta.tipo_evento === 'cheia' || !alerta.tipo_evento)) ||
+                    (tipoFilter === 'alerta_cheia' && alerta.gravidade === 'alerta' && (alerta.tipo_evento === 'cheia' || !alerta.tipo_evento)) ||
+                    (tipoFilter === 'emergencia_cheia' && alerta.gravidade === 'emergencia' && (alerta.tipo_evento === 'cheia' || !alerta.tipo_evento));
+                
+                const statusMatch = statusFilter === 'all' || 
+                    (statusFilter === 'emergencia' && alerta.gravidade === 'emergencia') ||
+                    (statusFilter === 'alerta' && alerta.gravidade === 'alerta') ||
+                    (statusFilter === 'atencao' && alerta.gravidade === 'atencao') ||
+                    (statusFilter === 'normal' && (!alerta.gravidade || alerta.gravidade === 'normal'));
+                
+                const rioMatch = rioFilter === 'all' || alerta.rio === rioFilter;
+                
+                return tipoMatch && statusMatch && rioMatch;
+            });
+            
+            const container = document.getElementById('alertas-container');
+            if (filteredAlertas.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-message">
+                        <i class="fas fa-search"></i>
+                        <h3>Nenhum alerta encontrado</h3>
+                        <p>Não há alertas correspondentes aos filtros selecionados.</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = createAlertasGrid(filteredAlertas);
+            }
+        }
+
+        // Função para preencher filtro de rios
+        function populateRioFilter(alertas) {
+            const rios = [...new Set(alertas.map(alerta => alerta.rio))].sort();
+            const filterRio = document.getElementById('filter-rio');
+            
+            // Limpar opções existentes (exceto "Todos os Rios")
+            while (filterRio.children.length > 1) {
+                filterRio.removeChild(filterRio.lastChild);
+            }
+            
+            // Adicionar rios
+            rios.forEach(rio => {
+                const option = document.createElement('option');
+                option.value = rio;
+                option.textContent = rio;
+                filterRio.appendChild(option);
+            });
+        }
+
+        // Função para abrir PDF do alerta
+        function openAlertPDF(pdfPath) {
+            if (pdfPath) {
+                // Abre o PDF em uma nova aba
+                window.open(pdfPath, '_blank');
+            } else {
+                alert('Arquivo PDF não disponível para este alerta.');
+            }
+        }
+
+        // Função para renderizar os alertas
+        async function renderAlertas() {
+            const container = document.getElementById('alertas-container');
+            const totalAlertas = document.getElementById('total-alertas');
+            const totalRios = document.getElementById('total-rios');
+            const lastUpdate = document.getElementById('last-update');
+            
+            // Mostra loading
+            container.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando alertas...</p>
+                </div>
+            `;
+            
+            try {
+                const data = await fetchAlertas();
+                const alertasData = data.data;
+                
+                // Salvar todos os alertas para filtragem
+                window.allAlertas = alertasData;
+                
+                // Atualiza estatísticas
+                const riosUnicos = [...new Set(alertasData.map(alerta => alerta.rio))];
+                const alertasAtivos = alertasData.filter(alerta => 
+                    alerta.gravidade === 'atencao' || alerta.gravidade === 'alerta' || alerta.gravidade === 'emergencia'
+                ).length;
+                
+                totalAlertas.textContent = `${alertasAtivos} alerta${alertasAtivos !== 1 ? 's' : ''} Emitidos${alertasAtivos !== 1 ? 's' : ''}`;
+                totalRios.textContent = `${riosUnicos.length} rio${riosUnicos.length !== 1 ? 's' : ''} monitorado${riosUnicos.length !== 1 ? 's' : ''}`;
+                lastUpdate.textContent = `Atualização: ${new Date().toLocaleTimeString('pt-BR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'})}`;
+                
+                if (alertasData.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Nenhum alerta encontrado</h3>
+                            <p>Os alertas serão exibidos aqui assim que estiverem disponíveis.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Preencher filtro de rios
+                populateRioFilter(alertasData);
+                
+                // Criar grid de alertas
+                container.innerHTML = createAlertasGrid(alertasData);
+                
+            } catch (error) {
+                console.error('Erro ao renderizar alertas:', error);
+                container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar alertas</h3>
+                        <p>${error.message}</p>
+                        <p style="margin-top: 1rem; font-size: 0.9rem;">
+                            Verifique sua conexão e tente novamente.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Função para atualizar os alertas
+        function refreshAlertas() {
+            // Adicionar efeito visual de atualização
+            const refreshBtn = document.querySelector('.btn-primary');
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
+            refreshBtn.disabled = true;
+            
+            renderAlertas();
+            
+            setTimeout(() => {
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar';
+                refreshBtn.disabled = false;
+            }, 2000);
+        }
+
+        // ========== ONDAS DINÂMICAS COM JAVASCRIPT ==========
+        function initDynamicWaves() {
+            const waterBg = document.querySelector('.water-background');
+            
+            // Remove ondas existentes
+            waterBg.innerHTML = '';
+            
+            // Remove o estilo anterior se existir
+            const oldStyle = document.getElementById('waves-dynamic-style');
+            if (oldStyle) {
+                oldStyle.remove();
+            }
+            
+            // Cria 3 camadas de ondas
+            for (let i = 1; i <= 3; i++) {
+                const wave = document.createElement('div');
+                wave.className = `wave wave-${i} dynamic-wave`;
+                
+                // Define propriedades dinâmicas
+                wave.style.setProperty('--wave-speed', `${15 + i * 2}s`);
+                wave.style.setProperty('--wave-height', `${60 + i * 30}px`);
+                wave.style.setProperty('--wave-opacity', `${0.7 - (i * 0.1)}`);
+                wave.style.setProperty('--wave-delay', `${i * -1}s`);
+                
+                waterBg.appendChild(wave);
+            }
+            
+            // Adiciona CSS dinâmico APENAS UMA VEZ
+            const style = document.createElement('style');
+            style.id = 'waves-dynamic-style';
+            style.textContent = `
+                .dynamic-wave {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 400%;
+                    height: var(--wave-height);
+                    background: linear-gradient(
+                        90deg,
+                        transparent 0%,
+                        var(--primary-color) 20%,
+                        var(--accent-color) 50%,
+                        var(--primary-color) 80%,
+                        transparent 100%
+                    );
+                    opacity: var(--wave-opacity);
+                    animation: dynamic-wave-flow var(--wave-speed) linear infinite;
+                    animation-delay: var(--wave-delay);
+                    border-radius: 50% 50% 0 0;
+                    filter: blur(calc(var(--wave-opacity) * 1.5px));
+                    transform-origin: center bottom;
+                }
+                
+                .wave-1 {
+                    --primary-color: rgba(30, 64, 175, 0.8);
+                    --accent-color: rgba(59, 130, 246, 1);
+                }
+                
+                .wave-2 {
+                    --primary-color: rgba(59, 130, 246, 0.7);
+                    --accent-color: rgba(30, 64, 175, 0.9);
+                    bottom: 10px;
+                }
+                
+                .wave-3 {
+                    --primary-color: rgba(96, 165, 250, 0.6);
+                    --accent-color: rgba(59, 130, 246, 0.8);
+                    bottom: 20px;
+                }
+                
+                @keyframes dynamic-wave-flow {
+                    0% {
+                        transform: translateX(0) scaleY(1);
+                    }
+                    25% {
+                        transform: translateX(-25%) scaleY(1.15);
+                    }
+                    50% {
+                        transform: translateX(-50%) scaleY(0.9);
+                        border-radius: 45% 55% 0 0;
+                    }
+                    75% {
+                        transform: translateX(-75%) scaleY(1.1);
+                    }
+                    100% {
+                        transform: translateX(-100%) scaleY(1);
+                    }
+                }
+                
+                /* Efeito de ondulação suave */
+                .dynamic-wave::before {
+                    content: '';
+                    position: absolute;
+                    top: -10px;
+                    left: 0;
+                    width: 100%;
+                    height: 20px;
+                    background: inherit;
+                    border-radius: 50% 50% 0 0;
+                    opacity: 0.7;
+                }
+                
+                /* Ajustes para dark mode */
+                .dark-mode .wave-1 {
+                    --primary-color: rgba(96, 165, 250, 0.9);
+                    --accent-color: rgba(59, 130, 246, 1);
+                }
+                
+                .dark-mode .wave-2 {
+                    --primary-color: rgba(59, 130, 246, 0.8);
+                    --accent-color: rgba(30, 64, 175, 1);
+                }
+                
+                .dark-mode .wave-3 {
+                    --primary-color: rgba(59, 130, 246, 0.7);
+                    --accent-color: rgba(96, 165, 250, 0.9);
+                }
+                
+                /* Aumentar opacidade no dark mode */
+                .dark-mode .dynamic-wave {
+                    opacity: calc(var(--wave-opacity) * 1.5);
+                }
+            `;
+            
+            document.head.appendChild(style);
+        }
+
+        // Inicializar ondas dinâmicas
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... seu código existente ...
+            
+            // Adicionar ondas dinâmicas
+            initDynamicWaves();
+            
+            // Atualizar ondas quando trocar tema
+            const themeToggle = document.querySelector('.theme-toggle');
+            themeToggle.addEventListener('click', function() {
+                // Re-inicializar ondas após troca de tema
+                setTimeout(initDynamicWaves, 100);
+            });
+        });
+        
+
+        // Atualização automática a cada 5 minutos (mais frequente que boletins)
+        function startAutoRefresh() {
+            setInterval(renderAlertas, 5 * 60 * 1000);
+        }
+
+        // Redesenhar quando a janela for redimensionada
+        window.addEventListener('resize', function() {
+            // Só redesenha se já tiver dados carregados
+            if (document.getElementById('alertas-container').children.length > 0 && 
+                !document.getElementById('alertas-container').querySelector('.loading')) {
+                renderAlertas();
+            }
+        });
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarPreferenciasTema();
+            renderAlertas();
+            startAutoRefresh();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "imagem": {
+    "arquivo": "ortofoto_Bacabal.png",
+    "largura": 5129,
+    "altura": 10000,
+    "formato": "PNG",
+    "tem_transparencia": true,
+    "qualidade": "PNG com transparência"
+  },
+  "georreferenciamento": {
+    "crs": "EPSG:4326 (WGS84)",
+    "bounds": {
+      "left": -44.77505296794488,
+      "bottom": -4.235252452343552,
+      "right": -44.76218784471313,
+      "top": -4.2101694167168
+    },
+    "centro": {
+      "lat": -4.222710934530176,
+      "lng": -44.768620406329006
+    }
+  },
+  "origem": {
+    "arquivo": "E:\\Igor Morim\\sima-ma\\docs\\DEM\\Bacabal.tif",
+    "crs_original": "EPSG:31983",
+    "width_original": 28538,
+    "height_original": 55444,
+    "bounds_original": {
+      "left": 524963.9397649938,
+      "bottom": 9531865.15798232,
+      "right": 526390.8397649939,
+      "top": 9534637.357982319
+    },
+    "tem_alpha_original": true
+  }
+}

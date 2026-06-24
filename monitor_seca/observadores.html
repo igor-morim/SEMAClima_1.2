@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão: Rede de Observadores">
+    <meta name="keywords" content="rede observadores, formulário, municípios Maranhão, monitoramento ambiental">
+    <meta name="author" content="Igor Carlos Cunha Morim">
+    <title>Rede de Observadores - Maranhão</title>
+
+    <link rel="icon" href="../assets/images/logo/Monitor_Secas/favicon/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="../assets/images/logo/Monitor_Secas/manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/logo/Monitor_Secas/logo_monitor_16.png"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/logo/Monitor_Secas/logo_monitor_32.png"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/logo/Monitor_Secas/logo_monitor_180.png"/>
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/logo/Monitor_Secas/logo_monitor_192.png"/>
+    <link rel="icon" type="image/png" sizes="512x512" href="../assets/images/logo/Monitor_Secas/logo_monitor_512.png"/>
+
+    <meta name="msapplication-TileColor" content="#ffc107">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #D2691E;
+            --secondary: #8B4513;
+            --accent: #CD853F;
+            --dark: #2F1B0A;
+            --light: #F5F5DC;
+            --gray: #A9A9A9;
+            --card-bg: rgba(139, 69, 19, 0.15);
+            --glass-bg: rgba(160, 82, 45, 0.2);
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #f44336;
+            --info: #2196F3;
+        }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #2F1B0A 0%, #5D4037 100%);
+            min-height: 100vh;
+            color: var(--light);
+            overflow-x: hidden;
+            font-size: 16px;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar responsiva FIXA */
+        .sidebar {
+            width: 70px;
+            background: rgba(47, 27, 10, 0.95);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+        }
+        
+        .sidebar:hover {
+            width: 280px;
+        }
+        
+        .logo {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .logo-icon {
+            font-size: 2.2em;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .leaflet-interactive:focus {
+            outline: none !important;
+        }
+        
+        .leaflet-interactive {
+            -webkit-tap-highlight-color: transparent !important;
+        }
+        
+        .logo-text {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar:hover .logo-text {
+            opacity: 1;
+        }
+        
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 5px;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            color: var(--gray);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(160, 82, 45, 0.3);
+            color: var(--accent);
+            border-right: 3px solid var(--accent);
+        }
+        
+        .nav-item i {
+            font-size: 1.4em;
+            margin-right: 20px;
+            min-width: 24px;
+        }
+        
+        .nav-text {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .sidebar:hover .nav-text {
+            opacity: 1;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-y: hidden;
+            margin-left: 70px; /* Compensa a largura da sidebar fixa */
+            width: calc(100% - 70px);
+            
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .page-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            background: white;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #D2691E, #CD853F, transparent);
+            border-radius: 3px;
+        }
+        
+        .page-description {
+            color: var(--gray);
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 1.1em;
+            padding: 15px 20px;
+            background: rgba(47, 27, 10, 0.5);
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+        }
+
+        /* Estilos do Mapa */
+        .map-container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+
+        }
+
+        /* Map controls sobre o mapa */
+        .map-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 800;
+            background: rgba(47, 27, 10, 0.85);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+            max-width: 250px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: var(--light);
+            font-size: 0.9em;
+        }
+
+        .form-control {
+            background: rgba(47, 27, 10, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: var(--light);
+            font-family: 'Inter', sans-serif;
+            min-width: 200px;
+        }
+
+        /* Stats container sobre o mapa */
+        .stats-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 800;
+            max-width: 220px;
+            background: rgba(47, 27, 10, 0.85);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .stats-card {
+            background: rgba(160, 82, 45, 0.3);
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-3px);
+            background: rgba(160, 82, 45, 0.4);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.75em;
+            color: var(--light);
+            text-align: center;
+        }
+
+        .main-map {
+            height: 750px;
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        /* Timeline container SOBRE O MAPA - MELHORADO */
+        .timeline-container {
+            position: absolute;
+            bottom: 20px;
+            right: 10px;
+            transform: translateX(-1%);
+            background: rgba(47, 27, 10, 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+            z-index: 800;
+            max-height: 140px;
+            width: 90%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+
+        .timeline-title {
+            margin-bottom: 10px;
+            color: var(--light);
+            font-size: 0.9em;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .timeline {
+            display: flex;
+            overflow-x: auto;
+            padding: 5px;
+            gap: 8px;
+            padding-bottom: 5px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) rgba(255,255,255,0.1);
+        }
+
+        .timeline::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .timeline::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+
+        .timeline::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .timeline-item {
+            min-width: 80px;
+            background: rgba(160, 82, 45, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            border: 2px solid transparent;
+        }
+
+        .timeline-item:hover {
+            background: rgba(160, 82, 45, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .timeline-item.active {
+            background: rgba(160, 82, 45, 0.7);
+            transform: scale(1.05);
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(205, 133, 63, 0.3);
+        }
+
+        .timeline-month {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--light);
+        }
+
+        .timeline-count {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--accent);
+            margin-top: 3px;
+        }
+
+        /* Legenda dentro do mapa */
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(47, 27, 10, 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+            z-index: 800;
+            min-width: 200px;
+        }
+
+        .map-legend h4 {
+            margin-bottom: 10px;
+            color: var(--light);
+            font-size: 1em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 5px;
+        }
+
+        .legenda-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .legenda-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .legenda-text {
+            color: var(--light);
+            font-size: 0.9em;
+        }
+
+        /* Instituições expansível */
+        .instituicoes-container {
+            background: rgba(47, 27, 10, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .instituicoes-header {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(160, 82, 45, 0.3);
+            transition: background 0.3s ease;
+            cursor: pointer;
+        }
+
+        .instituicoes-header:hover {
+            background: rgba(160, 82, 45, 0.5);
+        }
+
+        .instituicoes-header h4 {
+            margin: 0;
+            color: var(--light);
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instituicoes-toggle {
+            color: var(--accent);
+            transition: transform 0.3s ease;
+        }
+
+        .instituicoes-container.expanded .instituicoes-toggle {
+            transform: rotate(180deg);
+        }
+
+        .instituicoes-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 15px;
+        }
+
+        .instituicoes-container.expanded .instituicoes-content {
+            max-height: 1000px;
+            padding: 15px;
+        }
+
+        .instituicoes-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .instituicao-item {
+            background: rgba(160, 82, 45, 0.3);
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .instituicao-item:hover {
+            background: rgba(160, 82, 45, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .instituicao-item.active {
+            background: rgba(160, 82, 45, 0.7);
+            transform: translateY(-2px);
+        }
+
+        .instituicao-count {
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .municipios-instituicao {
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            background: rgba(47, 27, 10, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .municipios-instituicao.active {
+            display: block;
+        }
+
+        .municipios-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+        }
+
+        .municipio-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .municipio-nome {
+            color: var(--light);
+        }
+
+        .municipio-contagem {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .loading-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .error-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            flex-direction: column;
+            gap: 15px;
+            color: var(--danger);
+            text-align: center;
+        }
+
+        /* Novos estilos para melhorias */
+        .data-highlights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .highlight-card {
+            background: rgba(47, 27, 10, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .highlight-title {
+            font-size: 0.9em;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .highlight-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .instituicoes-chart {
+            margin-top: 15px;
+            background: rgba(47, 27, 10, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .chart-label {
+            width: 250px;
+            font-size: 0.9em;
+            color: var(--light);
+        }
+
+        .chart-bar-container {
+            flex: 1;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .chart-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .chart-value {
+            width: 90px;
+            text-align: right;
+            font-size: 0.9em;
+            color: var(--light);
+        }
+
+        /* ESTILOS PARA POPUP IDÊNTICO AO MONITOR_SECA */
+        .popup-content {
+            min-width: 320px;
+            max-width: 400px;
+            background: rgba(47, 27, 10, 0.95);
+            border-radius: 15px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 2px solid var(--accent);
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .popup-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            padding: 5px;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .popup-title {
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .popup-body {
+            padding: 10px;
+        }
+
+        .popup-section {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .popup-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .popup-section-title {
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .popup-section-title i {
+            color: var(--accent);
+            width: 20px;
+            text-align: center;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 3px 0;
+        }
+
+        .info-label {
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--light);
+            font-weight: 600;
+        }
+
+        .info-value.highlight {
+            color: var(--accent);
+            font-size: 1.3em;
+        }
+
+        .popup-instituicoes {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .popup-instituicao {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+            transition: all 0.2s ease;
+        }
+
+        .popup-instituicao:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(2px);
+        }
+
+        .instituicao-nome {
+            color: var(--light);
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .instituicao-respostas {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 1.1em;
+            background: rgba(205, 133, 63, 0.1);
+            padding: 4px 12px;
+            border-radius: 15px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .popup-footer {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9em;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .popup-footer.respondeu {
+            color: #90EE90;
+            background: rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.2);
+        }
+
+        /* === CORREÇÃO PARA REMOVER FUNDO BRANCO DO LEAFLET === */
+        .leaflet-popup-content-wrapper {
+            background: transparent !important;
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+            border-radius: 0 !important;
+            border: none !important;
+            color: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+
+        .leaflet-popup-tip {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .leaflet-popup-content {
+            line-height: 0.5 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-family: 'Inter', sans-serif !important;
+            background: transparent !important;
+            color: transparent !important;
+        }
+
+        .leaflet-container a.leaflet-popup-close-button {
+            color: white !important;
+            background: rgba(47, 27, 10, 0.9) !important;
+            border-radius: 50% !important;
+            width: 20px !important;
+            height: 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 16px !important;
+            font-weight: bold !important;
+            right: 3px !important;
+            top: 3px !important;
+            z-index: 1000 !important;
+        }
+
+        .leaflet-container a.leaflet-popup-close-button:hover {
+            background: var(--accent) !important;
+            color: white !important;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile menu toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1100;
+            background: rgba(47, 27, 10, 0.9);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            width: 50px;
+            height: 50px;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-toggle:hover {
+            background: rgba(160, 82, 45, 0.7);
+            transform: scale(1.05);
+        }
+
+        /* Botão compacto para mobile */
+        .map-controls-compact {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1100;
+        }
+        
+        .compact-toggle {
+            width: 52px;
+            height: 52px;
+            border-radius: 15px;
+            background: rgba(160, 82, 45, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+        
+        .compact-toggle:hover {
+            background: var(--accent);
+            transform: scale(1.05);
+        }
+        
+        .compact-menu {
+            position: absolute;
+            bottom: 62px;
+            left: 0;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(47, 27, 10, 0.9);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-lg);
+            padding: 10px;
+            z-index: 801;
+        }
+        
+        .compact-menu.show {
+            display: flex;
+        }
+        
+        .compact-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 15px;
+            background: rgba(160, 82, 45, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .compact-btn.active {
+            background: var(--accent);
+        }
+        
+        .compact-btn:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* Loading screen responsiva */
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(47, 27, 10, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 30px;
+        }
+        
+        .loading-text {
+            font-size: 1.2em;
+            color: white;
+            text-align: center;
+        }
+        
+        .loading-progress {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #CD853F);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Spinner para carregamento de período */
+        .periodo-loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2001;
+            text-align: center;
+            background: rgba(47, 27, 10, 0.95);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .periodo-spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px;
+        }
+
+        .periodo-loading-text {
+            color: white;
+            font-size: 1.3em;
+            font-weight: 500;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        /* Map controls responsivos - AGORA NO CANTO INFERIOR ESQUERDO */
+        .map-controls_2 {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+            z-index: 800;
+            background: rgba(47, 27, 10, 0.85);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            padding: 10px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .control-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            background: rgba(160, 82, 45, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn.active {
+            background: var(--accent);
+        }
+        
+        .control-btn:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* Estilos para modo fullscreen */
+        .map-container.fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+            background: var(--dark);
+            padding: 0 !important;
+            border-radius: 0 !important;
+            border: none !important;
+        }
+
+        .map-container.fullscreen .main-map {
+            height: 100vh !important;
+            border-radius: 0 !important;
+            border: none !important;
+        }
+
+        .map-container.fullscreen .map-controls,
+        .map-container.fullscreen .stats-container,
+        .map-container.fullscreen .map-legend,
+        .map-container.fullscreen .map-controls_2,
+        .map-container.fullscreen .timeline-container {
+            z-index: 10000 !important;
+        }
+
+        .map-container.fullscreen .instituicoes-container {
+            display: none;
+        }
+
+        
+        /* RESPONSIVIDADE MELHORADA */
+        @media (max-width: 1200px) {
+            .main-map {
+                height: 600px;
+            }
+            
+            .timeline-container {
+                width: 95%;
+                max-width: none;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 60px;
+            }
+            
+            .sidebar:hover {
+                width: 250px;
+            }
+            
+            .main-content {
+                padding: 5px;
+                margin-left: 60px;
+                width: calc(100% - 60px);
+            }
+            
+            .main-map {
+                height: 550px;
+            }
+            
+            .map-controls {
+                max-width: 220px;
+            }
+            
+            .stats-container {
+                max-width: 200px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                width: 280px;
+                height: 100%;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.mobile-open {
+                left: 0;
+            }
+            
+            .sidebar:hover {
+                width: 280px;
+            }
+            
+            .nav-text {
+                opacity: 1;
+            }
+            
+            .mobile-menu-toggle {
+                display: flex;
+            }
+            
+            .main-content {
+                padding: 10px;
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .page-title {
+                font-size: 1.8em;
+            }
+
+            .map-controls {
+                position: relative;
+                top: auto;
+                left: auto;
+                max-width: 100%;
+                margin-bottom: 15px;
+            }
+            
+            .stats-container {
+                position: relative;
+                top: auto;
+                right: auto;
+                max-width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                margin-bottom: 15px;
+            }
+            
+            .stats-card {
+                flex: 1;
+                min-width: 140px;
+                margin: 5px;
+            }
+            
+            .main-map {
+                height: 400px;
+            }
+
+            .data-highlights {
+                grid-template-columns: 1fr;
+            }
+
+            .municipios-list {
+                grid-template-columns: 1fr;
+            }
+
+            /* Ajustes para timeline no mobile */
+            .timeline-container {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                right: auto;
+                margin-top: 15px;
+                max-height: none;
+                width: 100%;
+                transform: none;
+            }
+
+            .timeline-item {
+                min-width: 70px;
+                padding: 8px;
+            }
+
+            /* Mostrar controles compactos no mobile */
+            .map-controls-compact {
+                display: block;
+            }
+
+            /* Ajustes para legenda no mobile */
+            .map-legend {
+                bottom: 10px;
+                right: 10px;
+                min-width: 160px;
+                padding: 10px;
+                font-size: 0.9em;
+            }
+
+            .map-controls_2 {
+                bottom: 10px;
+                left: 10px;
+                padding: 8px;
+            }
+
+            /* Ajustes para popups no mobile */
+            .popup-content {
+                min-width: 280px;
+                max-width: 320px;
+            }
+
+            .popup-header {
+                padding: 15px;
+            }
+
+            .popup-body {
+                padding: 15px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .page-title {
+                font-size: 1.5em;
+            }
+            
+            .page-description {
+                font-size: 0.9em;
+            }
+
+            .stat-value {
+                font-size: 1.3em;
+            }
+            
+            .stats-card {
+                min-width: 120px;
+                padding: 10px;
+            }
+
+            .timeline-item {
+                min-width: 65px;
+                padding: 6px;
+            }
+
+            .timeline-month {
+                font-size: 0.75em;
+            }
+
+            .timeline-count {
+                font-size: 0.9em;
+            }
+
+            .compact-toggle {
+                width: 48px;
+                height: 48px;
+                font-size: 1.3em;
+            }
+            
+            .compact-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 1.1em;
+            }
+
+            .map-legend {
+                min-width: 140px;
+                font-size: 0.8em;
+            }
+
+            .popup-content {
+                min-width: 250px;
+                max-width: 280px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-map {
+                height: 350px;
+            }
+            
+            .stats-container {
+                flex-direction: column;
+            }
+            
+            .stats-card {
+                min-width: 100%;
+                margin: 3px 0;
+            }
+
+            .timeline-container {
+                padding: 10px;
+            }
+
+            .timeline-item {
+                min-width: 60px;
+                padding: 5px;
+            }
+
+            .timeline-month {
+                font-size: 0.7em;
+            }
+
+            .timeline-count {
+                font-size: 0.85em;
+            }
+
+            .compact-toggle {
+                width: 44px;
+                height: 44px;
+                font-size: 1.2em;
+            }
+            
+            .compact-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1em;
+            }
+
+            .map-legend {
+                min-width: 130px;
+                padding: 8px;
+                font-size: 0.75em;
+            }
+
+            .map-controls_2 {
+                bottom: 5px;
+                left: 5px;
+                padding: 6px;
+            }
+
+            .control-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 1.2em;
+            }
+
+            .popup-content {
+                min-width: 220px;
+                max-width: 250px;
+            }
+
+            .popup-header {
+                padding: 12px;
+            }
+
+            .popup-body {
+                padding: 12px;
+            }
+
+            .popup-title {
+                font-size: 1.2em;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .main-map {
+                height: 300px;
+            }
+            
+            .page-title {
+                font-size: 1.3em;
+            }
+            
+            .timeline-item {
+                min-width: 55px;
+            }
+            
+            .popup-content {
+                min-width: 200px;
+                max-width: 220px;
+            }
+        }
+
+        /* Melhorias de acessibilidade */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Suporte para modo escuro do sistema */
+        @media (prefers-color-scheme: dark) {
+            .popup-content {
+                background: rgba(47, 27, 10, 0.95);
+                color: #e2e8f0;
+            }
+            
+            .popup-body {
+                color: #e2e8f0;
+            }
+            
+            .popup-section-title {
+                color: var(--accent);
+            }
+            
+            .popup-instituicao {
+                background: rgba(255, 255, 255, 0.05);
+            }
+            
+            .popup-instituicao:hover {
+                background: rgba(255, 255, 255, 0.08);
+            }
+            
+            .instituicao-nome {
+                color: #e2e8f0;
+            }
+            
+            .popup-footer {
+                background: rgba(255, 255, 255, 0.05);
+                color: #e2e8f0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Menu mobile toggle -->
+        <div class="mobile-menu-toggle" id="mobileMenuToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        
+        <div class="sidebar" id="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="logo-text">Mapa de Observadores</div>
+            </div>
+            
+            <div class="nav-items">
+                <a href="../Monitor_Seca.html" class="nav-item">
+                    <i class="fas fa-map"></i>
+                    <span class="nav-text">Mapa Interativo</span>
+                </a>
+                <a href="analises.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="nav-text">Análises</span>
+                </a>
+                <a href="observadores.html" class="nav-item active">
+                    <i class="fas fa-users"></i>
+                    <span class="nav-text">Rede de Observadores</span>
+                </a>
+                <a href="sobre.html" class="nav-item">
+                    <i class="fas fa-info-circle"></i>
+                    <span class="nav-text">Sobre</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Rede de Observadores</h1>
+            </div>
+            
+            <div class="map-container" id="mapContainer">
+                <!-- Map controls sobre o mapa -->
+                <div class="map-controls" id="mapControls">
+                    <div class="control-group">
+                        <label for="mesSelecionado">Selecionar Mês:</label>
+                        <select id="mesSelecionado" class="form-control">
+                            <option value="">Carregando meses...</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Stats container sobre o mapa -->
+                <div class="stats-container" id="statsContainer">
+                    <div class="stats-card">
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalMunicipios">0</span>
+                            <span class="stat-label">Municípios Responderam</span>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalRespostas">0</span>
+                            <span class="stat-label">Total de Respostas</span>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stat-item">
+                            <span class="stat-value" id="percentualResposta">0%</span>
+                            <span class="stat-label">Taxa de Resposta</span>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalInstituicoes">0</span>
+                            <span class="stat-label">Instituições Participantes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline container SOBRE O MAPA -->
+                <div class="timeline-container" id="timelineContainer">
+                    <div class="timeline-title">Linha do Tempo - Respostas por Mês</div>
+                    <div class="timeline" id="timeline">
+                        <!-- Timeline será preenchida dinamicamente -->
+                    </div>
+                </div>
+                
+                <div id="mapaObservadores" class="main-map">
+                    <!-- Legenda dentro do mapa -->
+                    <div class="map-legend">
+                        <h4>Legenda do Mapa</h4>
+                        <div class="legenda-item">
+                            <span class="legenda-color" style="background-color: #f7d80a;"></span>
+                            <span class="legenda-text">Município que respondeu</span>
+                        </div>
+                        <div class="legenda-item">
+                            <span class="legenda-color" style="background-color: transparent; border: 2px solid #ffffff;"></span>
+                            <span class="legenda-text">Município sem resposta</span>
+                        </div>
+                    </div>
+                    <div class="loading-container">
+                        <div class="loading-spinner"></div>
+                        <p>Carregando mapa...</p>
+                    </div>
+                </div>
+                
+                <!-- Botões horizontais para telas maiores -->
+                <div class="map-controls_2">
+                    <button class="control-btn" id="fullscreen" title="Tela Cheia">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="control-btn" id="map-type" title="Alternar Tipo de Mapa">
+                        <i class="fas fa-layer-group"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Instituições expansível -->
+            <div class="instituicoes-container" id="instituicoesContainer">
+                <div class="instituicoes-header" id="instituicoesHeader">
+                    <h4>
+                        <i class="fas fa-university"></i>
+                        Mais Informações sobre Instituições
+                    </h4>
+                    <i class="fas fa-chevron-down instituicoes-toggle"></i>
+                </div>
+                <div class="instituicoes-content">
+                    <div class="instituicoes-list" id="instituicoesList">
+                        <!-- Lista de instituições será preenchida dinamicamente -->
+                    </div>
+                    <div class="municipios-instituicao" id="municipiosInstituicao">
+                        <!-- Lista de municípios por instituição será preenchida dinamicamente -->
+                    </div>
+                    <div class="instituicoes-chart" id="instituicoesChart">
+                        <!-- Gráfico de barras será preenchido dinamicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão compacto para mobile -->
+        <div class="map-controls-compact">
+            <button class="compact-toggle" id="compactToggle" title="Controles do Mapa">
+                <i class="fas fa-sliders-h"></i>
+            </button>
+            <div class="compact-menu" id="compactMenu">
+                <button class="compact-btn" id="compact-reset-view" title="Resetar Visualização">
+                    <i class="fas fa-crosshairs"></i>
+                </button>
+                <button class="compact-btn" id="compact-fullscreen" title="Tela Cheia">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading screen principal -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Carregando mapa e dados dos observadores...</div>
+        <div class="loading-progress">
+            <div class="loading-bar" id="loadingBar"></div>
+        </div>
+    </div>
+
+    <!-- Spinner para carregamento de período -->
+    <div class="periodo-loading" id="periodoLoading">
+        <div class="periodo-spinner"></div>
+        <div class="periodo-loading-text">Carregando dados...</div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // FUNÇÃO PARA DETERMINAR ZOOM BASEADO NA TELA
+        function getZoomLevelByScreenSize() {
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            // Considerar telas grandes acima de 1440px de largura OU com alta densidade
+            const isLargeScreen = screenWidth > 1440 || (screenWidth > 1024 && window.devicePixelRatio >= 2);
+            
+            // Considerar telas muito pequenas (celulares) abaixo de 768px
+            const isSmallScreen = screenWidth <= 768;
+            
+            console.log(`Screen: ${screenWidth}x${screenHeight}, Pixel Ratio: ${window.devicePixelRatio}, Large: ${isLargeScreen}, Small: ${isSmallScreen}`);
+            
+            if (isLargeScreen) {
+                return 6.9; // Zoom para telas grandes
+            } else if (isSmallScreen) {
+                return 6.2; // Zoom para telas pequenas (mobile)
+            } else {
+                return 6.5; // Zoom padrão para tablets e notebooks
+            }
+        }
+
+        // FUNÇÃO PARA APLICAR O ZOOM OTIMIZADO
+        function applyOptimalZoom() {
+            const optimalZoom = getZoomLevelByScreenSize();
+            
+            // Se o mapa já foi inicializado, aplicar o zoom
+            if (mapa) {
+                mapa.setZoom(optimalZoom);
+            }
+            
+            return optimalZoom;
+        }
+
+        // DETECÇÃO DE ANDROID E CORREÇÃO DE BOTÃO
+        function detectAndroidAndFixButton() {
+            const isAndroid = /Android/.test(navigator.userAgent);
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isAndroid && isMobile) {
+                console.log('Android detectado - aplicando correções para botão inferior esquerdo');
+                
+                // Forçar exibição do botão compacto inferior esquerdo
+                const compactControls = document.querySelector('.map-controls-compact');
+                if (compactControls) {
+                    compactControls.style.display = 'block';
+                    compactControls.style.position = 'fixed';
+                    compactControls.style.bottom = '20px';
+                    compactControls.style.left = '20px';
+                    compactControls.style.zIndex = '1100';
+                }
+            }
+        }
+
+        // Dados iniciais
+        let dadosObservadores = {
+            grupos_mensais: {},
+            periodos_com_dados: []
+        };
+
+        let mapa = null;
+        let camadaMunicipios = null;
+        let geojsonData = null;
+        let totalMunicipiosMA = 217; // Total de municípios do Maranhão
+        let mesAtual = null;
+        let instituicaoSelecionada = null;
+        let isFullscreen = false;
+
+        // Função para simular loading
+        function simulateLoading() {
+            const loadingBar = document.getElementById('loadingBar');
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += 2;
+                loadingBar.style.width = `${progress}%`;
+                
+                if (progress >= 90) {
+                    clearInterval(interval);
+                }
+            }, 50);
+        }
+
+        // Função para concluir o loading
+        function concluirLoading() {
+            const loadingBar = document.getElementById('loadingBar');
+            
+            // Completa a barra de progresso
+            loadingBar.style.width = '100%';
+            
+            // Aguarda um pouco para mostrar 100% e depois esconde
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                }, 500);
+            }, 300);
+        }
+
+        // FUNÇÃO CORRIGIDA: Atualizar destaques gerais
+        function atualizarDestaquesGerais() {
+            // VERIFICA SE OS ELEMENTOS AINDA EXISTEM ANTES DE TENTAR ACESSÁ-LOS
+            if (document.getElementById('periodoDados')) {
+                document.getElementById('periodoDados').textContent = `${dadosObservadores.intervalo_inicio} - ${dadosObservadores.intervalo_fim}`;
+            }
+            if (document.getElementById('totalGeralRespostas')) {
+                document.getElementById('totalGeralRespostas').textContent = dadosObservadores.total_respostas;
+            }
+            if (document.getElementById('totalMunicipiosUnicos')) {
+                document.getElementById('totalMunicipiosUnicos').textContent = dadosObservadores.total_municipios_unicos;
+            }
+            if (document.getElementById('totalInstituicoesUnicas')) {
+                document.getElementById('totalInstituicoesUnicas').textContent = dadosObservadores.total_instituicoes_unicas;
+            }
+
+            // Atualiza a timeline (esta sempre existe)
+            atualizarTimeline();
+        }
+
+        // Função para carregar dados do mapa
+        async function carregarDadosMapa() {
+            try {
+                // Carrega dados dos observadores
+                const response = await fetch('../monitor_seca/rede_observadores/dados_mapa_observadores.json');
+                if (response.ok) {
+                    dadosObservadores = await response.json();
+                    console.log('Dados dos observadores carregados:', dadosObservadores);
+                    
+                    // Define o mês atual como o mais recente
+                    if (dadosObservadores.periodos_com_dados && dadosObservadores.periodos_com_dados.length > 0) {
+                        mesAtual = dadosObservadores.periodos_com_dados[dadosObservadores.periodos_com_dados.length - 1];
+                    }
+
+                    // Atualiza os destaques gerais
+                    atualizarDestaquesGerais();
+                    
+                } else {
+                    throw new Error('Erro ao carregar dados dos observadores');
+                }
+                
+                // Carrega GeoJSON dos municípios
+                await carregarGeoJSON();
+                
+                // ✅ CONCLUI O LOADING APÓS TUDO CARREGAR
+                concluirLoading();
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                
+                // ✅ MESMO EM ERRO, CONCLUI O LOADING
+                concluirLoading();
+                mostrarErro('Erro ao carregar dados do mapa. Verifique se os arquivos estão disponíveis.');
+            }
+        }
+
+        // Função para atualizar a timeline
+        function atualizarTimeline() {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = '';
+
+            // INVERTER A ORDEM: mostrar meses mais recentes primeiro
+            const periodosOrdenados = [...dadosObservadores.periodos_com_dados].reverse();
+            
+            periodosOrdenados.forEach(mes => {
+                const dadosMes = dadosObservadores.grupos_mensais[mes];
+                const timelineItem = document.createElement('div');
+                timelineItem.className = `timeline-item ${mes === mesAtual ? 'active' : ''}`;
+                timelineItem.dataset.mes = mes;
+                
+                timelineItem.innerHTML = `
+                    <div class="timeline-month">${formatarMesAbreviado(mes)}</div>
+                    <div class="timeline-count">${dadosMes.total_respostas}</div>
+                `;
+
+                timelineItem.addEventListener('click', function() {
+                    document.querySelectorAll('.timeline-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    mesAtual = this.dataset.mes;
+                    document.getElementById('mesSelecionado').value = mesAtual;
+                    atualizarEstatisticas(mesAtual);
+                    atualizarMapa();
+                });
+
+                timeline.appendChild(timelineItem);
+            });
+        }
+
+        // Função para formatar mês abreviado
+        function formatarMesAbreviado(mesString) {
+            if (!mesString) return '';
+            const [ano, mes] = mesString.split('-');
+            const meses = [
+                'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+                'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+            ];
+            return `${meses[parseInt(mes) - 1]}/${ano.substring(2)}`;
+        }
+
+        // Função para carregar GeoJSON dos municípios
+        async function carregarGeoJSON() {
+            try {
+                // Tenta carregar de diferentes locais possíveis
+                const urls = [
+                    '../docs/Shapefile/MA_Municipios_2022/MA_Municipios_2022.geojson',
+                ];
+
+                let geojsonLoaded = false;
+                
+                for (const url of urls) {
+                    try {
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            geojsonData = await response.json();
+                            console.log('GeoJSON carregado de:', url);
+                            geojsonLoaded = true;
+                            break;
+                        }
+                    } catch (e) {
+                        console.log('Falha ao carregar de:', url);
+                    }
+                }
+
+                if (!geojsonLoaded) {
+                    // Fallback: cria um GeoJSON básico com municípios principais
+                    geojsonData = criarGeoJSONBasico();
+                    console.log('Usando GeoJSON básico');
+                }
+
+                atualizarUI();
+                inicializarMapa();
+                
+            } catch (error) {
+                console.error('Erro ao carregar GeoJSON:', error);
+                throw error; // Propaga o erro para ser tratado em carregarDadosMapa()
+            }
+        }
+
+        // Função para criar GeoJSON básico (fallback)
+        function criarGeoJSONBasico() {
+            const municipiosPrincipais = [
+                { nome: "São Luís", lat: -2.53, lng: -44.30 },
+                { nome: "Imperatriz", lat: -5.53, lng: -47.48 },
+                { nome: "São José de Ribamar", lat: -2.55, lng: -44.05 },
+                { nome: "Timon", lat: -5.09, lng: -42.83 },
+                { nome: "Caxias", lat: -4.86, lng: -43.36 },
+                { nome: "Codó", lat: -4.46, lng: -43.88 },
+                { nome: "Bacabal", lat: -4.23, lng: -44.78 },
+                { nome: "Balsas", lat: -7.53, lng: -46.04 },
+                { nome: "Pinheiro", lat: -2.52, lng: -45.08 },
+                { nome: "Santa Inês", lat: -3.67, lng: -45.38 }
+            ];
+
+            return {
+                type: "FeatureCollection",
+                features: municipiosPrincipais.map((mun, index) => ({
+                    type: "Feature",
+                    properties: {
+                        id: index + 1,
+                        nome: mun.nome,
+                        codigo: `MA${(index + 1).toString().padStart(3, '0')}`
+                    },
+                    geometry: {
+                        type: "Point",
+                        coordinates: [mun.lng, mun.lat]
+                    }
+                }))
+            };
+        }
+
+        function atualizarUI() {
+            // Atualiza o seletor de meses
+            const mesSelect = document.getElementById('mesSelecionado');
+            if (dadosObservadores.periodos_com_dados && dadosObservadores.periodos_com_dados.length > 0) {
+                // INVERTER ORDEM para o seletor também
+                const periodosOrdenados = [...dadosObservadores.periodos_com_dados].reverse();
+                
+                mesSelect.innerHTML = periodosOrdenados.map(mes => 
+                    `<option value="${mes}" ${mes === mesAtual ? 'selected' : ''}>${formatarMes(mes)}</option>`
+                ).join('');
+            } else {
+                mesSelect.innerHTML = `<option value="">Nenhum período disponível</option>`;
+            }
+
+            // Atualiza as estatísticas
+            atualizarEstatisticas(mesAtual);
+
+            // Adiciona evento de change ao select
+            mesSelect.addEventListener('change', function() {
+                mesAtual = this.value;
+                console.log('Mês selecionado:', mesAtual);
+                
+                // Atualiza a timeline
+                document.querySelectorAll('.timeline-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.mes === mesAtual) {
+                        item.classList.add('active');
+                    }
+                });
+                
+                atualizarEstatisticas(mesAtual);
+                atualizarMapa();
+            });
+        }
+
+        function atualizarEstatisticas(mes) {
+            if (!mes || !dadosObservadores.grupos_mensais[mes]) {
+                document.getElementById('totalMunicipios').textContent = '0';
+                document.getElementById('totalRespostas').textContent = '0';
+                document.getElementById('percentualResposta').textContent = '0%';
+                document.getElementById('totalInstituicoes').textContent = '0';
+                document.getElementById('instituicoesList').innerHTML = '';
+                document.getElementById('instituicoesChart').innerHTML = '';
+                document.getElementById('municipiosInstituicao').innerHTML = '';
+                return;
+            }
+
+            const dadosMes = dadosObservadores.grupos_mensais[mes];
+            document.getElementById('totalMunicipios').textContent = dadosMes.total_municipios;
+            document.getElementById('totalRespostas').textContent = dadosMes.total_respostas;
+            document.getElementById('totalInstituicoes').textContent = dadosMes.total_instituicoes;
+            
+            // Calcula percentual de resposta
+            const percentual = ((dadosMes.total_municipios / totalMunicipiosMA) * 100).toFixed(1);
+            document.getElementById('percentualResposta').textContent = `${percentual}%`;
+            
+            // Atualiza a lista de instituições
+            atualizarListaInstituicoes(dadosMes);
+        }
+
+        function atualizarListaInstituicoes(dadosMes) {
+            const instituicoesList = document.getElementById('instituicoesList');
+            const instituicoesChart = document.getElementById('instituicoesChart');
+            const municipiosInstituicao = document.getElementById('municipiosInstituicao');
+            
+            instituicoesList.innerHTML = '';
+            instituicoesChart.innerHTML = '';
+            municipiosInstituicao.innerHTML = '';
+            municipiosInstituicao.classList.remove('active');
+            
+            if (!dadosMes.instituicoes_responderam || dadosMes.instituicoes_responderam.length === 0) {
+                instituicoesList.innerHTML = '<p>Nenhuma instituição respondeu neste período.</p>';
+                return;
+            }
+            
+            // Encontra o valor máximo para normalizar o gráfico
+            const maxContagem = Math.max(...Object.values(dadosMes.contagem_por_instituicao));
+            
+            dadosMes.instituicoes_responderam.forEach(instituicao => {
+                const contagem = dadosMes.contagem_por_instituicao[instituicao] || 0;
+                const percentual = (contagem / dadosMes.total_respostas * 100).toFixed(1);
+                
+                // Adiciona à lista
+                const instituicaoItem = document.createElement('div');
+                instituicaoItem.className = 'instituicao-item';
+                instituicaoItem.dataset.instituicao = instituicao;
+                instituicaoItem.innerHTML = `
+                    <span>${instituicao}</span>
+                    <span class="instituicao-count">${contagem}</span>
+                `;
+                
+                // Adiciona evento de clique para mostrar municípios da instituição
+                instituicaoItem.addEventListener('click', function() {
+                    const todasInstituicoes = document.querySelectorAll('.instituicao-item');
+                    todasInstituicoes.forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    instituicaoSelecionada = this.dataset.instituicao;
+                    mostrarMunicipiosPorInstituicao(instituicaoSelecionada, dadosMes);
+                });
+                
+                instituicoesList.appendChild(instituicaoItem);
+                
+                // Adiciona ao gráfico
+                const chartBar = document.createElement('div');
+                chartBar.className = 'chart-bar';
+                chartBar.innerHTML = `
+                    <div class="chart-label">${instituicao}</div>
+                    <div class="chart-bar-container">
+                        <div class="chart-bar-fill" style="width: ${(contagem / maxContagem) * 100}%"></div>
+                    </div>
+                    <div class="chart-value">${contagem} (${percentual}%)</div>
+                `;
+                instituicoesChart.appendChild(chartBar);
+            });
+        }
+
+        // Função para mostrar municípios por instituição
+        function mostrarMunicipiosPorInstituicao(instituicao, dadosMes) {
+            const municipiosInstituicao = document.getElementById('municipiosInstituicao');
+            
+            // Limpa o conteúdo anterior
+            municipiosInstituicao.innerHTML = '';
+            
+            // Cria o título
+            const titulo = document.createElement('h5');
+            titulo.textContent = `Municípios que responderam pela ${instituicao}:`;
+            titulo.style.marginBottom = '10px';
+            titulo.style.color = 'var(--light)';
+            municipiosInstituicao.appendChild(titulo);
+            
+            // Cria a lista de municípios
+            const municipiosList = document.createElement('div');
+            municipiosList.className = 'municipios-list';
+            
+            // Obtém os municípios e contagens específicas da instituição
+            const contagensDaInstituicao = dadosMes.contagem_municipios_por_instituicao[instituicao] || {};
+            const municipiosDaInstituicao = Object.keys(contagensDaInstituicao);
+            
+            // Ordena os municípios em ordem alfabética
+            municipiosDaInstituicao.sort((a, b) => a.localeCompare(b));
+            
+            // Adiciona os municípios à lista
+            if (municipiosDaInstituicao.length > 0) {
+                municipiosDaInstituicao.forEach(municipio => {
+                    const contagem = contagensDaInstituicao[municipio] || 0;
+                    
+                    const municipioItem = document.createElement('div');
+                    municipioItem.className = 'municipio-item';
+                    municipioItem.innerHTML = `
+                        <span class="municipio-nome">${municipio}</span>
+                        <span class="municipio-contagem">${contagem}</span>
+                    `;
+                    
+                    municipiosList.appendChild(municipioItem);
+                });
+            } else {
+                const mensagem = document.createElement('p');
+                mensagem.textContent = 'Nenhum município específico encontrado para esta instituição.';
+                mensagem.style.color = 'var(--gray)';
+                municipiosList.appendChild(mensagem);
+            }
+            
+            municipiosInstituicao.appendChild(municipiosList);
+            municipiosInstituicao.classList.add('active');
+        }
+
+        function formatarMes(mesString) {
+            if (!mesString) return '';
+            const [ano, mes] = mesString.split('-');
+            const meses = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            return `${meses[parseInt(mes) - 1]} de ${ano}`;
+        }
+
+        function inicializarMapa() {
+            // Remove loading
+            const mapaContainer = document.getElementById('mapaObservadores');
+            mapaContainer.innerHTML = '';
+            
+            // Inicializa o mapa com foco no Maranhão e zoom otimizado
+            const optimalZoom = getZoomLevelByScreenSize();
+
+            // Inicializa o mapa primeiro COM ZOOM OTIMIZADO
+            mapa = L.map('mapaObservadores', {
+                zoomControl: false,
+                wheelPxPerZoomLevel: 250,
+                zoomSnap: 0.1,
+                zoomDelta: 0.25,
+                wheelDebounceTime: 20,
+                smoothWheelZoom: true,
+                smoothSensitivity: 1.2,
+                attributionControl: false,
+                zoom: optimalZoom,
+            }).setView([-6.0, -45.0], optimalZoom); // ZOOM OTIMIZADO AQUI
+            
+            // Adiciona tile layer com tema mais adequado para o Maranhão
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '©OpenStreetMap, ©CartoDB',
+                subdomains: 'abcd',
+                minZoom: 6,
+                maxZoom: 19.9
+            }).addTo(mapa);
+
+            // Adiciona evento para o botão de tela cheia
+            document.getElementById('fullscreen').addEventListener('click', function() {
+                toggleFullscreen();
+            });
+
+            // Adiciona camada dos municípios
+            adicionarCamadaMunicipios();
+        }
+
+        function adicionarCamadaMunicipios() {
+            if (camadaMunicipios) {
+                mapa.removeLayer(camadaMunicipios);
+            }
+
+            // Verifica se é GeoJSON de pontos ou polígonos
+            const isPointData = geojsonData.features[0].geometry.type === 'Point';
+
+            if (isPointData) {
+                // Para dados de ponto (fallback)
+                camadaMunicipios = L.geoJSON(geojsonData, {
+                    pointToLayer: function(feature, latlng) {
+                        const municipio = feature.properties.nome;
+                        const respondeu = verificarMunicipioRespondeu(municipio, mesAtual);
+                        
+                        const cor = respondeu ? '#f7d80a' : 'transparent';
+                        const bordaCor = respondeu ? '#000000' : '#ffffff';
+                        const opacity = respondeu ? 1 : 1;
+
+                        return L.circleMarker(latlng, {
+                            radius: 8,
+                            fillColor: cor,
+                            color: bordaCor,
+                            weight: respondeu ? 1 : 1,
+                            opacity: opacity,
+                            fillOpacity: respondeu ? 0.8 : 0
+                        });
+                    },
+                    onEachFeature: function(feature, layer) {
+                        const municipio = feature.properties.nome;
+                        const respondeu = verificarMunicipioRespondeu(municipio, mesAtual);
+                        
+                        // SÓ ADICIONA POPUP SE O MUNICÍPIO RESPONDEU
+                        if (respondeu) {
+                            const contagem = dadosObservadores.grupos_mensais[mesAtual].contagem_por_municipio[municipio] || 0;
+                            
+                            // Cria conteúdo do popup idêntico ao Monitor_Seca
+                            const popupContent = criarPopupMunicipio(municipio, respondeu, contagem, mesAtual);
+                            
+                            layer.bindPopup(popupContent);
+                        }
+                        
+                        layer.bindTooltip(municipio, {
+                            permanent: false,
+                            direction: 'top'
+                        });
+                    }
+                }).addTo(mapa);
+            } else {
+                // Para dados de polígonos (GeoJSON real) - ESTILO CORRIGIDO
+                camadaMunicipios = L.geoJSON(geojsonData, {
+                    style: function(feature) {
+                        const municipio = feature.properties.NM_MUN || feature.properties.nome || feature.properties.NOME || feature.properties.name;
+                        const respondeu = verificarMunicipioRespondeu(municipio, mesAtual);
+                        
+                        // Municípios que responderam: amarelo com borda preta
+                        if (respondeu) {
+                            return {
+                                fillColor: '#f7d80a', // Amarelo
+                                weight: 1, // Borda mais grossa
+                                opacity: 1,
+                                color: '#000000', // Borda preta
+                                fillOpacity: 1 // Preenchimento sólido
+                            };
+                        } else {
+                            // Municípios que NÃO responderam: apenas borda branca
+                            return {
+                                fillColor: 'transparent', // Sem preenchimento
+                                weight: 1, // Borda fina
+                                opacity: 0.7,
+                                color: '#ffffff', // Borda branca
+                                fillOpacity: 0 // Sem preenchimento
+                            };
+                        }
+                    },
+                    onEachFeature: function(feature, layer) {
+                        const municipio = feature.properties.NM_MUN || feature.properties.nome || feature.properties.NOME || feature.properties.name;
+                        const respondeu = verificarMunicipioRespondeu(municipio, mesAtual);
+                        
+                        // SÓ ADICIONA POPUP SE O MUNICÍPIO RESPONDEU
+                        if (respondeu) {
+                            const contagem = dadosObservadores.grupos_mensais[mesAtual].contagem_por_municipio[municipio] || 0;
+                            
+                            // Cria conteúdo do popup idêntico ao Monitor_Seca
+                            const popupContent = criarPopupMunicipio(municipio, respondeu, contagem, mesAtual);
+                            
+                            layer.bindPopup(popupContent);
+                        }
+                        
+                        layer.bindTooltip(municipio, {
+                            permanent: false,
+                            direction: 'top'
+                        });
+                    }
+                }).addTo(mapa);
+            }
+
+            // Ajusta o zoom para mostrar todos os municípios
+            if (camadaMunicipios.getBounds().isValid()) {
+                mapa.fitBounds(camadaMunicipios.getBounds());
+            }
+        }
+
+        // FUNÇÃO MELHORADA: Criar popup IDÊNTICO ao Monitor_Seca
+        function criarPopupMunicipio(municipio, respondeu, contagem, mes) {
+            const dadosMes = dadosObservadores.grupos_mensais[mes];
+            
+            let instituicoesHTML = '';
+            
+            if (respondeu && dadosMes && dadosMes.contagem_municipios_por_instituicao) {
+                // Obtém as instituições que responderam neste município com suas contagens
+                const instituicoesNoMunicipio = [];
+                
+                // Verifica em quais instituições este município aparece e com qual contagem
+                for (const [instituicao, contagens] of Object.entries(dadosMes.contagem_municipios_por_instituicao)) {
+                    if (contagens[municipio]) {
+                        instituicoesNoMunicipio.push({
+                            instituicao: instituicao,
+                            contagem: contagens[municipio]
+                        });
+                    }
+                }
+                
+                // Ordena por contagem (maior primeiro)
+                instituicoesNoMunicipio.sort((a, b) => b.contagem - a.contagem);
+                
+                if (instituicoesNoMunicipio.length > 0) {
+                    instituicoesHTML = `
+                        <div class="popup-section">
+                            <div class="popup-section-title">
+                                <i class="fas fa-university"></i>
+                                Instituições que Responderam
+                            </div>
+                            <div class="popup-instituicoes">
+                    `;
+                    
+                    // Adiciona cada instituição ao popup
+                    instituicoesNoMunicipio.forEach(item => {
+                        instituicoesHTML += `
+                            <div class="popup-instituicao">
+                                <span class="instituicao-nome">${item.instituicao}</span>
+                                <span class="instituicao-respostas">${item.contagem}</span>
+                            </div>
+                        `;
+                    });
+                    
+                    instituicoesHTML += `
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            return `
+                <div class="popup-content">
+                    <div class="popup-header">
+                        <h3 class="popup-title">
+                            <i class="fas fa-city"></i>
+                            ${municipio}
+                        </h3>
+                    </div>
+                    <div class="popup-body">
+                        <div class="popup-section">
+                            <div class="popup-section-title">
+                                <i class="fas fa-info-circle"></i>
+                                Resumo de Respostas
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Total de Respostas:</span>
+                                <span class="info-value highlight">${contagem}</span>
+                            </div>
+                        </div>
+                        
+                        ${instituicoesHTML}
+                        
+                        <div class="popup-section">
+                            <div class="popup-section-title">
+                                <i class="fas fa-calendar-alt"></i>
+                                Período de Referência
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Mês:</span>
+                                <span class="info-value">${formatarMes(mes)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function verificarMunicipioRespondeu(municipio, mes) {
+            if (!mes || !dadosObservadores.grupos_mensais[mes]) {
+                return false;
+            }
+            
+            return dadosObservadores.grupos_mensais[mes].municipios_responderam.includes(municipio);
+        }
+
+        function atualizarMapa() {
+            if (camadaMunicipios) {
+                // Atualiza a camada existente
+                camadaMunicipios.eachLayer(function(layer) {
+                    if (layer.feature) {
+                        const municipio = layer.feature.properties.NM_MUN || layer.feature.properties.nome || layer.feature.properties.NOME || layer.feature.properties.name;
+                        const respondeu = verificarMunicipioRespondeu(municipio, mesAtual);
+                        
+                        // Atualiza o estilo
+                        if (layer.setStyle) {
+                            // Municípios que responderam: amarelo com borda preta
+                            if (respondeu) {
+                                layer.setStyle({
+                                    fillColor: '#f7d80a',
+                                    weight: 1,
+                                    opacity: 1,
+                                    color: '#000000',
+                                    fillOpacity: 1
+                                });
+                            } else {
+                                // Municípios que NÃO responderam: apenas borda branca
+                                layer.setStyle({
+                                    fillColor: 'transparent',
+                                    weight: 1,
+                                    opacity: 0.7,
+                                    color: '#ffffff',
+                                    fillOpacity: 0
+                                });
+                            }
+                        }
+                        
+                        // ATUALIZA POPUP APENAS SE O MUNICÍPIO RESPONDEU
+                        if (respondeu) {
+                            const contagem = dadosObservadores.grupos_mensais[mesAtual].contagem_por_municipio[municipio] || 0;
+                            const popupContent = criarPopupMunicipio(municipio, respondeu, contagem, mesAtual);
+                            layer.bindPopup(popupContent);
+                        } else {
+                            // Remove popup se existir
+                            if (layer.getPopup()) {
+                                layer.unbindPopup();
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function mostrarErro(mensagem) {
+            const mapaContainer = document.getElementById('mapaObservadores');
+            mapaContainer.innerHTML = `
+                <div class="error-container">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3em;"></i>
+                    <p>${mensagem}</p>
+                    <button onclick="carregarDadosMapa()" style="
+                        background: var(--accent);
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        margin-top: 10px;
+                    ">Tentar Novamente</button>
+                </div>
+            `;
+        }
+
+        // FUNÇÃO CORRIGIDA: Toggle fullscreen apenas para o mapa
+        function toggleFullscreen() {
+            const mapContainer = document.getElementById('mapContainer');
+            const fullscreenBtn = document.getElementById('fullscreen');
+            const compactFullscreenBtn = document.getElementById('compact-fullscreen');
+            
+            if (!isFullscreen) {
+                // Entrar em tela cheia
+                if (mapContainer.requestFullscreen) {
+                    mapContainer.requestFullscreen();
+                } else if (mapContainer.webkitRequestFullscreen) {
+                    mapContainer.webkitRequestFullscreen();
+                } else if (mapContainer.msRequestFullscreen) {
+                    mapContainer.msRequestFullscreen();
+                }
+                
+                // Adiciona classe para estilos de tela cheia
+                mapContainer.classList.add('fullscreen');
+                
+                // Atualiza ícones
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+                if (compactFullscreenBtn) {
+                    compactFullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+                }
+                
+                isFullscreen = true;
+                
+                // Ajusta o mapa para preencher a tela
+                setTimeout(() => {
+                    mapa.invalidateSize();
+                }, 300);
+            } else {
+                // Sair da tela cheia
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                
+                // Remove classe de tela cheia
+                mapContainer.classList.remove('fullscreen');
+                
+                // Atualiza ícones
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                if (compactFullscreenBtn) {
+                    compactFullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                }
+                
+                isFullscreen = false;
+                
+                // Ajusta o mapa de volta ao tamanho normal
+                setTimeout(() => {
+                    mapa.invalidateSize();
+                }, 300);
+            }
+        }
+
+        // Listener para detectar mudanças no modo fullscreen
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+        function handleFullscreenChange() {
+            const mapContainer = document.getElementById('mapContainer');
+            const fullscreenBtn = document.getElementById('fullscreen');
+            const compactFullscreenBtn = document.getElementById('compact-fullscreen');
+            
+            const isFullscreenNow = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+            
+            if (!isFullscreenNow && isFullscreen) {
+                // Saiu do modo fullscreen
+                mapContainer.classList.remove('fullscreen');
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                if (compactFullscreenBtn) {
+                    compactFullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                }
+                isFullscreen = false;
+                
+                // Ajusta o mapa de volta ao tamanho normal
+                setTimeout(() => {
+                    mapa.invalidateSize();
+                }, 300);
+            }
+        }
+
+        // Função para resetar a visualização do mapa
+        function resetView() {
+            const optimalZoom = getZoomLevelByScreenSize();
+            mapa.setView([-4.5, -45], optimalZoom);
+        }
+
+        // Função para toggle do container de instituições
+        function toggleInstituicoesContainer() {
+            const container = document.getElementById('instituicoesContainer');
+            container.classList.toggle('expanded');
+        }
+
+        // Menu mobile toggle
+        document.getElementById('mobileMenuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        });
+
+        // Fecha menu mobile ao clicar em um link
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.getElementById('sidebar').classList.remove('mobile-open');
+            });
+        });
+
+        // Event listener para o botão toggle do menu compacto
+        document.getElementById('compactToggle').addEventListener('click', function() {
+            const compactMenu = document.getElementById('compactMenu');
+            compactMenu.classList.toggle('show');
+        });
+
+        // Event listeners para os botões compactos
+        document.getElementById('compact-reset-view').addEventListener('click', function() {
+            resetView();
+            document.getElementById('compactMenu').classList.remove('show');
+        });
+        
+        document.getElementById('compact-fullscreen').addEventListener('click', function() {
+            toggleFullscreen();
+            document.getElementById('compactMenu').classList.remove('show');
+        });
+
+        // Event listener para o toggle do container de instituições (APENAS NO HEADER)
+        document.getElementById('instituicoesHeader').addEventListener('click', function() {
+            toggleInstituicoesContainer();
+        });
+
+        // Adicionar listener para redimensionamento da tela
+        window.addEventListener('resize', function() {
+            // Aguardar um pouco para que o redimensionamento termine
+            setTimeout(() => {
+                applyOptimalZoom();
+                detectAndroidAndFixButton();
+            }, 250);
+        });
+
+        // Inicializa quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Executar detecção Android primeiro
+            detectAndroidAndFixButton();
+            
+            // Iniciar animação de loading
+            simulateLoading();
+            
+            // Carregar dados do mapa
+            carregarDadosMapa();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SIMA - Sistema de Monitoramento Ambiental do Maranhão: Tecnologia para preservação ambiental com monitoramento inteligente dos recursos naturais.">
+    <meta name="keywords" content="monitoramento ambiental, Maranhão, SIMA, meio ambiente, hidrologia, meteorologia, SEMA">
+    <meta name="author" content="Igor Carlos Cunha Morim">
+    <title>Boletins Diários de Situação - BDS</title>
+    
+    <!-- Favicon SIMA - Caminhos Corrigidos -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo/CPDAm/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/CPDAm/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo/CPDAm/favicon-16x16.png">
+    <link rel="icon" href="assets/images/logo/CPDAm/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/images/logo/CPDAm/favicon.ico">
+
+    <!-- Para Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/logo/CPDAm/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/logo/CPDAm/android-chrome-512x512.png">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Paleta Aquática (mesma do HydroMonitor) */
+            --primary-color: #0077b6;
+            --primary-dark: #00509d;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #ffc300;
+            --danger-color: #ef4444;
+            --bg-color: #e8f7ff;
+            --bg-secondary: #f0f8ff;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #d1e5f0;
+            --shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Cores específicas para o BDS */
+            --accent-color: #00bcd4;
+            --unavailable-color: #95a5a6;
+            --unavailable-bg: #ecf0f194;
+            --card-gradient: linear-gradient(135deg, #ffffff 0%, #f8fdff 100%);
+        }
+
+        .dark-mode {
+            --primary-color: #48bfe3;
+            --primary-dark: #0077b6;
+            --secondary-color: #94a3b8;
+            --bg-color: #0a192f;
+            --bg-secondary: #09131f;
+            --bg-card: #142d4a;
+            --text-primary: #e3f2fd;
+            --text-secondary: #b0bec5;
+            --text-muted: #607d8b;
+            --border-color: #2c4a6a;
+            --shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+            
+            /* Ajustes para dark mode no BDS */
+            --accent-color: #4fc3f7;
+            --unavailable-color: #78909c;
+            --unavailable-bg: #37474f;
+            --card-gradient: linear-gradient(135deg, #142d4a 0%, #1a3658 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header - Estilo HydroDocs */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 119, 182, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        .page-header {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-description {
+            color: var(--text-secondary);
+            text-align: justify;
+            font-size: 1.2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Controls */
+        .controls-section {
+            padding: 1.5rem 2rem;
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: right;
+            align-items: center;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            background: rgba(0, 119, 182, 0.1);
+        }
+
+        .stat-item i {
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        /* Year Section */
+        .year-section {
+            margin-bottom: 2rem;
+        }
+
+        .year-header {
+            background: var(--bg-card);
+            padding: 1.2rem 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            border-left: 6px solid var(--primary-color);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .year-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 119, 182, 0.05), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .year-header:hover::before {
+            transform: translateX(100%);
+        }
+
+        .year-header h2 {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .year-header i {
+            transition: var(--transition);
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .year-header.expanded i {
+            transform: rotate(180deg);
+        }
+
+        .year-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 3px 8px rgba(0, 119, 182, 0.3);
+        }
+
+        .months-container {
+            display: none;
+            margin-top: 20px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .month-section {
+            margin-bottom: 20px;
+        }
+
+        .month-header {
+            background: var(--bg-card);
+            padding: 1rem 1.3rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            border-left: 5px solid var(--accent-color);
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .month-header:hover {
+            transform: translateX(5px);
+        }
+
+        .month-header h3 {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .month-header i {
+            transition: var(--transition);
+            color: var(--accent-color);
+            font-size: 1rem;
+        }
+
+        .month-header.expanded i {
+            transform: rotate(180deg);
+        }
+
+        .month-badge {
+            background: var(--accent-color);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 3px 8px rgba(0, 188, 212, 0.3);
+        }
+
+        .days-container {
+            display: none;
+            margin-top: 12px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* Cards com Destaque Visual */
+        .cards-highlight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .card-highlight {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.2rem;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-highlight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .card-highlight:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-highlight:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-highlight.available {
+            cursor: default; /* Alterado de pointer para default */
+        }
+
+        .card-highlight.unavailable {
+            background: var(--unavailable-bg);
+            color: var(--unavailable-color);
+            border-color: var(--border-color);
+        }
+
+        .card-highlight.unavailable:hover {
+            transform: none;
+            box-shadow: var(--shadow);
+        }
+
+        .card-highlight.unavailable:hover::before {
+            transform: scaleX(0);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .card-date {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-day {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+
+        .card-month {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .card-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .card-badge.status-available {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success-color);
+        }
+
+        .card-badge.status-unavailable {
+            background: rgba(149, 165, 166, 0.15);
+            color: var(--unavailable-color);
+        }
+
+        .card-body {
+            flex-grow: 1;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .card-description {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+        }
+
+        .card-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .card-meta span {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .card-meta i {
+            font-size: 0.65rem;
+            width: 12px;
+        }
+
+        .card-footer {
+            margin-top: auto;
+        }
+
+        .btn-download-highlight {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: var(--transition);
+            box-shadow: 0 3px 8px rgba(0, 119, 182, 0.3);
+            cursor: pointer;
+        }
+
+        .btn-download-highlight:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 119, 182, 0.4);
+        }
+
+        .card-highlight.unavailable .btn-download-highlight {
+            display: none;
+        }
+
+        /* Empty and Loading States */
+        .empty-message {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-muted);
+            font-style: italic;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .empty-message i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .loading p {
+            font-size: 1.1rem;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: var(--radius);
+            color: var(--danger-color);
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--danger-color);
+        }
+
+        .error-message i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Footer - Estilo HydroDocs */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: var(--transition);
+        }
+
+        .footer-link:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-copyright {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .main-content {
+                padding: 2rem;
+            }
+            
+            .page-title {
+                font-size: 2.5rem;
+            }
+            
+            .controls-section {
+                padding: 0.5rem;
+            }
+            
+            .stats {
+                gap: 1.5rem;
+                font-size: 1rem;
+            }
+            
+            .stat-item {
+                padding: 10px 16px;
+            }
+            
+            .year-header {
+                padding: 1.5rem 2rem;
+            }
+            
+            .year-header h2 {
+                font-size: 1.6rem;
+            }
+            
+            .month-header {
+                padding: 1.2rem 1.8rem;
+            }
+            
+            .month-header h3 {
+                font-size: 1.4rem;
+            }
+            
+            .cards-highlight-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .cards-highlight-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                margin: 1rem 0;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .cards-highlight-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            
+            /* Improve touch targets */
+            .year-header, .month-header, .card-highlight.available {
+                min-height: 44px; /* Minimum touch target size */
+            }
+            
+            .btn-download-highlight, .stat-item {
+                min-height: 36px; /* Minimum touch target size */
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        /* Very small screens */
+        @media (max-width: 360px) {
+            .cards-highlight-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header - Estilo HydroDocs -->
+        <header class="header">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-calendar-day"></i>
+                    <span>BDS - Boletim Diário de Situação</span>
+                </a>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="refreshBoletins()">
+                        <i class="fas fa-sync-alt"></i>
+                        Atualizar
+                    </button>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Boletim Diário de Situação</h1>
+                <p class="page-description">O Boletim Diário de Situação consiste em um relatorio tecnico integrado de monitoramento contínuo das condições hidrometeorológicas e de focos de calor no território estadual, disponibilizando diariamente informações técnicas atualizadas para subsidiar processos analíticos e decisórios pelos órgãos competentes.</p>
+            </div>
+            
+            <div class="controls-section">
+                <div class="stats">
+                    <div class="stat-item">
+                        <i class="fas fa-file-pdf"></i>
+                        <span id="total-boletins">0 boletins</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span id="last-update">Atualização: Carregando...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="boletins-container">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando boletins...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer - Estilo HydroDocs -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                <!--<div class="footer-logo"></div>-->
+                    <i class="fas fa-file-alt"></i>
+                    <span>BDS - Boletins Diários de Situação</span>
+                </div>
+                
+                <!--<div class="footer-links">
+                    <a href="#" class="footer-link">Termos de Uso</a>
+                    <a href="#" class="footer-link">Política de Privacidade</a>
+                    <a href="#" class="footer-link">Contato</a>
+                </div>-->
+                
+                <div class="footer-copyright">
+                    &copy; 2025 Sistema de Monitoramento Ambiental - SIMA/MA
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ========== TEMA ESCURO ==========
+        function carregarPreferenciasTema() {
+            const temaSalvo = localStorage.getItem('temaEscuro');
+            if (temaSalvo === 'true') {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const botaoTema = document.querySelector('.theme-toggle');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                botaoTema.innerHTML = '<i class="fas fa-sun"></i>';
+                localStorage.setItem('temaEscuro', 'true');
+            } else {
+                botaoTema.innerHTML = '<i class="fas fa-moon"></i>';
+                localStorage.setItem('temaEscuro', 'false');
+            }
+        }
+
+        // ========== FUNÇÕES DO BOLETIM ==========
+        
+        // Função para formatar a data
+        function formatDate(dateStr) {
+            const [day, month, year] = dateStr.split('-');
+            const months = [
+                'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+                'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+            ];
+            return `${parseInt(day)} ${months[parseInt(month) - 1]}`;
+        }
+
+        // Função para obter o nome do mês
+        function getMonthName(month) {
+            const months = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            return months[month - 1];
+        }
+
+        // Função para obter o nome abreviado do mês
+        function getShortMonthName(month) {
+            const months = [
+                'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+                'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+            ];
+            return months[month - 1];
+        }
+
+        // Função para organizar boletins por ano e mês
+        function organizeBoletins(boletins) {
+            const organized = {};
+            
+            boletins.forEach(boletim => {
+                const { year, month } = boletim;
+                
+                if (!organized[year]) {
+                    organized[year] = {};
+                }
+                
+                if (!organized[year][month]) {
+                    organized[year][month] = [];
+                }
+                
+                organized[year][month].push(boletim);
+            });
+            
+            return organized;
+        }
+
+        // Função para buscar boletins da API
+        async function fetchBoletins() {
+            try {
+                const response = await fetch('/api/boletins');
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar boletins');
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Erro:', error);
+                throw error;
+            }
+        }
+
+        // Função para criar cards no modelo destaque
+        function createCards(year, month, boletins) {
+            // Criar um mapa de boletins por dia para acesso rápido
+            const boletinsMap = {};
+            boletins.forEach(boletim => {
+                const day = parseInt(boletim.date.split('-')[0]);
+                boletinsMap[day] = boletim;
+            });
+            
+            // Obter o último dia do mês
+            const lastDay = new Date(year, month, 0).getDate();
+            
+            let cardsHTML = '';
+            
+            // Criar cards em ordem decrescente (do último para o primeiro dia)
+            for (let day = lastDay; day >= 1; day--) {
+                const boletim = boletinsMap[day];
+                const isAvailable = !!boletim;
+                
+                if (isAvailable) {
+                    cardsHTML += `
+                        <div class="card-highlight available">
+                            <div class="card-header">
+                                <div class="card-date">
+                                    <span class="card-day">${day}</span>
+                                    <span class="card-month">${getShortMonthName(month)}</span>
+                                </div>
+                                <div class="card-badge status-available">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h4 class="card-title">Boletim Diário</h4>
+                                <p class="card-description">Relatório técnico completo</p>
+                                <div class="card-meta">
+                                    <span><i class="fas fa-file-pdf"></i> PDF</span>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="${boletim.path}" class="btn-download-highlight" target="_blank">
+                                    <i class="fas fa-download"></i>
+                                    <span>Baixar</span>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    cardsHTML += `
+                        <div class="card-highlight unavailable">
+                            <div class="card-header">
+                                <div class="card-date">
+                                    <span class="card-day">${day}</span>
+                                    <span class="card-month">${getShortMonthName(month)}</span>
+                                </div>
+                                <div class="card-badge status-unavailable">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h4 class="card-title">Boletim Diário</h4>
+                                <p class="card-description">Relatório técnico completo</p>
+                                <div class="card-meta">
+                                    <span><i class="fas fa-file-pdf"></i> PDF</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            return cardsHTML;
+        }
+
+        // Função para criar um grid de cards para um mês específico
+        function createMonthGrid(year, month, boletins) {
+            return `<div class="cards-highlight-grid">${createCards(year, month, boletins)}</div>`;
+        }
+
+        // Função para renderizar os boletins
+        async function renderBoletins() {
+            const container = document.getElementById('boletins-container');
+            const totalBoletins = document.getElementById('total-boletins');
+            const lastUpdate = document.getElementById('last-update');
+            
+            // Mostra loading
+            container.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando boletins...</p>
+                </div>
+            `;
+            
+            try {
+                const data = await fetchBoletins();
+                const boletinsData = data.data;
+                
+                // Atualiza estatísticas
+                totalBoletins.textContent = `${boletinsData.length} boletim${boletinsData.length !== 1 ? 's' : ''}`;
+                lastUpdate.textContent = `Atualização: ${new Date().toLocaleTimeString('pt-BR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'})}`;
+                
+                if (boletinsData.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-message">
+                            <i class="fas fa-file-pdf"></i>
+                            <h3>Nenhum boletim encontrado</h3>
+                            <p>Os boletins serão exibidos aqui assim que estiverem disponíveis.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const organized = organizeBoletins(boletinsData);
+                
+                // Ordenar anos decrescente
+                const years = Object.keys(organized).sort((a, b) => b - a);
+                
+                let html = '';
+                
+                years.forEach(year => {
+                    const yearData = organized[year];
+                    const isCurrentYear = parseInt(year) === new Date().getFullYear();
+                    
+                    html += `
+                        <div class="year-section">
+                            <div class="year-header" onclick="toggleYear('year${year}')">
+                                <h2><i class="fas fa-calendar-alt"></i> ${year} </h2>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="months-container" id="year${year}">
+                    `;
+                    
+                    // Ordenar meses decrescente
+                    const months = Object.keys(yearData).sort((a, b) => b - a);
+                    
+                    months.forEach(month => {
+                        const monthData = yearData[month];
+                        const monthName = getMonthName(parseInt(month));
+                        
+                        html += `
+                            <div class="month-section">
+                                <div class="month-header" onclick="toggleMonth('month${year}${month}')">
+                                    <h3><i class="fas fa-folder${isCurrentYear && parseInt(month) === new Date().getMonth() + 1 ? '-open' : ''}"></i> ${monthName} <span class="month-badge">${monthData.length}</span></h3>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="days-container" id="month${year}${month}">
+                        `;
+                        
+                        // Criar grid de cards para este mês
+                        html += createMonthGrid(parseInt(year), parseInt(month), monthData);
+                        
+                        html += `
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                
+                // Removido: Event listeners para os cards de boletim
+                // Agora apenas o botão tem a funcionalidade de abrir o arquivo
+                
+                // Expandir ano e mês atual
+                const currentYear = new Date().getFullYear();
+                const currentMonth = new Date().getMonth() + 1;
+                
+                setTimeout(() => {
+                    if (document.getElementById(`year${currentYear}`)) {
+                        toggleYear(`year${currentYear}`);
+                    }
+                    if (document.getElementById(`month${currentYear}${currentMonth}`)) {
+                        setTimeout(() => toggleMonth(`month${currentYear}${currentMonth}`), 100);
+                    }
+                }, 500);
+                
+            } catch (error) {
+                console.error('Erro ao renderizar boletins:', error);
+                container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar boletins</h3>
+                        <p>${error.message}</p>
+                        <p style="margin-top: 1rem; font-size: 0.9rem;">
+                            Verifique sua conexão e tente novamente.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Função para expandir/recolher os anos
+        function toggleYear(yearId) {
+            const container = document.getElementById(yearId);
+            const header = container.previousElementSibling;
+            
+            if (container.style.display === 'block') {
+                container.style.display = 'none';
+                header.classList.remove('expanded');
+            } else {
+                container.style.display = 'block';
+                header.classList.add('expanded');
+            }
+        }
+        
+        // Função para expandir/recolher os meses
+        function toggleMonth(monthId) {
+            const container = document.getElementById(monthId);
+            const header = container.previousElementSibling;
+            
+            if (container.style.display === 'block') {
+                container.style.display = 'none';
+                header.classList.remove('expanded');
+            } else {
+                container.style.display = 'block';
+                header.classList.add('expanded');
+            }
+        }
+
+        // Função para atualizar os boletins
+        function refreshBoletins() {
+            renderBoletins();
+        }
+
+        // Atualização automática a cada 15 minutos
+        function startAutoRefresh() {
+            setInterval(renderBoletins, 60 * 60 * 1000);
+        }
+
+        // Redesenhar quando a janela for redimensionada
+        window.addEventListener('resize', function() {
+            // Só redesenha se já tiver dados carregados
+            if (document.getElementById('boletins-container').children.length > 0 && 
+                !document.getElementById('boletins-container').querySelector('.loading')) {
+                renderBoletins();
+            }
+        });
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarPreferenciasTema();
+            renderBoletins();
+            startAutoRefresh();
+        });
+    </script>
+</body>
+</html>
